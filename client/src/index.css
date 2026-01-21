@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============ CUSTOM PASTEL THEME VARIABLES ============ */
+:root {
+  /* User Provided Palette */
+  --color-primary: #AEB877;
+  /* Olive - Main Action */
+  --color-secondary: #A5C89E;
+  /* Sage - Cards/Secondary */
+  --color-accent: #D8E983;
+  /* Lime - Highlights */
+  --color-highlight: #FFFBB1;
+  /* Pale Yellow - Backgrounds */
+
+  /* Derived Colors for Contrast */
+  --color-bg: #E2E6D5;
+  /* Significantly darker Olive/Sage tint for strong card contrast */
+  --color-surface: #FFFFFF;
+  /* White Surface */
+  --color-text-main: #2C3318;
+  /* Dark Olive for text */
+  --color-text-muted: #5C6642;
+  /* Muted Olive */
+
+  /* Glassmorphism Variables */
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  /* Increased opacity for better separation */
+  --glass-border: rgba(174, 184, 119, 0.3);
+  --glass-shadow: 0 4px 6px -1px rgba(44, 51, 24, 0.05), 0 2px 4px -1px rgba(44, 51, 24, 0.03);
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  /* Removed fixed background pattern to reduce noise and improve card contrast */
+}
+
+/* ============ UTILITIES ============ */
+@layer components {
+
+  /* Layout & Containers */
+  .gov-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Glassmorphism Card - ENHANCED CONTRAST */
+  .glass-card {
+    @apply bg-white border border-[#AEB877]/20 shadow-md rounded-2xl transition-all duration-300;
+    /* Removed backdrop-blur for now to focus on solid contrast, can be re-added if opacity < 1 */
+  }
+
+  .glass-card-hover {
+    @apply hover:shadow-xl hover:shadow-[#A5C89E]/20 hover:-translate-y-1;
+  }
+
+  /* Typography */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#8B9850] to-[#6B8560];
+  }
+
+  .gov-h1 {
+    @apply text-3xl md:text-4xl font-extrabold text-[#2C3318] tracking-tight mb-6;
+  }
+
+  .gov-h2 {
+    @apply text-2xl font-bold text-[#4A5532] mb-4;
+  }
+
+  /* Interactive Elements */
+  .btn-primary {
+    @apply inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-bold rounded-xl text-white shadow-md transform transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#AEB877];
+    background: linear-gradient(135deg, #AEB877 0%, #8B9850 100%);
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #BCC880 0%, #9DAA60 100%);
+    @apply shadow-lg shadow-[#AEB877]/30;
+  }
+
+  .btn-secondary {
+    @apply inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-bold rounded-xl text-[#2C3318] shadow-md transform transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#A5C89E];
+    background: linear-gradient(135deg, #A5C89E 0%, #8CAE85 100%);
+  }
+
+  .btn-secondary:hover {
+    background: linear-gradient(135deg, #B5D8AE 0%, #9EB890 100%);
+    @apply shadow-lg shadow-[#A5C89E]/30;
+  }
+
+  .btn-outline {
+    @apply inline-flex justify-center items-center px-6 py-3 border-2 border-[#AEB877] text-base font-bold rounded-xl text-[#5C6642] bg-transparent hover:bg-[#FFFBB1]/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#AEB877];
+  }
+
+  /* Form Elements - Modernized */
+  .input-modern {
+    @apply w-full px-4 py-3 bg-white border border-[#AEB877]/30 rounded-xl shadow-sm text-[#2C3318] placeholder-[#9CA385] focus:outline-none focus:ring-2 focus:ring-[#AEB877] focus:border-[#AEB877] transition-all;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase;
+  }
+
+  .badge-pending {
+    @apply bg-[#FFFBB1] text-[#8B9850] border border-[#AEB877];
+  }
+
+  .badge-verified {
+    @apply bg-[#E6F4EA] text-[#4A5532] border border-[#A5C89E];
+  }
+
+  .badge-rejected {
+    @apply bg-red-50 text-red-700 border border-red-200;
+  }
+
+  /* Mobile Responsive Table Cards */
+  .table-card-view {
+    @apply block md:hidden space-y-4;
+  }
+
+  .table-row-card {
+    @apply bg-white p-4 rounded-xl shadow-sm border border-[#AEB877]/20 space-y-2;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F2F5E6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #AEB877;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8B9850;
+}
