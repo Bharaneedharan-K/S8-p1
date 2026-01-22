@@ -7,7 +7,7 @@ export const LandingPage = () => {
     <div className="min-h-screen bg-[#FCFDF5] font-sans selection:bg-[#D8E983] selection:text-[#2C3318]">
 
       {/* Hero Section */}
-      <div className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+      <div className="relative pt-6 pb-20 lg:pt-12 lg:pb-32 overflow-hidden">
 
         {/* Modern Background Blobs */}
         <div className="absolute top-0 right-0 -mr-24 -mt-24 w-[800px] h-[800px] bg-gradient-to-br from-[#D8E983]/20 to-[#AEB877]/20 rounded-full blur-3xl opacity-60 animate-blob"></div>
@@ -75,7 +75,7 @@ export const LandingPage = () => {
 
             {/* Right Visual (Abstract UI Card) */}
             <div className="flex-1 w-full max-w-lg lg:max-w-none relative">
-              <div className="relative z-10 bg-white/40 backdrop-blur-xl border border-white/60 p-6 rounded-3xl shadow-2xl shadow-[#AEB877]/10 transform rotate-2 hover:rotate-0 transition-transform duration-500">
+              <div className="relative z-10 bg-[#EBF0D8] backdrop-blur-xl border-2 border-[#AEB877]/50 p-6 rounded-3xl shadow-2xl shadow-[#2C3318]/10 transform rotate-2 hover:rotate-0 transition-transform duration-500">
                 {/* Fake UI Header */}
                 <div className="flex items-center justify-between mb-6 border-b border-[#AEB877]/10 pb-4">
                   <div className="flex items-center gap-3">

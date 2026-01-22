@@ -19,11 +19,19 @@ export const addLandRecord = async (req, res) => {
         const dataURI = `data:${req.files.document[0].mimetype};base64,${base64Image}`;
 
         // Assume cloudinary is imported, need to add import
-        // If cloudinary util exports the v2 instance directly:
-        const cloudinaryResponse = await cloudinary.uploader.upload(dataURI, {
+        // Create upload options
+        const uploadOptions = {
             folder: 'land_records',
             resource_type: 'auto'
-        });
+        };
+
+        // For PDFs, use 'raw' resource type to prevent image conversion issues
+        if (req.files.document[0].mimetype === 'application/pdf') {
+            uploadOptions.resource_type = 'raw';
+        }
+
+        // If cloudinary util exports the v2 instance directly:
+        const cloudinaryResponse = await cloudinary.uploader.upload(dataURI, uploadOptions);
 
         const documentUrl = cloudinaryResponse.secure_url;
 
