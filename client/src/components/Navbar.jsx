@@ -112,6 +112,9 @@ export const Navbar = () => {
                         {user?.status === 'FARMER_PENDING_VERIFICATION' && (
                           <NavLink to="/farmer/verify">Verify ID</NavLink>
                         )}
+                        <NavLink to="/farmer/lands">My Land</NavLink>
+                        <NavLink to="/farmer/schemes">Schemes</NavLink>
+                        <NavLink to="/farmer/applications">My Applications</NavLink>
                         <NavLink to="/farmer/profile">Profile</NavLink>
                       </>
                     )}
@@ -130,6 +133,8 @@ export const Navbar = () => {
                         <NavLink to="/admin/farmers">Farmers</NavLink>
                         <NavLink to="/admin/officers">Officers</NavLink>
                         <NavLink to="/admin/verify-land">Verify Land</NavLink>
+                        <NavLink to="/admin/schemes">Schemes</NavLink>
+                        <NavLink to="/admin/applications">Applications</NavLink>
                       </>
                     )}
                   </div>
@@ -242,6 +247,8 @@ export const Navbar = () => {
                         <NavLink to="/admin/farmers" mobile>Manage Farmers</NavLink>
                         <NavLink to="/admin/officers" mobile>Manage Officers</NavLink>
                         <NavLink to="/admin/verify-land" mobile>Verify Land</NavLink>
+                        <NavLink to="/admin/schemes" mobile>Schemes</NavLink>
+                        <NavLink to="/admin/applications" mobile>Applications</NavLink>
                       </>
                     )}
                   </div>

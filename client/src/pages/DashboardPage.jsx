@@ -276,6 +276,14 @@ const AdminDashboard = () => {
           <span className="text-3xl">📝</span>
           <span className="font-bold text-[#4A5532]">Verify Land</span>
         </Link>
+        <Link to="/admin/schemes" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
+          <span className="text-3xl">💰</span>
+          <span className="font-bold text-[#4A5532]">Manage Schemes</span>
+        </Link>
+        <Link to="/admin/applications" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
+          <span className="text-3xl">📊</span>
+          <span className="font-bold text-[#4A5532]">Review Applications</span>
+        </Link>
         <Link to="/admin/logs" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
           <span className="text-3xl">⛓️</span>
           <span className="font-bold text-[#4A5532]">Blockchain Logs</span>

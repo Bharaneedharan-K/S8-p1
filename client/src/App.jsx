@@ -16,6 +16,10 @@ import { AddLandPage } from './pages/AddLandPage';
 import { VerifyLandPage } from './pages/VerifyLandPage';
 import { LandRecordsPage } from './pages/LandRecordsPage';
 import { BlockchainLogsPage } from './pages/BlockchainLogsPage';
+import { SchemesPage } from './pages/SchemesPage';
+import { ManageSchemesPage } from './pages/ManageSchemesPage';
+import { MyApplicationsPage } from './pages/MyApplicationsPage';
+import { SchemeApplicationsPage } from './pages/SchemeApplicationsPage';
 import './index.css';
 
 function App() {
@@ -85,7 +89,7 @@ function App() {
             path="/farmer/schemes"
             element={
               <PrivateRoute requiredRole="FARMER">
-                <div className="min-h-screen flex items-center justify-center"><h1>💰 Available Schemes (Phase 4)</h1></div>
+                <SchemesPage />
               </PrivateRoute>
             }
           />
@@ -93,7 +97,7 @@ function App() {
             path="/farmer/applications"
             element={
               <PrivateRoute requiredRole="FARMER">
-                <div className="min-h-screen flex items-center justify-center"><h1>📊 My Applications (Phase 4)</h1></div>
+                <MyApplicationsPage />
               </PrivateRoute>
             }
           />
@@ -165,19 +169,20 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/admin/schemes"
-            element={
-              <PrivateRoute requiredRole="ADMIN">
-                <div className="min-h-screen flex items-center justify-center"><h1>💰 Manage Schemes (Phase 4)</h1></div>
-              </PrivateRoute>
-            }
-          />
+
           <Route
             path="/admin/applications"
             element={
               <PrivateRoute requiredRole="ADMIN">
-                <div className="min-h-screen flex items-center justify-center"><h1>📊 Applications (Phase 4)</h1></div>
+                <SchemeApplicationsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/schemes"
+            element={
+              <PrivateRoute requiredRole="ADMIN">
+                <ManageSchemesPage />
               </PrivateRoute>
             }
           />

@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { LAND_TYPES } from '../utils/constants';
 
 export const AddLandPage = () => {
     const { token, user } = useContext(AuthContext);
@@ -169,9 +170,9 @@ export const AddLandPage = () => {
                             <div>
                                 <label className="block text-sm font-bold text-[#5C6642] mb-1">Land Type</label>
                                 <select name="landType" required className="input-modern appearance-none bg-white" onChange={handleChange}>
-                                    <option value="Agricultural">Agricultural</option>
-                                    <option value="Commercial">Commercial</option>
-                                    <option value="Residential">Residential</option>
+                                    {LAND_TYPES.map(type => (
+                                        <option key={type} value={type}>{type}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
