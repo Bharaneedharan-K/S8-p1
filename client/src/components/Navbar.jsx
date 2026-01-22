@@ -120,6 +120,7 @@ export const Navbar = () => {
                       <>
                         <NavLink to="/dashboard">Dashboard</NavLink>
                         <NavLink to="/officer/farmers">Verifications</NavLink>
+                        <NavLink to="/officer/lands">Land Records</NavLink>
                       </>
                     )}
 
@@ -128,6 +129,7 @@ export const Navbar = () => {
                         <NavLink to="/dashboard">Dashboard</NavLink>
                         <NavLink to="/admin/farmers">Farmers</NavLink>
                         <NavLink to="/admin/officers">Officers</NavLink>
+                        <NavLink to="/admin/verify-land">Verify Land</NavLink>
                       </>
                     )}
                   </div>
@@ -230,6 +232,7 @@ export const Navbar = () => {
                       <>
                         <NavLink to="/dashboard" mobile>Dashboard</NavLink>
                         <NavLink to="/officer/farmers" mobile>Verify Farmers</NavLink>
+                        <NavLink to="/officer/lands" mobile>Land Records</NavLink>
                       </>
                     )}
 
@@ -238,6 +241,7 @@ export const Navbar = () => {
                         <NavLink to="/dashboard" mobile>Dashboard</NavLink>
                         <NavLink to="/admin/farmers" mobile>Manage Farmers</NavLink>
                         <NavLink to="/admin/officers" mobile>Manage Officers</NavLink>
+                        <NavLink to="/admin/verify-land" mobile>Verify Land</NavLink>
                       </>
                     )}
                   </div>

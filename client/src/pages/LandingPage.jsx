@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 export const LandingPage = () => {
   return (
     <div className="min-h-screen bg-[#FCFDF5] font-sans selection:bg-[#D8E983] selection:text-[#2C3318]">
-
-      {/* Navbar Placeholder (Visual continuity if needed, otherwise Navbar component handles it) */}
 
       {/* Hero Section */}
       <div className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
@@ -18,8 +17,8 @@ export const LandingPage = () => {
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
 
             {/* Left Content */}
-            <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E2E6D5]/50 border border-[#AEB877]/20 backdrop-blur-sm mb-8 animate-fadeIn">
+            <div className="flex-1 text-center lg:text-left space-y-8">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E2E6D5]/50 border border-[#AEB877]/20 backdrop-blur-sm animate-fadeIn">
                 <span className="flex h-2 w-2 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#AEB877] opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#4A5532]"></span>
@@ -27,7 +26,7 @@ export const LandingPage = () => {
                 <span className="text-xs font-bold text-[#4A5532] tracking-wider uppercase">Official Government Portal</span>
               </div>
 
-              <h1 className="text-5xl lg:text-7xl font-playfair font-black text-[#2C3318] leading-[1.1] mb-6 tracking-tight">
+              <h1 className="text-5xl lg:text-7xl font-playfair font-black text-[#2C3318] leading-[1.1] tracking-tight">
                 Land Records, <br />
                 <span className="relative inline-block">
                   <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#AEB877] to-[#8B9850]">Secured.</span>
@@ -35,11 +34,20 @@ export const LandingPage = () => {
                 </span>
               </h1>
 
-              <p className="text-lg lg:text-xl text-[#5C6642] mb-10 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              <p className="text-lg lg:text-xl text-[#5C6642] leading-relaxed max-w-2xl mx-auto lg:mx-0">
                 Empowering Indian farmers with a <span className="font-bold text-[#4A5532]">blockchain-backed</span> identity and land management system. Transparent, immutable, and built for trust.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              {/* Public Verification Tool */}
+              <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl border border-white/50 shadow-xl max-w-lg mx-auto lg:mx-0 text-left">
+                <h3 className="text-[#2C3318] font-bold mb-3 flex items-center gap-2">
+                  <span className="text-xl">🔍</span> Public Verification
+                </h3>
+                <p className="text-xs text-[#5C6642] mb-3">Verify land authenticity by pasting the blockchain hash.</p>
+                <VerificationSearch />
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
                 <Link
                   to="/login"
                   className="w-full sm:w-auto px-8 py-4 bg-[#2C3318] text-[#D8E983] text-lg font-bold rounded-xl hover:shadow-lg hover:shadow-[#2C3318]/20 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2"
@@ -55,7 +63,7 @@ export const LandingPage = () => {
                 </Link>
               </div>
 
-              <div className="mt-10 flex items-center justify-center lg:justify-start gap-6 text-sm font-medium text-[#9CA385]">
+              <div className="flex items-center justify-center lg:justify-start gap-6 text-sm font-medium text-[#9CA385]">
                 <div className="flex items-center gap-2">
                   <span className="text-[#AEB877]">✓</span> Government of India
                 </div>
@@ -144,3 +152,65 @@ const FeatureCard = ({ icon, title, desc, color }) => (
     </p>
   </div>
 );
+
+// Internal Component for Verification
+const VerificationSearch = () => {
+  const [hash, setHash] = useState('');
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    if (!hash) return;
+    setLoading(true);
+    setError('');
+    setResult(null);
+
+    try {
+      const res = await axios.get(`/api/land/public/verify/${hash}`);
+      setResult(res.data.land);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Verification Failed. Invalid Hash.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full">
+      <form onSubmit={handleVerify} className="relative flex items-center">
+        <input
+          type="text"
+          placeholder="Paste Blockchain Hash (0x...)"
+          value={hash}
+          onChange={(e) => setHash(e.target.value)}
+          className="w-full pl-4 pr-12 py-3 bg-white/80 border border-[#AEB877]/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877] text-sm font-mono text-[#2C3318]"
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="absolute right-2 p-2 bg-[#2C3318] text-white rounded-lg hover:bg-[#4A5532] transition-colors disabled:opacity-50"
+        >
+          {loading ? '...' : '🔍'}
+        </button>
+      </form>
+
+      {error && <p className="text-red-600 text-xs mt-2 font-bold bg-red-50 p-2 rounded border border-red-200">❌ {error}</p>}
+
+      {result && (
+        <div className="mt-3 bg-[#E6F4EA] p-3 rounded-xl border border-[#A5C89E] animate-fadeIn">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">✅</span>
+            <span className="text-sm font-bold text-[#2C3318]">Verified Valid Record</span>
+          </div>
+          <div className="text-xs text-[#5C6642] space-y-1">
+            <p><span className="font-bold">Survey No:</span> {result.surveyNumber}</p>
+            <p><span className="font-bold">Owner:</span> {result.ownerName}</p>
+            <p><span className="font-bold">Date:</span> {new Date(result.createdAt).toLocaleDateString()}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

@@ -237,6 +237,17 @@ const OfficerDashboard = () => {
             <h3 className="font-bold text-lg text-[#2C3318] group-hover:text-[#A5C89E]">Add Land Record</h3>
             <p className="text-[#5C6642] text-sm mt-2">Create new land ownership entries in the registry.</p>
           </Link>
+
+          <Link
+            to="/officer/lands"
+            className="group glass-card p-6 border border-transparent hover:border-[#D8E983]/50 transition-all"
+          >
+            <div className="w-14 h-14 bg-[#D8E983]/20 text-[#4A5532] rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:bg-[#D8E983] group-hover:text-[#2C3318] transition-colors shadow-sm">
+              📂
+            </div>
+            <h3 className="font-bold text-lg text-[#2C3318] group-hover:text-[#8B9850]">View Records</h3>
+            <p className="text-[#5C6642] text-sm mt-2">Track status of submitted land records (Approved/Pending).</p>
+          </Link>
         </div>
       </div>
     </div>
@@ -260,6 +271,10 @@ const AdminDashboard = () => {
         <Link to="/admin/farmers" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
           <span className="text-3xl">👨‍🌾</span>
           <span className="font-bold text-[#4A5532]">Manage Farmers</span>
+        </Link>
+        <Link to="/admin/verify-land" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
+          <span className="text-3xl">📝</span>
+          <span className="font-bold text-[#4A5532]">Verify Land</span>
         </Link>
         <Link to="/admin/logs" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
           <span className="text-3xl">⛓️</span>

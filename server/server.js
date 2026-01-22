@@ -4,6 +4,7 @@ import cors from 'cors';
 import db from './config/db.js';
 import authRoutes from './routes/auth.js';
 import farmerRoutes from './routes/farmer.js';
+import landRoutes from './routes/land.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import User from './models/User.js';
 import cloudinary from './utils/cloudinary.js';
@@ -24,6 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/farmer', farmerRoutes);
+app.use('/api/land', landRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

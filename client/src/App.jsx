@@ -12,6 +12,10 @@ import { ManageOfficersPage } from './pages/ManageOfficersPage';
 import { ManageFarmersPage } from './pages/ManageFarmersPage';
 import { FarmerVerificationPage } from './pages/FarmerVerificationPage';
 import { OfficerVerificationPage } from './pages/OfficerVerificationPage';
+import { AddLandPage } from './pages/AddLandPage';
+import { VerifyLandPage } from './pages/VerifyLandPage';
+import { LandRecordsPage } from './pages/LandRecordsPage';
+import { BlockchainLogsPage } from './pages/BlockchainLogsPage';
 import './index.css';
 
 function App() {
@@ -73,7 +77,7 @@ function App() {
             path="/farmer/lands"
             element={
               <PrivateRoute requiredRole="FARMER">
-                <div className="min-h-screen flex items-center justify-center"><h1>🏞️ My Lands (Phase 3)</h1></div>
+                <LandRecordsPage />
               </PrivateRoute>
             }
           />
@@ -107,7 +111,7 @@ function App() {
             path="/officer/add-land"
             element={
               <PrivateRoute requiredRole="OFFICER">
-                <div className="min-h-screen flex items-center justify-center"><h1>📋 Add Land Record (Phase 3)</h1></div>
+                <AddLandPage />
               </PrivateRoute>
             }
           />
@@ -115,7 +119,7 @@ function App() {
             path="/officer/lands"
             element={
               <PrivateRoute requiredRole="OFFICER">
-                <div className="min-h-screen flex items-center justify-center"><h1>📊 Land Records (Phase 3)</h1></div>
+                <LandRecordsPage />
               </PrivateRoute>
             }
           />
@@ -146,6 +150,14 @@ function App() {
             }
           />
           <Route
+            path="/admin/verify-land"
+            element={
+              <PrivateRoute requiredRole="ADMIN">
+                <VerifyLandPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/admin/lands"
             element={
               <PrivateRoute requiredRole="ADMIN">
@@ -170,10 +182,10 @@ function App() {
             }
           />
           <Route
-            path="/admin/blockchain"
+            path="/admin/logs"
             element={
               <PrivateRoute requiredRole="ADMIN">
-                <div className="min-h-screen flex items-center justify-center"><h1>⛓️ Blockchain Logs (Phase 5)</h1></div>
+                <BlockchainLogsPage />
               </PrivateRoute>
             }
           />
