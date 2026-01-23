@@ -11,11 +11,22 @@ The system connects three key stakeholders—**Farmers, Government Officers, and
 - **❌ Bureaucracy**: Slow approval processes for land registration and schemes.
 - **❌ Lack of Transparency**: Public cannot easily verify land ownership history.
 
-**✅ Our Solution**: A Hybrid System where metadata lives in a fast database (MongoDB) but the **"Truth" (Ownership Hash)** is permanently written to the Public Blockchain.
+## 3. Alignment with Problem Statement
+**Problem Statement**: *"Software for computerization of farmer, land details along with beneficiary schemes details... Design a block chain based mechanism to ensure frauds are eliminated..."*
+
+| Requirement | Our Implementation |
+| :--- | :--- |
+| **Computerization of Farmer & Land Details** | Full MERN Stack Application. `User` model stores Farmer Profile. `Land` model stores Survey No, Area, District. |
+| **Beneficiary Schemes Details** | Dedicated **Schemes Module**. Admins create schemes (e.g., PM-KISAN), Farmers apply, and Officers approve based on land data. |
+| **Difficulty in Access/Retrieval** | **Centralized Dashboard** for Admins/Officers to search, sort, and filter records instantly. No more manual file hunting. |
+| **Blockchain Mechanism** | **Ethereum Smart Contract (`LandRegistry.sol`)**. Every approved land record is hashed and stored on-chain. |
+| **Eliminate Frauds** | **Tamper-Proof Audit**. If a database admin alters a record, the **Public Verification Page** flags it immediately as "TAMPERED" because the hash won't match the Blockchain. |
+
+**✅ Conclusion**: This project is a **100% Fit** for the problem statement. It not only computerizes the data but uses Blockchain as the *enforcer* of truth, making fraud mathematically impossible without detection.
 
 ---
 
-## 3. Core Use Cases
+## 4. Core Use Cases
 
 ### 👨‍🌾 For Farmers
 1.  **Digital Identity**: Verified account linked to Aadhaar/Mobile.
