@@ -11,6 +11,7 @@ import { UnauthorizedPage } from './pages/UnauthorizedPage';
 import { ManageOfficersPage } from './pages/ManageOfficersPage';
 import { ManageFarmersPage } from './pages/ManageFarmersPage';
 import { FarmerVerificationPage } from './pages/FarmerVerificationPage';
+import { FarmerProfilePage } from './pages/FarmerProfilePage';
 import { OfficerVerificationPage } from './pages/OfficerVerificationPage';
 import { AddLandPage } from './pages/AddLandPage';
 import { VerifyLandPage } from './pages/VerifyLandPage';
@@ -74,7 +75,7 @@ function App() {
             path="/farmer/profile"
             element={
               <PrivateRoute requiredRole="FARMER">
-                <div className="min-h-screen flex items-center justify-center"><h1>👤 Farmer Profile (Phase 2)</h1></div>
+                <FarmerProfilePage />
               </PrivateRoute>
             }
           />

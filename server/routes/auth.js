@@ -8,6 +8,7 @@ import {
   getAllUsers,
   getUserById,
   updateUserStatus,
+  getProfileStats
 } from '../controllers/authController.js';
 import { authMiddleware, authorize } from '../middleware/auth.js';
 
@@ -41,6 +42,7 @@ router.post(
 
 // Protected routes
 router.get('/me', authMiddleware, getCurrentUser);
+router.get('/profile/stats', authMiddleware, getProfileStats);
 
 // Admin and Officer routes - Get users (officers can see farmers in their district)
 router.get('/users', authMiddleware, getAllUsers);

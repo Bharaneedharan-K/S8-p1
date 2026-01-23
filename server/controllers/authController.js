@@ -284,3 +284,42 @@ export const updateUserStatus = async (req, res) => {
     });
   }
 };
+
+// Get aggregated profile stats (Farmer)
+export const getProfileStats = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // Import here to avoid circular dependency issues at top level if any
+    const LandModel = (await import('../models/Land.js')).default;
+    const ApplicationModel = (await import('../models/SchemeApplication.js')).default;
+
+    const [lands, applications] = await Promise.all([
+      LandModel.find({ farmerId: userId }),
+      ApplicationModel.find({ farmerId: userId })
+    ]);
+
+    // Calculate totals
+    const totalLands = lands.length;
+    const totalArea = lands.reduce((sum, land) => sum + (Number(land.area) || 0), 0);
+    const approvedLands = lands.filter(l => l.status === 'LAND_APPROVED').length;
+
+    const totalApplications = applications.length;
+    const approvedApps = applications.filter(a => a.status === 'APPROVED').length;
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        totalLands,
+        totalArea,
+        approvedLands,
+        totalApplications,
+        approvedApps
+      }
+    });
+
+  } catch (error) {
+    console.error('Profile Stats Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch stats' });
+  }
+};
