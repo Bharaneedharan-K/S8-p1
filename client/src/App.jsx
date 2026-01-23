@@ -18,6 +18,7 @@ import { LandRecordsPage } from './pages/LandRecordsPage';
 import { BlockchainLogsPage } from './pages/BlockchainLogsPage';
 import { SchemesPage } from './pages/SchemesPage';
 import { ManageSchemesPage } from './pages/ManageSchemesPage';
+
 import { MyApplicationsPage } from './pages/MyApplicationsPage';
 import { SchemeApplicationsPage } from './pages/SchemeApplicationsPage';
 import './index.css';

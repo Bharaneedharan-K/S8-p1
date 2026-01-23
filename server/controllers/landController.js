@@ -165,7 +165,7 @@ export const getLandByHash = async (req, res) => {
         const { hash } = req.params;
         const land = await Land.findOne({ landHash: hash })
             .populate('farmerId', 'name')
-            .select('ownerName surveyNumber area district status landHash txHash createdAt');
+            .select('ownerName surveyNumber area district status landHash txHash createdAt address');
 
         if (!land) {
             return res.status(404).json({ success: false, message: 'Invalid Hash: Record not found in registry.' });
@@ -179,5 +179,25 @@ export const getLandByHash = async (req, res) => {
     } catch (error) {
         console.error('Verify Hash Error:', error);
         res.status(500).json({ success: false, message: 'Verification failed', error: error.message });
+    }
+};
+
+// Public: Get Land by Survey Number (For recalculation check)
+export const getLandBySurveyNumber = async (req, res) => {
+    try {
+        const { surveyNumber } = req.params;
+        const land = await Land.findOne({ surveyNumber, status: 'LAND_APPROVED' })
+            .select('ownerName surveyNumber area district address status landHash txHash createdAt');
+
+        if (!land) {
+            return res.status(404).json({ success: false, message: 'Survey Number not found or not yet approved.' });
+        }
+
+        res.status(200).json({
+            success: true,
+            land
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Fetch failed', error: error.message });
     }
 };

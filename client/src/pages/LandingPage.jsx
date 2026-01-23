@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { ethers } from 'ethers';
+import LandRegistry from '../blockchain/LandRegistry.json';
 
 export const LandingPage = () => {
   return (
@@ -155,23 +157,93 @@ const FeatureCard = ({ icon, title, desc, color }) => (
 
 // Internal Component for Verification
 const VerificationSearch = () => {
-  const [hash, setHash] = useState('');
-  const [result, setResult] = useState(null);
+  const [surveyInput, setSurveyInput] = useState('');
+  const [result, setResult] = useState(null); // { status: 'VERIFIED' | 'TAMPERED' | 'NOT_FOUND', land: ... }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleVerify = async (e) => {
     e.preventDefault();
-    if (!hash) return;
+    if (!surveyInput) return;
     setLoading(true);
     setError('');
     setResult(null);
 
     try {
-      const res = await axios.get(`/api/land/public/verify/${hash}`);
-      setResult(res.data.land);
+      // 1. Fetch Land Details from Database
+      const res = await axios.get(`/api/land/public/survey/${surveyInput}`);
+      const dbLand = res.data.land;
+
+      if (!dbLand) {
+        setError('Land Record not found in Government Database.');
+        return;
+      }
+
+      // 2. Connect to Blockchain (ReadOnly)
+      // Use a public RPC or specific provider. For localhost/amoy, we assume metamask or fallback
+      let provider;
+      if (window.ethereum) {
+        provider = new ethers.BrowserProvider(window.ethereum);
+      } else {
+        provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545'); // Fallback
+      }
+
+      const contractAddress = LandRegistry.address; // Dynamic address from artifacts
+      // Simple ABI for getLand
+      const abi = [
+        "function getLand(string memory _surveyNumber) public view returns (uint256, string memory, string memory, address, uint256)"
+      ];
+
+      const contract = new ethers.Contract(contractAddress, abi, provider);
+
+      // 3. Fetch from Blockchain
+      let chainData;
+      try {
+        const tx = await contract.getLand(surveyInput);
+        chainData = {
+          id: tx[0],
+          surveyNumber: tx[1],
+          hash: tx[2],
+          owner: tx[3],
+          timestamp: tx[4]
+        };
+      } catch (chainErr) {
+        console.error(chainErr);
+        // Likely not found in contract
+        setResult({
+          status: 'TAMPERED',
+          message: 'Blockchain Record Missing (Possible Dev Reset)',
+          land: dbLand,
+          isDevReset: true
+        });
+        return;
+      }
+
+      // 4. Recalculate Hash locally (Data Integrity Check)
+      // Note: Must match exactly backend hashing logic: surveyNumber-area-address-ownerName
+      const dataString = `${dbLand.surveyNumber}-${dbLand.area}-${dbLand.address}-${dbLand.ownerName}`;
+      const calculatedHash = ethers.id(dataString);
+
+      // 5. Compare
+      const isHashMatch = calculatedHash === dbLand.landHash; // DB Integrity
+      const isBlockchainMatch = dbLand.landHash === chainData.hash; // Blockchain Integrity
+
+      if (isHashMatch && isBlockchainMatch) {
+        setResult({ status: 'VERIFIED', land: dbLand });
+      } else {
+        setResult({
+          status: 'TAMPERED',
+          message: !isHashMatch ? 'Database Data Corrupted (Hash Mismatch)' : 'Blockchain Record Mismatch',
+          land: dbLand
+        });
+      }
+
     } catch (err) {
-      setError(err.response?.data?.message || 'Verification Failed. Invalid Hash.');
+      if (err.response && err.response.status === 404) {
+        setError('Survey Number not found.');
+      } else {
+        setError('Verification Error: ' + (err.message || 'Unknown'));
+      }
     } finally {
       setLoading(false);
     }
@@ -182,9 +254,9 @@ const VerificationSearch = () => {
       <form onSubmit={handleVerify} className="relative flex items-center">
         <input
           type="text"
-          placeholder="Paste Blockchain Hash (0x...)"
-          value={hash}
-          onChange={(e) => setHash(e.target.value)}
+          placeholder="Enter Survey Number (e.g. SR-101)..."
+          value={surveyInput}
+          onChange={(e) => setSurveyInput(e.target.value)}
           className="w-full pl-4 pr-12 py-3 bg-white/80 border border-[#AEB877]/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877] text-sm font-mono text-[#2C3318]"
         />
         <button
@@ -198,16 +270,37 @@ const VerificationSearch = () => {
 
       {error && <p className="text-red-600 text-xs mt-2 font-bold bg-red-50 p-2 rounded border border-red-200">❌ {error}</p>}
 
-      {result && (
-        <div className="mt-3 bg-[#E6F4EA] p-3 rounded-xl border border-[#A5C89E] animate-fadeIn">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg">✅</span>
-            <span className="text-sm font-bold text-[#2C3318]">Verified Valid Record</span>
+      {result && result.status === 'VERIFIED' && (
+        <div className="mt-3 bg-[#E6F4EA] p-4 rounded-xl border border-[#A5C89E] animate-fadeIn">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl">✅</span>
+            <span className="text-lg font-bold text-[#2C3318]">VERIFIED SECURE</span>
           </div>
-          <div className="text-xs text-[#5C6642] space-y-1">
-            <p><span className="font-bold">Survey No:</span> {result.surveyNumber}</p>
-            <p><span className="font-bold">Owner:</span> {result.ownerName}</p>
-            <p><span className="font-bold">Date:</span> {new Date(result.createdAt).toLocaleDateString()}</p>
+          <div className="text-xs text-[#5C6642] space-y-1 mb-2">
+            <p><span className="font-bold">Survey No:</span> {result.land.surveyNumber}</p>
+            <p><span className="font-bold">Owner:</span> {result.land.ownerName}</p>
+            <p className="font-mono text-[10px] break-all bg-white/50 p-1 rounded">Hash: {result.land.landHash}</p>
+          </div>
+          <div className="text-[10px] bg-[#2C3318]/10 text-[#2C3318] px-2 py-1 rounded inline-block font-bold">
+            Blockchain Match Confirmed
+          </div>
+        </div>
+      )}
+
+      {result && result.status === 'TAMPERED' && (
+        <div className="mt-3 bg-red-50 p-4 rounded-xl border border-red-200 animate-fadeIn">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl">❌</span>
+            <span className="text-lg font-bold text-red-700">TAMPER / SYNC ERROR</span>
+          </div>
+          <p className="text-xs text-red-600 font-bold mb-2">{result.message}</p>
+          <div className="text-xs text-gray-500">
+            <p>The data in the database does not match the blockchain record.</p>
+            {result.isDevReset && (
+              <p className="mt-1 text-gray-400 italic">
+                *Note: If you restarted the blockchain, past records are wiped. Please create a NEW record to test verification.
+              </p>
+            )}
           </div>
         </div>
       )}

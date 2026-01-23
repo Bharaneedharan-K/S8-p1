@@ -6,13 +6,17 @@ import {
     getPendingLands,
     verifyLandRecord,
     getAllLands,
-    getLandByHash
+    getLandByHash,
+    getLandBySurveyNumber
 } from '../controllers/landController.js';
 
 const router = express.Router();
 
 // Public: Verify by Hash
 router.get('/public/verify/:hash', getLandByHash);
+
+// Public: Get by Survey Number
+router.get('/public/survey/:surveyNumber', getLandBySurveyNumber);
 
 // Officer: Add Land
 router.post(

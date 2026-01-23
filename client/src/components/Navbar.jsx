@@ -135,6 +135,7 @@ export const Navbar = () => {
                         <NavLink to="/admin/verify-land">Verify Land</NavLink>
                         <NavLink to="/admin/schemes">Schemes</NavLink>
                         <NavLink to="/admin/applications">Applications</NavLink>
+                        <NavLink to="/admin/logs">Audit Logs</NavLink>
                       </>
                     )}
                   </div>
