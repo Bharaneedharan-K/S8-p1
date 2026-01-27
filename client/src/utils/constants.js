@@ -1,15 +1,49 @@
-export const LAND_TYPES = [
-    "Agricultural",
-    "Wetland",
-    "Dry Land",
-    "Commercial",
-    "Residential"
+export const TN_DISTRICTS = [
+    'Ariyalur',
+    'Chengalpattu',
+    'Chennai',
+    'Coimbatore',
+    'Cuddalore',
+    'Dharmapuri',
+    'Dindigul',
+    'Erode',
+    'Kallakurichi',
+    'Kancheepuram',
+    'Kanniyakumari',
+    'Karur',
+    'Krishnagiri',
+    'Madurai',
+    'Mayiladuthurai',
+    'Nagapattinam',
+    'Namakkal',
+    'Nilgiris',
+    'Perambalur',
+    'Pudukkottai',
+    'Ramanathapuram',
+    'Ranipet',
+    'Salem',
+    'Sivagangai',
+    'Tenkasi',
+    'Thanjavur',
+    'Theni',
+    'Thiruvallur',
+    'Thiruvarur',
+    'Thoothukudi',
+    'Tiruchirappalli',
+    'Tirunelveli',
+    'Tirupathur',
+    'Tiruppur',
+    'Tiruvannamalai',
+    'Vellore',
+    'Viluppuram',
+    'Virudhunagar'
 ];
 
-export const DISTRICTS = [
-    "Central",
-    "North",
-    "South",
-    "East",
-    "West"
+export const LAND_TYPES = [
+    'Agricultural',
+    'Residential',
+    'Commercial',
+    'Industrial',
+    'Wetland',
+    'Dryland'
 ];
