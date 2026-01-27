@@ -1,6 +1,6 @@
 import Land from '../models/Land.js';
 import User from '../models/User.js';
-import cloudinary from '../utils/cloudinary.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 // Add new Land Record (Officer Only)
 export const addLandRecord = async (req, res) => {
@@ -31,7 +31,10 @@ export const addLandRecord = async (req, res) => {
         }
 
         // If cloudinary util exports the v2 instance directly:
-        const cloudinaryResponse = await cloudinary.uploader.upload(dataURI, uploadOptions);
+        // const cloudinaryResponse = await cloudinary.uploader.upload(dataURI, uploadOptions);
+
+        // Use our custom helper instead to handle buffers/streams properly
+        const cloudinaryResponse = await uploadToCloudinary(req.files.document[0].buffer, req.files.document[0].originalname);
 
         const documentUrl = cloudinaryResponse.secure_url;
 

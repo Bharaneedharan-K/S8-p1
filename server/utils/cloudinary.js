@@ -18,5 +18,27 @@ cloudinary.config({
 
 console.log('✅ Cloudinary configured successfully');
 
+export const uploadToCloudinary = (buffer, filename) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'land-registry',
+        resource_type: 'auto',
+        filename_override: filename, // Help Cloudinary detect type
+        use_filename: true,
+      },
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary Upload Error:', error);
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+    uploadStream.end(buffer);
+  });
+};
+
 export default cloudinary;
 

@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import { generateToken } from '../utils/jwt.js';
 import { sendOfficerCredentials } from '../utils/email.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 import { validationResult } from 'express-validator';
 
 // Register - Farmer Only
@@ -15,15 +16,29 @@ export const register = async (req, res) => {
       });
     }
 
-    const { name, email, mobile, password, district } = req.body;
+    const { name, email, mobile, password, district, address } = req.body; // Added address
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: 'User already exists with this email',
-      });
+      return res.status(400).json({ message: 'User already exists' }); // Modified status and message
+    }
+
+    // Handle File Uploads (Cloudinary)
+    let profilePhotoUrl = '';
+    let aadhaarCardUrl = '';
+
+    if (req.files) {
+      if (req.files.profilePhoto) {
+        const result = await uploadToCloudinary(req.files.profilePhoto[0].buffer, req.files.profilePhoto[0].originalname);
+        profilePhotoUrl = result.secure_url;
+      }
+      if (req.files.aadhaarCard) {
+        console.log('📄 Uploading Aadhaar PDF...');
+        const result = await uploadToCloudinary(req.files.aadhaarCard[0].buffer, req.files.aadhaarCard[0].originalname);
+        console.log('✅ Aadhaar Upload Result:', result); // DEBUG
+        aadhaarCardUrl = result.secure_url;
+      }
     }
 
     // Create new farmer user
@@ -31,10 +46,13 @@ export const register = async (req, res) => {
       name,
       email,
       mobile,
-      password,
+      password, // Will be hashed by pre-save hook
       district,
+      address, // Added address
+      selfieUrl: profilePhotoUrl, // Mapped to selfieUrl
+      aadhaarUrl: aadhaarCardUrl, // Mapped to aadhaarUrl
       role: 'FARMER',
-      status: 'FARMER_PENDING_VERIFICATION',
+      status: 'FARMER_PENDING_VERIFICATION', // Default status for new farmers
     });
 
     await user.save();

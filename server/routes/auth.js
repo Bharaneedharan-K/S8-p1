@@ -12,11 +12,15 @@ import {
 } from '../controllers/authController.js';
 import { authMiddleware, authorize } from '../middleware/auth.js';
 
+import upload from '../middleware/upload.js';
+
 const router = express.Router();
 
 // Public routes
+// Register (Farmer) - Now supports file uploads
 router.post(
   '/register',
+  upload.fields([{ name: 'profilePhoto' }, { name: 'aadhaarCard' }]),
   [
     body('name').notEmpty().trim().withMessage('Name is required'),
     body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),

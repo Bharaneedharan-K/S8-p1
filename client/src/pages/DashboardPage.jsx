@@ -51,19 +51,13 @@ const FarmerDashboard = () => {
         <div className="bg-gradient-to-r from-[#FFFBB1] to-[#FFFBB1]/50 border border-[#D8E983] rounded-2xl p-6 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#D8E983]/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
           <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="bg-[#D8E983]/30 p-3 rounded-full text-[#4A5532] text-xl">⚠️</div>
+            <div className="bg-[#D8E983]/30 p-3 rounded-full text-[#4A5532] text-xl">⏳</div>
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-[#4A5532]">Action Required</h3>
+              <h3 className="text-lg font-bold text-[#4A5532]">Verification Pending</h3>
               <p className="text-[#5C6642] mt-1 text-sm">
-                Your account is pending verification. Please upload your documents to access services.
+                Your documents have been submitted and are currently under review by the Land Officer. You will be notified once approved.
               </p>
             </div>
-            <Link
-              to="/farmer/verify"
-              className="mt-4 sm:mt-0 px-5 py-2.5 bg-[#AEB877] hover:bg-[#8B9850] text-white text-sm font-bold rounded-xl shadow-lg shadow-[#AEB877]/30 transition-all active:scale-95"
-            >
-              Verify Identity →
-            </Link>
           </div>
         </div>
       )}

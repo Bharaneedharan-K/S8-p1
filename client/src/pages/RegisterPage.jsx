@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FiUpload, FiCheck, FiX } from 'react-icons/fi';
 
 import { TN_DISTRICTS } from '../utils/constants';
 
@@ -18,10 +19,12 @@ export const RegisterPage = () => {
     confirmPassword: '',
     district: '',
   });
+  const [files, setFiles] = useState({
+    profilePhoto: null,
+    aadhaarCard: null,
+  });
   const [localError, setLocalError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
-  // ... (validation logic remains same)
   const validateStep = (stepNum) => {
     if (stepNum === 1) {
       if (!formData.name || !formData.email) {
@@ -42,6 +45,11 @@ export const RegisterPage = () => {
         return false;
       }
     } else if (stepNum === 3) {
+      if (!files.profilePhoto || !files.aadhaarCard) {
+        setLocalError('Please upload both Profile Photo and Aadhaar Card');
+        return false;
+      }
+    } else if (stepNum === 4) {
       if (!formData.password || !formData.confirmPassword) {
         setLocalError('Please enter password');
         return false;
@@ -64,6 +72,18 @@ export const RegisterPage = () => {
     setLocalError('');
   };
 
+  const handleFileChange = (e, field) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setLocalError('File size must be less than 5MB');
+        return;
+      }
+      setFiles((prev) => ({ ...prev, [field]: file }));
+      setLocalError('');
+    }
+  };
+
   const handleNext = () => {
     if (validateStep(step)) {
       setLocalError('');
@@ -73,18 +93,22 @@ export const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateStep(3)) return;
+    if (!validateStep(4)) return;
 
-    const result = await register({
-      name: formData.name,
-      email: formData.email,
-      mobile: formData.mobile,
-      password: formData.password,
-      district: formData.district,
-    });
+    try {
+      const formDataObj = new FormData();
+      Object.keys(formData).forEach(key => formDataObj.append(key, formData[key]));
+      if (files.profilePhoto) formDataObj.append('profilePhoto', files.profilePhoto);
+      if (files.aadhaarCard) formDataObj.append('aadhaarCard', files.aadhaarCard);
 
-    if (result.success) {
-      navigate('/dashboard');
+      const result = await register(formDataObj); // register function in context handles FormData
+
+      if (result.success) {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      setLocalError('Registration failed');
     }
   };
 
@@ -106,8 +130,8 @@ export const RegisterPage = () => {
           {/* Progress Bar */}
           <div className="bg-[#FCFDF5] border-b border-[#AEB877]/20 px-6 py-4">
             <div className="flex justify-between mb-2">
-              {['Basic Info', 'Location', 'Security'].map((label, index) => (
-                <span key={index} className={`text-xs font-bold uppercase tracking-wider ${step > index ? 'text-[#AEB877]' : step === index + 1 ? 'text-[#8B9850]' : 'text-slate-300'}`}>
+              {['Basic Info', 'Location', 'Identity', 'Security'].map((label, index) => (
+                <span key={index} className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${step > index ? 'text-[#AEB877]' : step === index + 1 ? 'text-[#8B9850]' : 'text-slate-300'}`}>
                   {label}
                 </span>
               ))}
@@ -115,7 +139,7 @@ export const RegisterPage = () => {
             <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-[#D8E983] to-[#AEB877] transition-all duration-500 ease-out"
-                style={{ width: `${(step / 3) * 100}%` }}
+                style={{ width: `${(step / 4) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -128,7 +152,7 @@ export const RegisterPage = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Step 1 */}
+              {/* Step 1: Basic Info */}
               {step === 1 && (
                 <div className="space-y-4 animate-fadeIn">
                   <div>
@@ -160,7 +184,7 @@ export const RegisterPage = () => {
                 </div>
               )}
 
-              {/* Step 2 */}
+              {/* Step 2: Location */}
               {step === 2 && (
                 <div className="space-y-4 animate-fadeIn">
                   <div>
@@ -197,8 +221,82 @@ export const RegisterPage = () => {
                 </div>
               )}
 
-              {/* Step 3 */}
+              {/* Step 3: Identity Verification (NEW) */}
               {step === 3 && (
+                <div className="space-y-6 animate-fadeIn">
+                  {/* Profile Photo Upload */}
+                  <div>
+                    <label className="block text-sm font-bold text-[#4A5532] mb-2 ml-1">Profile Photo (Selfie)</label>
+                    <div className="relative border-2 border-dashed border-[#AEB877]/40 rounded-xl p-6 bg-[#FCFDF5] hover:bg-[#F4F9E6] transition-colors text-center cursor-pointer group">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, 'profilePhoto')}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        {files.profilePhoto ? (
+                          <>
+                            <div className="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-[#8B9850]">
+                              <img src={URL.createObjectURL(files.profilePhoto)} alt="Preview" className="w-full h-full object-cover" />
+                            </div>
+                            <span className="text-sm font-semibold text-[#4A5532] flex items-center gap-1">
+                              <FiCheck className="text-green-600" /> {files.profilePhoto.name}
+                            </span>
+                            <span className="text-xs text-slate-500">Click to change</span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-12 h-12 bg-[#E9F0C8] rounded-full flex items-center justify-center text-[#8B9850] group-hover:scale-110 transition-transform">
+                              <FiUpload size={24} />
+                            </div>
+                            <span className="text-sm font-medium text-[#5C6642]">Click to upload photo</span>
+                            <span className="text-xs text-slate-400">JPG, PNG max 5MB</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Aadhaar Card Upload */}
+                  <div>
+                    <label className="block text-sm font-bold text-[#4A5532] mb-2 ml-1">Aadhaar Card (ID Proof)</label>
+                    <div className="relative border-2 border-dashed border-[#AEB877]/40 rounded-xl p-6 bg-[#FCFDF5] hover:bg-[#F4F9E6] transition-colors text-center cursor-pointer group">
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={(e) => handleFileChange(e, 'aadhaarCard')}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        {files.aadhaarCard ? (
+                          <>
+                            <FiCheck className="text-green-600 text-3xl mb-1" />
+                            <span className="text-sm font-semibold text-[#4A5532]">{files.aadhaarCard.name}</span>
+                            <span className="text-xs text-slate-500">Click to change</span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-12 h-12 bg-[#E9F0C8] rounded-full flex items-center justify-center text-[#8B9850] group-hover:scale-110 transition-transform">
+                              <FiUpload size={24} />
+                            </div>
+                            <span className="text-sm font-medium text-[#5C6642]">Click to upload Aadhaar</span>
+                            <span className="text-xs text-slate-400">JPG, PDF max 5MB</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                    <button type="button" onClick={() => setStep(2)} className="btn-outline">Back</button>
+                    <button type="button" onClick={handleNext} className="btn-primary">Continue →</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Security (Password) */}
+              {step === 4 && (
                 <div className="space-y-4 animate-fadeIn">
                   <div>
                     <label className="block text-sm font-bold text-[#4A5532] mb-1.5 ml-1">Password</label>
@@ -223,7 +321,7 @@ export const RegisterPage = () => {
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4 mt-6">
-                    <button type="button" onClick={() => setStep(2)} className="btn-outline">Back</button>
+                    <button type="button" onClick={() => setStep(3)} className="btn-outline">Back</button>
                     <button type="submit" disabled={loading} className="btn-secondary shadow-[#A5C89E]/20">
                       {loading ? 'Creating...' : 'Create Account'}
                     </button>

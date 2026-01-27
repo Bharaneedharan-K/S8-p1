@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema(
         return this.role === 'FARMER' || this.role === 'OFFICER';
       },
     },
+    address: {
+      type: String,
+      trim: true,
+    },
     status: {
       type: String,
       enum: {

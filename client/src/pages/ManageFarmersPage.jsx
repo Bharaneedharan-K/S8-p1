@@ -288,7 +288,11 @@ export const ManageFarmersPage = () => {
                   </div>
                   <div className="bg-[#FCFDF5] rounded-xl border border-[#AEB877]/20 p-4 flex justify-center items-center min-h-[300px]">
                     {viewingDocument.url.endsWith('.pdf') ? (
-                      <iframe src={viewingDocument.url} className="w-full h-96 rounded-lg" title="doc"></iframe>
+                      <iframe
+                        src={`https://docs.google.com/gview?url=${viewingDocument.url}&embedded=true`}
+                        className="w-full h-96 rounded-lg"
+                        title="doc"
+                      ></iframe>
                     ) : (
                       <img src={viewingDocument.url} className="max-h-[500px] w-auto object-contain rounded-lg shadow-sm" alt="doc" />
                     )}

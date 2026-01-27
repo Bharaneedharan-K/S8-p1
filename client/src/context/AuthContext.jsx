@@ -9,16 +9,32 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Initialize from localStorage
+  // Initialize from localStorage and fetch fresh data
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
 
-    if (storedToken && storedUser) {
+    if (storedToken) {
       setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+
+      // Fetch fresh user data to ensure status is up to date
+      authService.getCurrentUser()
+        .then(response => {
+          const freshUser = response.data.user;
+          setUser(freshUser);
+          localStorage.setItem('user', JSON.stringify(freshUser));
+        })
+        .catch(() => {
+          // If token is invalid, logout
+          logout();
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const login = useCallback(async (email, password) => {

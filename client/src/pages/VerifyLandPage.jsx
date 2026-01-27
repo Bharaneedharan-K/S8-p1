@@ -10,7 +10,9 @@ export const VerifyLandPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
     const [processingId, setProcessingId] = useState(null);
+    const [viewingDocument, setViewingDocument] = useState(null);
 
     // Fetch Pending Lands
     const fetchPendingLands = async () => {
@@ -194,14 +196,12 @@ export const VerifyLandPage = () => {
                                         <span className="font-bold text-[#4A5532]">Address:</span> {land.address}
                                     </p>
                                     <div className="flex items-center justify-between pt-2">
-                                        <a
-                                            href={land.documentUrl}
-                                            target="_blank"
-                                            rel="noreferrer"
+                                        <button
+                                            onClick={() => setViewingDocument(land.documentUrl)}
                                             className="text-[#AEB877] font-bold text-sm hover:underline flex items-center gap-1"
                                         >
                                             📄 View Document
-                                        </a>
+                                        </button>
                                         <div className="text-[#9CA385] text-xs">
                                             Verified by: {land.officerId?.name}
                                         </div>
@@ -238,7 +238,47 @@ export const VerifyLandPage = () => {
                         ))}
                     </div>
                 )}
+
             </div>
+
+            {/* Document Viewer Modal */}
+            {viewingDocument && (
+                <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                        <div className="fixed inset-0 bg-[#2C3318]/40 transition-opacity backdrop-blur-sm" aria-hidden="true" onClick={() => setViewingDocument(null)}></div>
+                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg leading-6 font-bold text-[#2C3318]" id="modal-title">
+                                        Land Document Preview
+                                    </h3>
+                                    <button onClick={() => setViewingDocument(null)} className="text-[#9CA385] hover:text-[#5C6642] text-2xl">×</button>
+                                </div>
+                                <div className="bg-[#FCFDF5] rounded-xl border border-[#AEB877]/20 p-4 flex justify-center items-center min-h-[300px]">
+                                    {viewingDocument.endsWith('.pdf') ? (
+                                        <iframe
+                                            src={`https://docs.google.com/gview?url=${viewingDocument}&embedded=true`}
+                                            className="w-full h-96 rounded-lg"
+                                            title="doc"
+                                        ></iframe>
+                                    ) : (
+                                        <img src={viewingDocument} className="max-h-[500px] w-auto object-contain rounded-lg shadow-sm" alt="doc" />
+                                    )}
+                                </div>
+                            </div>
+                            <div className="bg-[#FFFBB1]/20 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+                                <a href={viewingDocument} target="_blank" rel="noreferrer" className="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-[#AEB877] text-base font-bold text-white hover:bg-[#8B9850] focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                                    Download Original
+                                </a>
+                                <button type="button" onClick={() => setViewingDocument(null)} className="mt-3 w-full inline-flex justify-center rounded-xl border border-[#AEB877]/30 shadow-sm px-4 py-2 bg-white text-base font-medium text-[#4A5532] hover:bg-[#FFFBB1]/30 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                    Close Preview
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
