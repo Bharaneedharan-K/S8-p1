@@ -270,37 +270,49 @@ const VerificationSearch = () => {
 
       {error && <p className="text-red-600 text-xs mt-2 font-bold bg-red-50 p-2 rounded border border-red-200">❌ {error}</p>}
 
-      {result && result.status === 'VERIFIED' && (
-        <div className="mt-3 bg-[#E6F4EA] p-4 rounded-xl border border-[#A5C89E] animate-fadeIn">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">✅</span>
-            <span className="text-lg font-bold text-[#2C3318]">VERIFIED SECURE</span>
-          </div>
-          <div className="text-xs text-[#5C6642] space-y-1 mb-2">
-            <p><span className="font-bold">Survey No:</span> {result.land.surveyNumber}</p>
-            <p><span className="font-bold">Owner:</span> {result.land.ownerName}</p>
-            <p className="font-mono text-[10px] break-all bg-white/50 p-1 rounded">Hash: {result.land.landHash}</p>
-          </div>
-          <div className="text-[10px] bg-[#2C3318]/10 text-[#2C3318] px-2 py-1 rounded inline-block font-bold">
-            Blockchain Match Confirmed
-          </div>
-        </div>
-      )}
-
-      {result && result.status === 'TAMPERED' && (
-        <div className="mt-3 bg-red-50 p-4 rounded-xl border border-red-200 animate-fadeIn">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">❌</span>
-            <span className="text-lg font-bold text-red-700">TAMPER / SYNC ERROR</span>
-          </div>
-          <p className="text-xs text-red-600 font-bold mb-2">{result.message}</p>
-          <div className="text-xs text-gray-500">
-            <p>The data in the database does not match the blockchain record.</p>
-            {result.isDevReset && (
-              <p className="mt-1 text-gray-400 italic">
-                *Note: If you restarted the blockchain, past records are wiped. Please create a NEW record to test verification.
-              </p>
+      {result && (
+        <div className="mt-4 p-5 rounded-2xl bg-white/80 border border-[#E2E6D5] shadow-sm animate-fadeIn backdrop-blur-sm">
+          {/* Header with Status Badge */}
+          <div className="flex justify-between items-center mb-4 border-b border-[#E2E6D5] pb-2">
+            <h4 className="font-bold text-[#2C3318] flex items-center gap-2">
+              <span>🌾</span> Land Details
+            </h4>
+            {result.status === 'VERIFIED' ? (
+              <span className="px-2 py-1 bg-[#E6F4EA] text-[#2C3318] text-xs font-bold rounded-lg border border-[#A5C89E] flex items-center gap-1">
+                <span>✅</span> Verified
+              </span>
+            ) : (
+              <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs font-bold rounded-lg border border-gray-200 flex items-center gap-1">
+                <span>ℹ️</span> Record Found
+              </span>
             )}
+          </div>
+
+          {/* Details Grid */}
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="col-span-2 sm:col-span-1">
+              <p className="text-xs text-[#9CA385] font-bold uppercase mb-0.5">Owner Name</p>
+              <p className="font-bold text-[#2C3318] text-lg">{result.land.ownerName}</p>
+            </div>
+            <div className="col-span-2 sm:col-span-1">
+              <p className="text-xs text-[#9CA385] font-bold uppercase mb-0.5">Survey No</p>
+              <p className="font-bold text-[#2C3318]">{result.land.surveyNumber}</p>
+            </div>
+            <div className="col-span-2 sm:col-span-1">
+              <p className="text-xs text-[#9CA385] font-bold uppercase mb-0.5">Area</p>
+              <p className="font-bold text-[#2C3318]">{result.land.area} Acres</p>
+            </div>
+            <div className="col-span-2 sm:col-span-1">
+              <p className="text-xs text-[#9CA385] font-bold uppercase mb-0.5">District</p>
+              <p className="font-bold text-[#2C3318]">{result.land.district || 'N/A'}</p>
+            </div>
+          </div>
+
+          {/* Hash Footer */}
+          <div className="mt-4 pt-3 border-t border-[#E2E6D5]">
+            <p className="text-[10px] text-[#9CA385] font-mono break-all">
+              <span className="font-bold">Hash:</span> {result.land.landHash}
+            </p>
           </div>
         </div>
       )}
