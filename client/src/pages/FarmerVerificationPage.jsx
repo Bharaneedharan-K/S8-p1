@@ -12,7 +12,7 @@ export const FarmerVerificationPage = () => {
   const [selfieFile, setSelfieFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'success' or 'error'
+  const [messageType, setMessageType] = useState(''); // 'sV uccess' or 'error'
 
   // Previews
   const [aadhaarPreview, setAadhaarPreview] = useState(null);
