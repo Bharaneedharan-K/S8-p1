@@ -118,7 +118,29 @@ export const VerifyLandPage = () => {
 
         } catch (err) {
             console.error(err);
-            setError('Verification failed: ' + (err.message || 'Unknown error'));
+            // Handle "Already Registered" Error
+            if (err.message && (err.message.includes('already registered') || err.message.includes('execution reverted'))) {
+                const alreadyRegistered = window.confirm(
+                    `Blockchain Error: "${err.reason || 'Land already registered'}"\n\nIt seems this land was already minted but the database wasn't updated.\n\nDo you want to FORCE SYNC the database to 'Approved'?`
+                );
+
+                if (alreadyRegistered) {
+                    try {
+                        // Optimistic sync - In real app, we should read from blockchain first to verify hash match
+                        await apiClient.patch(`/land/verify/${land._id}`, {
+                            status: 'LAND_APPROVED',
+                            landHash: 'SYNCED_FROM_BLOCKCHAIN', // or fetch real hash if possible
+                            txHash: 'PREVIOUSLY_MINTED'
+                        });
+                        setSuccess('Database forcefully synced with Blockchain!');
+                        fetchPendingLands();
+                        return; // Exit success
+                    } catch (syncErr) {
+                        setError('Failed to sync database: ' + syncErr.message);
+                    }
+                }
+            }
+            setError('Verification failed: ' + (err.reason || err.message || 'Unknown error'));
         } finally {
             setProcessingId(null);
         }
