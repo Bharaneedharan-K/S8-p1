@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ export const FarmerProfilePage = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await axios.get('/api/auth/profile/stats');
+                const res = await apiClient.get('/auth/profile/stats');
                 setStats(res.data.stats);
             } catch (err) {
                 console.error("Failed to load stats", err);

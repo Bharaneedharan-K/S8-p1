@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 export const LandRecordsPage = () => {
@@ -13,9 +13,7 @@ export const LandRecordsPage = () => {
             try {
                 setLoading(true);
                 // Backend automatically filters based on role (Farmer -> Own lands, Officer -> All/District in future)
-                const res = await axios.get('/api/land', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await apiClient.get('/land');
                 setLands(res.data.lands || []);
             } catch (err) {
                 setError('Failed to fetch land records.');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import { LAND_TYPES } from '../utils/constants';
 
@@ -16,9 +16,7 @@ export const ManageSchemesPage = () => {
 
     const fetchSchemes = async () => {
         try {
-            const res = await axios.get('/api/schemes', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await apiClient.get('/schemes');
             setSchemes(res.data.schemes);
         } catch (err) { console.error(err); }
         finally { setLoading(false); }
@@ -78,15 +76,11 @@ export const ManageSchemesPage = () => {
 
             if (editingId) {
                 // Update
-                await axios.put(`/api/schemes/${editingId}`, payload, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await apiClient.put(`/schemes/${editingId}`, payload);
                 alert('Scheme Updated Successfully!');
             } else {
                 // Create
-                await axios.post('/api/schemes', payload, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await apiClient.post('/schemes', payload);
                 alert('Scheme Created Successfully!');
             }
 
@@ -102,9 +96,8 @@ export const ManageSchemesPage = () => {
     const handleToggleStatus = async (scheme) => {
         try {
             const newStatus = scheme.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-            await axios.put(`/api/schemes/${scheme._id}`,
-                { status: newStatus },
-                { headers: { Authorization: `Bearer ${token}` } }
+            await apiClient.put(`/schemes/${scheme._id}`,
+                { status: newStatus }
             );
             fetchSchemes();
         } catch (err) {

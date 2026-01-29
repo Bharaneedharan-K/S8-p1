@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 const DISTRICTS = [
@@ -24,11 +24,12 @@ export const ManageFarmersPage = () => {
   const fetchFarmersFromDB = async () => {
     try {
       setFetchingFarmers(true);
-      let url = '/api/auth/users?role=FARMER';
+      let url = '/auth/users?role=FARMER';
       if (selectedDistrict) url += `&district=${selectedDistrict}`;
       if (selectedStatus) url += `&status=${selectedStatus}`;
 
-      const response = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
+      // apiClient automatically adds Base URL and Auth headers
+      const response = await apiClient.get(url);
       const fetchedFarmers = response.data.users || response.data.data || [];
       setFarmers(Array.isArray(fetchedFarmers) ? fetchedFarmers : []);
     } catch (err) {
@@ -50,7 +51,7 @@ export const ManageFarmersPage = () => {
       setLoading(true);
       setError('');
       setSuccess('');
-      await axios.patch(`/api/auth/users/${farmerId}/status`, { status: newStatus }, { headers: { Authorization: `Bearer ${token}` } });
+      await apiClient.patch(`/auth/users/${farmerId}/status`, { status: newStatus });
       setSuccess(`Farmer status updated to ${newStatus}`);
       fetchFarmersFromDB();
     } catch (err) {

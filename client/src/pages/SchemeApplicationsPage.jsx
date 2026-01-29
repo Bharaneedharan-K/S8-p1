@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 export const SchemeApplicationsPage = () => {
@@ -10,9 +10,7 @@ export const SchemeApplicationsPage = () => {
 
     const fetchApps = async () => {
         try {
-            const res = await axios.get('/api/applications', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await apiClient.get('/applications');
             setApps(res.data.applications);
         } catch (err) { console.error(err); }
         finally { setLoading(false); }
@@ -26,9 +24,7 @@ export const SchemeApplicationsPage = () => {
 
         setProcessingId(appId);
         try {
-            await axios.patch(`/api/applications/${appId}/review`, { status, adminRemarks: remarks }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await apiClient.patch(`/applications/${appId}/review`, { status, adminRemarks: remarks });
             fetchApps();
         } catch (err) {
             alert('Review failed');

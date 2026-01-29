@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { LAND_TYPES } from '../utils/constants';
@@ -36,9 +36,7 @@ export const AddLandPage = () => {
             // or cleaner: backend could have a specialized search endpoint.
             // For now, we'll try to get all and filter, or use an existing endpoint.
             // Better approach: Let's assume the officer gets farmers in their district
-            const res = await axios.get(`/api/auth/users?role=FARMER`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await apiClient.get(`/auth/users?role=FARMER`);
 
             const foundFarmer = res.data.users.find(u => u.email === searchEmail);
 
@@ -83,9 +81,9 @@ export const AddLandPage = () => {
             Object.keys(formData).forEach(key => data.append(key, formData[key]));
             data.append('document', file);
 
-            await axios.post('/api/land/add', data, {
+            // apiClient automatically handles Auth header
+            await apiClient.post('/land/add', data, {
                 headers: {
-                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
                 }
             });

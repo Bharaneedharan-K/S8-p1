@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { ethers } from 'ethers';
 import LandRegistry from '../blockchain/LandRegistry.json';
 
@@ -171,7 +171,7 @@ const VerificationSearch = () => {
 
     try {
       // 1. Fetch Land Details from Database
-      const res = await axios.get(`/api/land/public/survey/${surveyInput}`);
+      const res = await apiClient.get(`/land/public/survey/${surveyInput}`);
       const dbLand = res.data.land;
 
       if (!dbLand) {

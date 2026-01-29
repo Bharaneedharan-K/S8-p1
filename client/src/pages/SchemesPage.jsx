@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 export const SchemesPage = () => {
@@ -16,15 +16,11 @@ export const SchemesPage = () => {
         const fetchData = async () => {
             try {
                 // Fetch Active Schemes
-                const schemeRes = await axios.get('/api/schemes/active', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const schemeRes = await apiClient.get('/schemes/active');
                 setSchemes(schemeRes.data.schemes);
 
                 // Fetch User's Approved Lands (for application)
-                const landRes = await axios.get('/api/land?status=LAND_APPROVED', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const landRes = await apiClient.get('/land?status=LAND_APPROVED');
                 setLands(landRes.data.lands);
 
             } catch (err) {
@@ -62,11 +58,9 @@ export const SchemesPage = () => {
 
 
         try {
-            await axios.post('/api/applications/apply', {
+            await apiClient.post('/applications/apply', {
                 schemeId: selectedScheme._id,
                 landId: selectedLand
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
 
             setMessage({ type: 'success', text: 'Application Submitted Successfully! Track status in "My Applications".' });

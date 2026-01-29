@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -73,10 +73,9 @@ export const FarmerVerificationPage = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post('/api/farmer/submit-verification', formData, {
+      const response = await apiClient.post('/farmer/submit-verification', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
         },
       });
 

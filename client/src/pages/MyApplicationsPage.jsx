@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 export const MyApplicationsPage = () => {
@@ -10,9 +10,7 @@ export const MyApplicationsPage = () => {
     useEffect(() => {
         const fetchApps = async () => {
             try {
-                const res = await axios.get('/api/applications/my', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await apiClient.get('/applications/my');
                 setApps(res.data.applications);
             } catch (err) { console.error(err); }
             finally { setLoading(false); }

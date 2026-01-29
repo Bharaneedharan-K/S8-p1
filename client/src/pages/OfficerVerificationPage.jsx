@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 export const OfficerVerificationPage = () => {
@@ -14,9 +14,7 @@ export const OfficerVerificationPage = () => {
     try {
       setLoading(true);
       // Backend automatically filters by district for officers
-      const res = await axios.get('/api/auth/users?status=FARMER_PENDING_VERIFICATION', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiClient.get('/auth/users?status=FARMER_PENDING_VERIFICATION');
       setFarmers(res.data.users || []);
     } catch (err) {
       setError('Failed to fetch pending verifications');
@@ -33,9 +31,8 @@ export const OfficerVerificationPage = () => {
     if (!window.confirm(`Are you sure you want to ${status === 'FARMER_VERIFIED' ? 'APPROVE' : 'REJECT'} this application?`)) return;
 
     try {
-      await axios.patch(`/api/auth/users/${farmerId}/status`,
-        { status },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await apiClient.patch(`/auth/users/${farmerId}/status`,
+        { status }
       );
       setSuccess(`Farmer application ${status === 'FARMER_VERIFIED' ? 'approved' : 'rejected'} successfully`);
       fetchPendingFarmers();
