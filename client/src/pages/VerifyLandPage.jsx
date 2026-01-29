@@ -104,12 +104,10 @@ export const VerifyLandPage = () => {
             console.log('Transaction mined');
 
             // 3. Backend Update (Store Hash and TxHash)
-            await axios.patch(`/api/land/verify/${land._id}`, {
+            await apiClient.patch(`/land/verify/${land._id}`, {
                 status: 'LAND_APPROVED',
                 landHash: landHash,
                 txHash: tx.hash
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
 
             setSuccess(`Land ${land.surveyNumber} Successfully Verified & Minted!`);
@@ -156,11 +154,9 @@ export const VerifyLandPage = () => {
 
         try {
             setProcessingId(land._id);
-            await axios.patch(`/api/land/verify/${land._id}`, {
+            await apiClient.patch(`/land/verify/${land._id}`, {
                 status: 'LAND_REJECTED',
                 rejectionReason: reason
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
 
             setSuccess(`Land ${land.surveyNumber} Rejected.`);
