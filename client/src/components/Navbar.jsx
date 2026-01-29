@@ -82,7 +82,7 @@ export const Navbar = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xl font-extrabold text-white tracking-tight leading-none group-hover:text-[#AEB877] transition-colors">
-                    Farmer Portal
+                    WELFORA
                   </span>
                   <span className="text-[10px] font-bold text-[#A5C89E] uppercase tracking-widest">
                     Government of India
@@ -123,6 +123,7 @@ export const Navbar = () => {
                       <>
                         <NavLink to="/dashboard">Dashboard</NavLink>
                         <NavLink to="/officer/farmers">Verifications</NavLink>
+                        <NavLink to="/officer/add-land">Add Land Record</NavLink>
                         <NavLink to="/officer/lands">Land Records</NavLink>
                       </>
                     )}
@@ -230,6 +231,9 @@ export const Navbar = () => {
                         {user?.status === 'FARMER_PENDING_VERIFICATION' && (
                           <NavLink to="/farmer/verify" mobile>Verify Identity</NavLink>
                         )}
+                        <NavLink to="/farmer/lands" mobile>My Land</NavLink>
+                        <NavLink to="/farmer/schemes" mobile>Schemes</NavLink>
+                        <NavLink to="/farmer/applications" mobile>My Applications</NavLink>
                         <NavLink to="/farmer/profile" mobile>My Profile</NavLink>
                       </>
                     )}
@@ -238,6 +242,7 @@ export const Navbar = () => {
                       <>
                         <NavLink to="/dashboard" mobile>Dashboard</NavLink>
                         <NavLink to="/officer/farmers" mobile>Verify Farmers</NavLink>
+                        <NavLink to="/officer/add-land" mobile>Add Land Record</NavLink>
                         <NavLink to="/officer/lands" mobile>Land Records</NavLink>
                       </>
                     )}

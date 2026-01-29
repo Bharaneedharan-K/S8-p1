@@ -29,9 +29,9 @@ export const LandingPage = () => {
               </div>
 
               <h1 className="text-5xl lg:text-7xl font-playfair font-black text-[#2C3318] leading-[1.1] tracking-tight">
-                Land Records, <br />
-                <span className="relative inline-block">
-                  <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#AEB877] to-[#8B9850]">Secured.</span>
+                WELFORA <br />
+                <span className="relative inline-block text-3xl lg:text-5xl mt-2 font-medium">
+                  <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#AEB877] to-[#8B9850]">Right Welfare to Right People</span>
                   <span className="absolute bottom-2 left-0 w-full h-3 bg-[#D8E983]/30 -rotate-2 -z-0"></span>
                 </span>
               </h1>
