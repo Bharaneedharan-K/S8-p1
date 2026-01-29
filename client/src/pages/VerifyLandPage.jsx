@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import { ethers } from 'ethers';
 import LandRegistry from '../blockchain/LandRegistry.json';
@@ -18,9 +18,7 @@ export const VerifyLandPage = () => {
     const fetchPendingLands = async () => {
         try {
             setLoading(true);
-            const res = await axios.get('/api/land/pending', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await apiClient.get('/land/pending');
             setLands(res.data.lands || []);
         } catch (err) {
             setError('Failed to fetch pending land records');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import { TN_DISTRICTS } from '../utils/constants';
 
@@ -25,9 +25,8 @@ export const ManageOfficersPage = () => {
   const fetchOfficers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/auth/users?role=OFFICER', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // apiClient handles baseURL and headers automatically
+      const res = await apiClient.get('/auth/users?role=OFFICER');
       setOfficers(res.data.users || []);
     } catch (err) {
       setError('Failed to fetch officers list');
@@ -48,9 +47,7 @@ export const ManageOfficersPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/auth/create-officer', formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await apiClient.post('/auth/create-officer', formData);
       setSuccess('Officer account created successfully!');
       setShowForm(false);
       setFormData({ name: '', email: '', password: '', district: '', mobile: '' });
