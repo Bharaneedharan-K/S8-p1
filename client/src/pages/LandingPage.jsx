@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import apiClient from '../services/api';
+import axios from 'axios';
 import { ethers } from 'ethers';
 import LandRegistry from '../blockchain/LandRegistry.json';
 

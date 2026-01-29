@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import apiClient from '../services/api';
+import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 
 export const SchemeApplicationsPage = () => {
