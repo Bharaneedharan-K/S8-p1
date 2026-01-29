@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 const DISTRICTS = [

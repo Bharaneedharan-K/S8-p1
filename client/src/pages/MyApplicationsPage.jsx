@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 export const MyApplicationsPage = () => {

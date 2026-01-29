@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -118,7 +118,7 @@ export const FarmerVerificationPage = () => {
               {[1, 2, 3].map((s) => (
                 <div key={s} className="flex flex-col items-center bg-white/0">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-colors ${step === s ? 'border-[#AEB877] bg-[#AEB877] text-white' :
-                      step > s ? 'border-[#A5C89E] bg-[#A5C89E] text-white' : 'border-[#AEB877]/30 bg-white text-[#9CA385]'
+                    step > s ? 'border-[#A5C89E] bg-[#A5C89E] text-white' : 'border-[#AEB877]/30 bg-white text-[#9CA385]'
                     }`}>
                     {step > s ? '✓' : s}
                   </div>
