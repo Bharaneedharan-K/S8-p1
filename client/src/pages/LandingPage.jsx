@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import apiClient from '../services/api';
 import { ethers } from 'ethers';
 import LandRegistry from '../blockchain/LandRegistry.json';
+import { Footer } from '../components/Footer';
 
 export const LandingPage = () => {
   return (
@@ -139,19 +140,38 @@ export const LandingPage = () => {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
 
 const FeatureCard = ({ icon, title, desc, color }) => (
-  <div className="group p-8 rounded-3xl bg-white border border-[#E2E6D5] hover:border-[#AEB877] shadow-sm hover:shadow-xl transition-all duration-300">
-    <div className={`w-16 h-16 ${color} rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300`}>
+  <div className="group p-8 rounded-3xl bg-white border border-[#E2E6D5] hover:border-[#AEB877] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+    <div className={`w-16 h-16 ${color} rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
       {icon}
     </div>
     <h3 className="text-xl font-bold text-[#2C3318] mb-3 group-hover:text-[#AEB877] transition-colors">{title}</h3>
-    <p className="text-[#5C6642] leading-relaxed">
+    <p className="text-[#5C6642] leading-relaxed text-sm">
       {desc}
     </p>
+  </div>
+);
+
+const StatItem = ({ number, label }) => (
+  <div className="p-4">
+    <div className="text-3xl lg:text-4xl font-black text-[#D8E983] mb-1">{number}</div>
+    <div className="text-[#A5C89E] text-xs font-bold uppercase tracking-wider">{label}</div>
+  </div>
+);
+
+const StepCard = ({ number, title, desc }) => (
+  <div className="relative z-10 bg-white p-8 rounded-2xl border border-[#E2E6D5] shadow-lg hover:shadow-xl transition-shadow text-center group">
+    <div className="w-16 h-16 mx-auto bg-[#F2F5E6] text-[#2C3318] rounded-full flex items-center justify-center font-black text-xl mb-6 group-hover:bg-[#AEB877] group-hover:text-white transition-colors border-4 border-white shadow-md">
+      {number}
+    </div>
+    <h3 className="text-xl font-bold text-[#2C3318] mb-3">{title}</h3>
+    <p className="text-[#5C6642] text-sm leading-relaxed">{desc}</p>
   </div>
 );
 
