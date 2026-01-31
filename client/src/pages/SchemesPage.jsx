@@ -12,6 +12,14 @@ export const SchemesPage = () => {
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
 
+    // Auto-dismiss toast
+    useEffect(() => {
+        if (message.text) {
+            const timer = setTimeout(() => setMessage({ type: '', text: '' }), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [message]);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -74,18 +82,34 @@ export const SchemesPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F2F5E6] py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[#F2F5E6] py-8 px-4 sm:px-6 lg:px-8 relative">
+            {/* Toast Notifications */}
+            <div className="fixed top-24 right-5 z-50 flex flex-col gap-2 pointer-events-none">
+                {message.type === 'error' && (
+                    <div className="pointer-events-auto bg-white border-l-4 border-red-500 shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight flex items-center gap-3">
+                        <span className="text-2xl">🚫</span>
+                        <div>
+                            <h4 className="font-bold text-red-600">Error</h4>
+                            <p className="text-red-500 text-sm">{message.text}</p>
+                        </div>
+                    </div>
+                )}
+                {message.type === 'success' && (
+                    <div className="pointer-events-auto bg-white border-l-4 border-[#AEB877] shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight flex items-center gap-3">
+                        <span className="text-2xl">✅</span>
+                        <div>
+                            <h4 className="font-bold text-[#4A5532]">Success</h4>
+                            <p className="text-[#5C6642] text-sm">{message.text}</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-[#2C3318]">Government Schemes</h1>
                     <p className="text-[#5C6642] mt-1">Browse and apply for available agricultural subsidies and benefits.</p>
                 </div>
-
-                {message.text && (
-                    <div className={`p-4 rounded-xl mb-6 ${message.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-[#E6F4EA] text-[#2C3318]'}`}>
-                        {message.type === 'error' ? '⚠️ ' : '✅ '} {message.text}
-                    </div>
-                )}
 
                 {loading ? (
                     <div className="text-center py-12">Loading schemes...</div>

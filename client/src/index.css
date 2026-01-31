@@ -145,6 +145,21 @@ body {
   animation: fadeIn 0.4s ease-out forwards;
 }
 
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.animate-slideInRight {
+    animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);

@@ -49,6 +49,7 @@ export const AddLandPage = () => {
             }
         } catch (err) {
             setError('Failed to search for farmer.');
+            setTimeout(() => setError(''), 3000);
         } finally {
             setSearchingFarmer(false);
         }
@@ -66,10 +67,12 @@ export const AddLandPage = () => {
         e.preventDefault();
         if (!verifiedFarmer) {
             setError('Please verify the Farmer identity first.');
+            setTimeout(() => setError(''), 3000);
             return;
         }
         if (!file) {
             setError('Please upload the land document.');
+            setTimeout(() => setError(''), 3000);
             return;
         }
 
@@ -89,23 +92,47 @@ export const AddLandPage = () => {
             });
 
             setSuccess('Land record added successfully! Sent for Admin Approval.');
-            setTimeout(() => navigate('/dashboard'), 2000);
+            setTimeout(() => {
+                setSuccess('');
+                navigate('/dashboard');
+            }, 2000);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to add land record.');
+            setTimeout(() => setError(''), 3000);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-[#F2F5E6] py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[#F2F5E6] py-8 px-4 sm:px-6 lg:px-8 relative">
+            {/* Toast Notifications */}
+            <div className="fixed top-24 right-5 z-50 flex flex-col gap-2 pointer-events-none">
+                {error && (
+                    <div className="pointer-events-auto bg-white border-l-4 border-red-500 shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight flex items-center gap-3">
+                        <span className="text-2xl">🚫</span>
+                        <div>
+                            <h4 className="font-bold text-red-600">Error</h4>
+                            <p className="text-red-500 text-sm">{error}</p>
+                        </div>
+                    </div>
+                )}
+                {success && (
+                    <div className="pointer-events-auto bg-white border-l-4 border-[#AEB877] shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight flex items-center gap-3">
+                        <span className="text-2xl">✅</span>
+                        <div>
+                            <h4 className="font-bold text-[#4A5532]">Success</h4>
+                            <p className="text-[#5C6642] text-sm">{success}</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+
             <div className="max-w-3xl mx-auto">
                 <h1 className="text-3xl font-bold text-[#2C3318] mb-2">Add New Land Record</h1>
                 <p className="text-[#5C6642] mb-8">Register land details and documents for admin verification.</p>
 
                 <div className="bg-white rounded-2xl shadow-xl shadow-[#AEB877]/10 p-8 border border-[#AEB877]/20">
-                    {error && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg mb-6 border border-red-200">⚠️ {error}</div>}
-                    {success && <div className="bg-[#E6F4EA] text-[#2C3318] px-4 py-3 rounded-lg mb-6 border border-[#A5C89E]">✅ {success}</div>}
 
                     {/* Farmer Verification Step */}
                     <div className="mb-8 p-6 bg-[#FCFDF5] rounded-xl border border-[#E2E6D5]">

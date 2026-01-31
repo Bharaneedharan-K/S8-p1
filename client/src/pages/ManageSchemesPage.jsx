@@ -13,6 +13,8 @@ export const ManageSchemesPage = () => {
         minLandArea: '', maxLandArea: '', allowedLandTypes: [], allowedDistricts: '',
         benefitAmount: '', startDate: '', endDate: '', status: 'ACTIVE'
     });
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
     const fetchSchemes = async () => {
         try {
@@ -77,19 +79,21 @@ export const ManageSchemesPage = () => {
             if (editingId) {
                 // Update
                 await apiClient.put(`/schemes/${editingId}`, payload);
-                alert('Scheme Updated Successfully!');
+                setSuccess('Scheme Updated Successfully!');
             } else {
                 // Create
                 await apiClient.post('/schemes', payload);
-                alert('Scheme Created Successfully!');
+                setSuccess('Scheme Created Successfully!');
             }
 
             setShowModal(false);
             resetForm();
             fetchSchemes();
+            setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             console.error(err);
-            alert('Failed to save scheme. Check inputs.');
+            setError('Failed to save scheme. Check inputs.');
+            setTimeout(() => setError(''), 3000);
         }
     };
 
@@ -100,15 +104,39 @@ export const ManageSchemesPage = () => {
                 { status: newStatus }
             );
             fetchSchemes();
+            setSuccess(`Scheme ${newStatus === 'ACTIVE' ? 'Activated' : 'Deactivated'} Successfully`);
+            setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            alert('Failed to update status');
+            setError('Failed to update status');
+            setTimeout(() => setError(''), 3000);
         }
     };
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     return (
-        <div className="min-h-screen bg-[#F2F5E6] py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[#F2F5E6] py-8 px-4 sm:px-6 lg:px-8 relative">
+            {/* Toast Notifications */}
+            <div className="fixed top-24 right-5 z-50 flex flex-col gap-2 pointer-events-none">
+                {error && (
+                    <div className="pointer-events-auto bg-white border-l-4 border-red-500 shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight flex items-center gap-3">
+                        <span className="text-2xl">🚫</span>
+                        <div>
+                            <h4 className="font-bold text-red-600">Error</h4>
+                            <p className="text-red-500 text-sm">{error}</p>
+                        </div>
+                    </div>
+                )}
+                {success && (
+                    <div className="pointer-events-auto bg-white border-l-4 border-[#AEB877] shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight flex items-center gap-3">
+                        <span className="text-2xl">✅</span>
+                        <div>
+                            <h4 className="font-bold text-[#4A5532]">Success</h4>
+                            <p className="text-[#5C6642] text-sm">{success}</p>
+                        </div>
+                    </div>
+                )}
+            </div>
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-[#2C3318]">Manage Schemes</h1>

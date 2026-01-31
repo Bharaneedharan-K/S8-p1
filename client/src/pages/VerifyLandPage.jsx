@@ -66,15 +66,15 @@ export const VerifyLandPage = () => {
                         });
                     } catch (addError) {
                         setError('Please add Localhost 8545 to MetaMask manually.');
+                        setTimeout(() => setError(''), 5000);
                         return;
                     }
                 } else {
                     console.error(switchError);
-                    // On some versions, simple switch error might not be 4902, 
-                    // but we can try to proceed or alert.
-                    // For now, let's just log and hope the user switches manually if auto fails.
+                    // On some versions, simple switch error might not be 4902
                 }
             }
+
 
             setProcessingId(land._id);
             setError('');
@@ -132,13 +132,16 @@ export const VerifyLandPage = () => {
                         });
                         setSuccess('Database forcefully synced with Blockchain!');
                         fetchPendingLands();
+                        setTimeout(() => setSuccess(''), 5000);
                         return; // Exit success
                     } catch (syncErr) {
                         setError('Failed to sync database: ' + syncErr.message);
+                        setTimeout(() => setError(''), 5000);
                     }
                 }
             }
             setError('Verification failed: ' + (err.reason || err.message || 'Unknown error'));
+            setTimeout(() => setError(''), 5000);
         } finally {
             setProcessingId(null);
         }
@@ -165,21 +168,41 @@ export const VerifyLandPage = () => {
         } catch (err) {
             console.error(err);
             setError('Rejection failed');
+            setTimeout(() => setError(''), 5000);
         } finally {
             setProcessingId(null);
         }
     };
 
     return (
-        <div className="min-h-screen bg-[#F2F5E6] py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[#F2F5E6] py-8 px-4 sm:px-6 lg:px-8 relative">
+            {/* Toast Notifications */}
+            <div className="fixed top-24 right-5 z-50 flex flex-col gap-2 pointer-events-none">
+                {error && (
+                    <div className="pointer-events-auto bg-white border-l-4 border-red-500 shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight flex items-center gap-3">
+                        <span className="text-2xl">🚫</span>
+                        <div>
+                            <h4 className="font-bold text-red-600">Error</h4>
+                            <p className="text-red-500 text-sm">{error}</p>
+                        </div>
+                    </div>
+                )}
+                {success && (
+                    <div className="pointer-events-auto bg-white border-l-4 border-[#AEB877] shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight flex items-center gap-3">
+                        <span className="text-2xl">✅</span>
+                        <div>
+                            <h4 className="font-bold text-[#4A5532]">Success</h4>
+                            <p className="text-[#5C6642] text-sm">{success}</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-[#2C3318]">Verify Land Records</h1>
                     <p className="text-[#5C6642] mt-1">Review documents and mint land titles to the Blockchain.</p>
                 </div>
-
-                {error && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-xl mb-6 border border-red-200">⚠️ {error}</div>}
-                {success && <div className="bg-[#E6F4EA] text-[#2C3318] px-4 py-3 rounded-xl mb-6 border border-[#A5C89E]">✅ {success}</div>}
 
                 {loading ? (
                     <p className="text-center text-[#5C6642]">Loading pending records...</p>

@@ -8,7 +8,8 @@ import {
   getAllUsers,
   getUserById,
   updateUserStatus,
-  getProfileStats
+  getProfileStats,
+  updateUser
 } from '../controllers/authController.js';
 import { authMiddleware, authorize } from '../middleware/auth.js';
 
@@ -72,5 +73,6 @@ router.post(
 
 router.get('/users/:id', authMiddleware, authorize('ADMIN'), getUserById);
 router.patch('/users/:id/status', authMiddleware, authorize('ADMIN', 'OFFICER'), updateUserStatus);
+router.put('/users/:id', authMiddleware, authorize('ADMIN'), updateUser);
 
 export default router;

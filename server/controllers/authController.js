@@ -341,3 +341,42 @@ export const getProfileStats = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch stats' });
   }
 };
+
+// Update user details (Admin only for now)
+export const updateUser = async (req, res) => {
+  try {
+    const { name, mobile, district, status } = req.body;
+    const updates = {};
+
+    if (name) updates.name = name;
+    if (mobile) updates.mobile = mobile;
+    if (district) updates.district = district;
+    if (status) updates.status = status;
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      updates,
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'User updated successfully',
+      user: user.toJSON(),
+    });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update user',
+      error: error.message,
+    });
+  }
+};
