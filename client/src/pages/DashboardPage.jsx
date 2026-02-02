@@ -1,247 +1,186 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import apiClient from '../services/api';
+import {
+  FaTractor, FaUserShield, FaBuildingColumns, FaMapLocationDot,
+  FaRightLeft, FaCircleCheck, FaHandHoldingDollar, FaClipboardList,
+  FaFileSignature, FaUsers, FaUserTie, FaPhone, FaCircleInfo,
+  FaClock, FaLayerGroup, FaGears, FaCalendarDays
+} from 'react-icons/fa6';
 
 export const DashboardPage = () => {
   const { user } = useAuth();
 
-  const renderDashboardByRole = () => {
-    switch (user?.role) {
-      case 'FARMER':
-        return <FarmerDashboard />;
-      case 'OFFICER':
-        return <OfficerDashboard />;
-      case 'ADMIN':
-        return <AdminDashboard />;
-      default:
-        return <div className="text-gray-500">Unknown role</div>;
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-[#FCFDF5] pb-20">
+    <div className="min-h-screen bg-[#F2F5E6] pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="mb-8 md:flex md:items-end md:justify-between">
-          <div>
-            <h1 className="gov-h1 mb-2">Dashboard Overview</h1>
-            <p className="text-[#5C6642]">Welcome back, {user?.name}</p>
+        {/* Unified Header */}
+        <div className="mb-10 bg-[#2C3318] rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between shadow-xl shadow-[#2C3318]/10 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#AEB877] rounded-full -mr-16 -mt-32 opacity-20 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#D8E983] rounded-full -ml-10 -mb-20 opacity-10 blur-2xl"></div>
+
+          <div className="relative z-10 flex items-center gap-6">
+            <div className="w-20 h-20 bg-[#AEB877] rounded-2xl flex items-center justify-center text-4xl text-[#2C3318] shadow-inner border-4 border-[#2C3318]">
+              {user?.role === 'FARMER' ? <FaTractor /> : user?.role === 'OFFICER' ? <FaUserShield /> : <FaBuildingColumns />}
+            </div>
+            <div>
+              <p className="text-[#AEB877] text-sm font-bold uppercase tracking-widest mb-1">{user?.role} Portal</p>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-[#F2F5E6]">
+                Welcome back, {user?.name.split(' ')[0]}
+              </h1>
+              <p className="text-[#A5C89E] mt-1 text-sm md:text-base max-w-lg">
+                Access your dashboard to manage records, verify documents, and track status.
+              </p>
+            </div>
           </div>
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-[#A5C89E]/20 text-[#2C3318] border border-[#A5C89E]/30 mt-4 md:mt-0">
-            {user?.role} Portal
-          </span>
+          <div className="relative z-10 mt-6 md:mt-0 bg-[#A5C89E]/10 backdrop-blur-md border border-[#A5C89E]/20 px-6 py-3 rounded-2xl flex flex-col items-center">
+            <p className="text-[#AEB877] text-xs font-bold uppercase flex items-center gap-2"><FaCalendarDays /> Date</p>
+            <p className="text-[#F2F5E6] font-bold text-lg">{new Date().toLocaleDateString()}</p>
+          </div>
         </div>
 
         <div className="animate-fadeIn">
-          {renderDashboardByRole()}
+          {user?.role === 'FARMER' && <FarmerDashboard user={user} />}
+          {user?.role === 'OFFICER' && <OfficerDashboard user={user} />}
+          {user?.role === 'ADMIN' && <AdminDashboard />}
         </div>
       </div>
     </div>
   );
 };
 
-const FarmerDashboard = () => {
-  const { user } = useAuth();
-  const isPending = user?.status === 'FARMER_PENDING_VERIFICATION';
+// --- Reusable Components ---
+const StatCard = ({ title, value, icon, color }) => (
+  <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#AEB877]/10 flex items-center justify-between hover:shadow-md transition-shadow group">
+    <div>
+      <p className="text-sm font-bold text-[#9CA385] uppercase tracking-wider">{title}</p>
+      <p className={`text-3xl font-bold mt-1 text-[${color}] group-hover:scale-105 transition-transform origin-left`}>{value}</p>
+    </div>
+    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-${color === '#2C3318' ? '[#AEB877]' : '[#F2F5E6]'} text-${color}`}>
+      {icon}
+    </div>
+  </div>
+);
+
+const ActionCard = ({ to, title, description, icon, color = "bg-[#2C3318]" }) => (
+  <Link to={to} className="bg-white p-6 rounded-2xl border border-[#AEB877]/10 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 group flex flex-col h-full">
+    <div className={`w-12 h-12 ${color} text-white rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform shadow-md`}>
+      {icon}
+    </div>
+    <h3 className="font-bold text-xl text-[#2C3318] mb-2 group-hover:text-[#5C6642] transition-colors">{title}</h3>
+    <p className="text-[#9CA385] text-sm leading-relaxed flex-1">{description}</p>
+    <div className="mt-4 flex items-center text-[#5C6642] text-sm font-bold group-hover:gap-2 transition-all">
+      Access <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+    </div>
+  </Link>
+);
+
+// --- Sub-Dashboards ---
+
+const FarmerDashboard = ({ user }) => {
   const isVerified = user?.status === 'FARMER_VERIFIED';
 
   return (
     <div className="space-y-8">
-      {/* 1. Status Banner */}
-      {isPending && (
-        <div className="bg-gradient-to-r from-[#FFFBB1] to-[#FFFBB1]/50 border border-[#D8E983] rounded-2xl p-6 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#D8E983]/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
-          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="bg-[#D8E983]/30 p-3 rounded-full text-[#4A5532] text-xl">⏳</div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-[#4A5532]">Verification Pending</h3>
-              <p className="text-[#5C6642] mt-1 text-sm">
-                Your documents have been submitted and are currently under review by the Land Officer. You will be notified once approved.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isVerified && (
-        <div className="bg-gradient-to-r from-[#A5C89E]/20 to-[#A5C89E]/10 border border-[#A5C89E]/30 rounded-2xl p-6 shadow-sm flex items-center gap-4">
-          <div className="bg-[#A5C89E]/30 p-3 rounded-full text-[#2C3318] text-xl">✅</div>
+      {/* Status Banner */}
+      {!isVerified && (
+        <div className="bg-gradient-to-r from-[#FFFBB1] to-[#FFFBB1]/40 border border-[#D8E983] rounded-2xl p-6 flex items-start gap-4 shadow-sm animate-pulse-slow">
+          <div className="bg-[#D8E983] p-3 rounded-full text-[#4A5532]"><FaClock /></div>
           <div>
-            <h3 className="text-lg font-bold text-[#2C3318]">Verified Account</h3>
-            <p className="text-[#5C6642] text-sm">You have full access to all land records and government schemes.</p>
+            <h3 className="text-lg font-bold text-[#4A5532]">Verification Pending</h3>
+            <p className="text-[#5C6642] text-sm">Your profile is under review by the designated officer. Features are limited until approval.</p>
           </div>
         </div>
       )}
 
-      {/* 2. Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass-card p-6 border-l-4 border-l-[#AEB877] relative overflow-hidden group hover:bg-[#FFFBB1]/30 transition-colors">
-          <p className="text-sm font-bold text-[#9CA385] uppercase tracking-wider mb-2">District</p>
-          <p className="text-2xl font-bold text-[#2C3318]">{user?.district}</p>
-          <div className="absolute bottom-4 right-4 text-[#AEB877]/10 text-6xl font-bold -z-10 group-hover:scale-110 transition-transform select-none">📍</div>
-        </div>
-
-        <div className="glass-card p-6 border-l-4 border-l-[#A5C89E] relative overflow-hidden group hover:bg-[#A5C89E]/10 transition-colors">
-          <p className="text-sm font-bold text-[#9CA385] uppercase tracking-wider mb-2">Mobile</p>
-          <p className="text-2xl font-bold text-[#2C3318] font-mono tracking-tight">{user?.mobile}</p>
-          <div className="absolute bottom-4 right-4 text-[#A5C89E]/10 text-6xl font-bold -z-10 group-hover:scale-110 transition-transform select-none">📱</div>
-        </div>
-
-        <div className="glass-card p-6 border-l-4 border-l-[#D8E983] relative overflow-hidden group hover:bg-[#D8E983]/10 transition-colors">
-          <p className="text-sm font-bold text-[#9CA385] uppercase tracking-wider mb-2">Status</p>
-          <div className="mt-1">
-            {isPending && <span className="badge badge-pending">Pending</span>}
-            {isVerified && <span className="badge badge-verified">Verified</span>}
-            {user?.status === 'FARMER_REJECTED' && <span className="badge badge-rejected">Rejected</span>}
-          </div>
-          <div className="absolute bottom-4 right-4 text-[#D8E983]/20 text-6xl font-bold -z-10 group-hover:scale-110 transition-transform select-none">🛡️</div>
-        </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard title="Status" value={isVerified ? 'Verified' : 'Pending'} icon={isVerified ? <FaCircleCheck /> : <FaClock />} color={isVerified ? '#2C3318' : '#D8E983'} />
+        <StatCard title="District" value={user?.district} icon={<FaMapLocationDot />} color="#5C6642" />
+        <StatCard title="Lands" value="--" icon={<FaLayerGroup />} color="#2C3318" />
+        <StatCard title="Applications" value="--" icon={<FaFileSignature />} color="#AEB877" />
       </div>
 
-      {/* 3. Services Grid */}
+      {/* Services Grid */}
       <div>
-        <h2 className="gov-h2 flex items-center gap-2">
-          <span className="text-2xl">⚡</span> Quick Services
+        <h2 className="text-2xl font-bold text-[#2C3318] mb-6 flex items-center gap-2">
+          <span className="w-8 h-1 bg-[#AEB877] rounded-full"></span> Services
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* Land Records */}
-          <div className={`glass-card p-0 overflow-hidden flex flex-col h-full group ${!isVerified ? 'opacity-80 grayscale-[0.5]' : 'hover:ring-2 hover:ring-[#AEB877]/30'}`}>
-            <div className="relative h-32 bg-gradient-to-r from-[#AEB877] to-[#8B9850] p-6 text-white overflow-hidden">
-              <div className="relative z-10">
-                <h3 className="text-xl font-bold">Land Records</h3>
-                <p className="text-[#FFFBB1] text-sm mt-1">Manage registration & ownership</p>
-              </div>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-10 -mt-20 blur-2xl"></div>
-              <div className="absolute bottom-4 right-6 text-5xl">🏞️</div>
-            </div>
-
-            <div className="p-6 flex-1 flex flex-col justify-between bg-white/60 relative">
-              {!isVerified && (
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center text-center p-6">
-                  <span className="text-4xl shadow-lg rounded-full bg-white p-2 mb-2">🔒</span>
-                  <p className="font-bold text-[#5C6642]">Locked</p>
-                </div>
-              )}
-              <p className="text-[#5C6642] text-sm mb-4">
-                View digital copies of your land records, check ownership status, and request mutations.
-              </p>
-              {isVerified && (
-                <Link to="/farmer/lands" className="w-full btn-outline justify-between group-hover:bg-[#FFFBB1]/50 group-hover:text-[#2C3318] group-hover:border-[#AEB877]">
-                  Access Records <span>→</span>
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Schemes */}
-          <div className={`glass-card p-0 overflow-hidden flex flex-col h-full group ${!isVerified ? 'opacity-80 grayscale-[0.5]' : 'hover:ring-2 hover:ring-[#A5C89E]/30'}`}>
-            <div className="relative h-32 bg-gradient-to-r from-[#A5C89E] to-[#8CAE85] p-6 text-white overflow-hidden">
-              <div className="relative z-10">
-                <h3 className="text-xl font-bold">Government Schemes</h3>
-                <p className="text-[#FFFBB1] text-sm mt-1">Subsidies & financial aid</p>
-              </div>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-10 -mt-20 blur-2xl"></div>
-              <div className="absolute bottom-4 right-6 text-5xl">🌾</div>
-            </div>
-
-            <div className="p-6 flex-1 flex flex-col justify-between bg-white/60 relative">
-              {!isVerified && (
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center text-center p-6">
-                  <span className="text-4xl shadow-lg rounded-full bg-white p-2 mb-2">🔒</span>
-                  <p className="font-bold text-[#5C6642]">Locked</p>
-                </div>
-              )}
-              <p className="text-[#5C6642] text-sm mb-4">
-                Browse available government schemes, check eligibility, and track application status.
-              </p>
-              {isVerified && (
-                <Link to="/farmer/schemes" className="w-full btn-outline border-[#A5C89E] justify-between group-hover:bg-[#FFFBB1]/50 group-hover:text-[#2C3318] group-hover:border-[#A5C89E]">
-                  View Schemes <span>→</span>
-                </Link>
-              )}
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ActionCard
+            to="/farmer/lands"
+            title="My Land Records"
+            description="View ownership details, history, and status of your registered lands."
+            icon={<FaMapLocationDot />}
+          />
+          <ActionCard
+            to="/farmer/schemes"
+            title="Government Schemes"
+            description="Apply for subsidies and financial aid programs tailored for you."
+            icon={<FaHandHoldingDollar />}
+            color="bg-[#AEB877]"
+          />
+          <ActionCard
+            to="/transfer-requests"
+            title="Land Transfers"
+            description="Manage incoming and outgoing land transfer requests."
+            icon={<FaRightLeft />}
+          />
+          <ActionCard
+            to="/farmer/profile"
+            title="My Profile"
+            description="Update personal details and view account account settings."
+            icon={<FaUserTie />}
+            color="bg-[#5C6642]"
+          />
         </div>
       </div>
     </div>
   );
 };
 
-const OfficerDashboard = () => {
-  const { user } = useAuth();
-
+const OfficerDashboard = ({ user }) => {
   return (
     <div className="space-y-8">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass-card p-6 flex items-center justify-between group hover:scale-[1.02] transition-transform cursor-pointer">
-          <div>
-            <p className="text-sm font-bold text-[#9CA385] uppercase tracking-wider">Assigned District</p>
-            <p className="text-3xl font-bold text-[#2C3318] mt-1">{user?.district}</p>
-          </div>
-          <div className="w-12 h-12 bg-[#AEB877]/20 text-[#4A5532] rounded-xl flex items-center justify-center text-2xl group-hover:bg-[#AEB877] group-hover:text-white transition-colors">
-            📍
-          </div>
-        </div>
-
-        <div className="glass-card p-6 flex items-center justify-between group hover:scale-[1.02] transition-transform cursor-pointer">
-          <div>
-            <p className="text-sm font-bold text-[#9CA385] uppercase tracking-wider">Pending Tasks</p>
-            <p className="text-3xl font-bold text-[#D8E983] mt-1" style={{ textShadow: '1px 1px 0 #AEB877' }}>--</p>
-            <p className="text-xs text-[#5C6642] mt-1">Requires review</p>
-          </div>
-          <div className="w-12 h-12 bg-[#D8E983]/20 text-[#8B9850] rounded-xl flex items-center justify-center text-2xl group-hover:bg-[#D8E983] group-hover:text-[#4A5532] transition-colors">
-            ⏳
-          </div>
-        </div>
-
-        <div className="glass-card p-6 flex items-center justify-between group hover:scale-[1.02] transition-transform cursor-pointer">
-          <div>
-            <p className="text-sm font-bold text-[#9CA385] uppercase tracking-wider">Verified Total</p>
-            <p className="text-3xl font-bold text-[#A5C89E] mt-1" style={{ textShadow: '1px 1px 0 #5C6642' }}>--</p>
-          </div>
-          <div className="w-12 h-12 bg-[#A5C89E]/20 text-[#5C6642] rounded-xl flex items-center justify-center text-2xl group-hover:bg-[#A5C89E] group-hover:text-white transition-colors">
-            ✅
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard title="Assigned District" value={user?.district} icon={<FaMapLocationDot />} color="#2C3318" />
+        <StatCard title="Pending Review" value="--" icon={<FaClock />} color="#AEB877" />
+        <StatCard title="Verified Today" value="--" icon={<FaCircleCheck />} color="#5C6642" />
+        <StatCard title="Transfer Requests" value="--" icon={<FaRightLeft />} color="#D8E983" />
       </div>
 
-      {/* Quick Actions */}
       <div>
-        <h2 className="gov-h2">Action Center</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Link
+        <h2 className="text-2xl font-bold text-[#2C3318] mb-6 flex items-center gap-2">
+          <span className="w-8 h-1 bg-[#AEB877] rounded-full"></span> Officer Actions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ActionCard
             to="/officer/farmers"
-            className="group glass-card p-6 border border-transparent hover:border-[#AEB877]/50 transition-all"
-          >
-            <div className="w-14 h-14 bg-[#FFFBB1] text-[#4A5532] rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:bg-[#AEB877] group-hover:text-white transition-colors shadow-sm">
-              👨‍🌾
-            </div>
-            <h3 className="font-bold text-lg text-[#2C3318] group-hover:text-[#AEB877]">Verify Farmers</h3>
-            <p className="text-[#5C6642] text-sm mt-2">Review submitted documents and approve registrations.</p>
-          </Link>
-
-          <Link
+            title="Verify Farmers"
+            description="Review and approve farmer identity documents."
+            icon={<FaUserTie />}
+          />
+          <ActionCard
             to="/officer/add-land"
-            className="group glass-card p-6 border border-transparent hover:border-[#A5C89E]/50 transition-all"
-          >
-            <div className="w-14 h-14 bg-[#A5C89E]/20 text-[#2C3318] rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:bg-[#A5C89E] group-hover:text-white transition-colors shadow-sm">
-              📝
-            </div>
-            <h3 className="font-bold text-lg text-[#2C3318] group-hover:text-[#A5C89E]">Add Land Record</h3>
-            <p className="text-[#5C6642] text-sm mt-2">Create new land ownership entries in the registry.</p>
-          </Link>
-
-          <Link
+            title="Register New Land"
+            description="Create new land records in the registry."
+            icon={<FaFileSignature />}
+          />
+          <ActionCard
             to="/officer/lands"
-            className="group glass-card p-6 border border-transparent hover:border-[#D8E983]/50 transition-all"
-          >
-            <div className="w-14 h-14 bg-[#D8E983]/20 text-[#4A5532] rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:bg-[#D8E983] group-hover:text-[#2C3318] transition-colors shadow-sm">
-              📂
-            </div>
-            <h3 className="font-bold text-lg text-[#2C3318] group-hover:text-[#8B9850]">View Records</h3>
-            <p className="text-[#5C6642] text-sm mt-2">Track status of submitted land records (Approved/Pending).</p>
-          </Link>
+            title="View Records"
+            description="Search and view all land records in your district."
+            icon={<FaLayerGroup />}
+            color="bg-[#AEB877]"
+          />
+          <ActionCard
+            to="/transfer-requests"
+            title="Approve Transfers"
+            description="Verify land transfer requests after buyer acceptance."
+            icon={<FaRightLeft />}
+            color="bg-[#5C6642]"
+          />
         </div>
       </div>
     </div>
@@ -250,38 +189,60 @@ const OfficerDashboard = () => {
 
 const AdminDashboard = () => {
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-[#AEB877] to-[#8B9850] rounded-2xl p-8 text-white text-center shadow-lg shadow-[#AEB877]/20">
-        <span className="text-5xl block mb-4 filter drop-shadow-md">⚙️</span>
-        <h2 className="text-3xl font-bold mb-2">Admin Control Panel</h2>
-        <p className="text-[#FFFBB1] max-w-xl mx-auto">Manage system-wide settings, user roles, and monitor blockchain network status.</p>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <StatCard title="Total Farmers" value="--" icon={<FaUsers />} color="#2C3318" />
+        <StatCard title="Total Officers" value="--" icon={<FaUserShield />} color="#5C6642" />
+        <StatCard title="Lands Minted" value="--" icon={<FaLayerGroup />} color="#AEB877" />
+        <StatCard title="Pending Actions" value="--" icon={<FaClock />} color="#D8E983" />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Link to="/admin/officers" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
-          <span className="text-3xl">👨‍💼</span>
-          <span className="font-bold text-[#4A5532]">Manage Officers</span>
-        </Link>
-        <Link to="/admin/farmers" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
-          <span className="text-3xl">👨‍🌾</span>
-          <span className="font-bold text-[#4A5532]">Manage Farmers</span>
-        </Link>
-        <Link to="/admin/verify-land" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
-          <span className="text-3xl">📝</span>
-          <span className="font-bold text-[#4A5532]">Verify Land</span>
-        </Link>
-        <Link to="/admin/schemes" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
-          <span className="text-3xl">💰</span>
-          <span className="font-bold text-[#4A5532]">Manage Schemes</span>
-        </Link>
-        <Link to="/admin/applications" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
-          <span className="text-3xl">📊</span>
-          <span className="font-bold text-[#4A5532]">Review Applications</span>
-        </Link>
-        <Link to="/admin/logs" className="btn-outline border-[#AEB877]/30 bg-white hover:bg-[#FFFBB1]/30 h-32 flex-col gap-2 shadow-sm">
-          <span className="text-3xl">⛓️</span>
-          <span className="font-bold text-[#4A5532]">Blockchain Logs</span>
-        </Link>
+      <div>
+        <h2 className="text-2xl font-bold text-[#2C3318] mb-6 flex items-center gap-2">
+          <span className="w-8 h-1 bg-[#AEB877] rounded-full"></span> Administration
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ActionCard
+            to="/admin/verify-land"
+            title="Verify Land (Mint)"
+            description="Final approval to mint seeded lands to Blockchain."
+            icon={<FaFileSignature />}
+            color="bg-[#2C3318]"
+          />
+          <ActionCard
+            to="/transfer-requests"
+            title="Approve Transfers"
+            description="Execute land ownership transfers via Blockchain."
+            icon={<FaRightLeft />}
+          />
+          <ActionCard
+            to="/admin/officers"
+            title="Manage Officers"
+            description="Add or remove officers and assign districts."
+            icon={<FaUserShield />}
+          />
+          <ActionCard
+            to="/admin/farmers"
+            title="Manage Farmers"
+            description="Oversee registered farmers and their status."
+            icon={<FaUsers />}
+            color="bg-[#5C6642]"
+          />
+          <ActionCard
+            to="/admin/schemes"
+            title="Manage Schemes"
+            description="Create and update government welfare schemes."
+            icon={<FaHandHoldingDollar />}
+            color="bg-[#AEB877]"
+          />
+          <ActionCard
+            to="/admin/logs"
+            title="Audit Logs"
+            description="View system-wide activity and blockchain events."
+            icon={<FaClipboardList />}
+            color="bg-[#9CA385]"
+          />
+        </div>
       </div>
     </div>
   );
