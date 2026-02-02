@@ -2,41 +2,18 @@ import Land from '../models/Land.js';
 import User from '../models/User.js';
 import { uploadToCloudinary } from '../utils/cloudinary.js';
 
-// Add new Land Record (Officer Only)
+// Add new Land Record (Farmer or Officer)
 export const addLandRecord = async (req, res) => {
     try {
-        const { farmerId, ownerName, surveyNumber, area, district, landType, address } = req.body;
+        const { farmerId, ownerName, surveyNumber, area, district, landType, address, officerId, verificationDate } = req.body;
 
-        // Check if files uploaded
-        if (!req.files || !req.files.document) {
-            return res.status(400).json({ success: false, message: 'Land document is required' });
+        // Check if files uploaded (Optional now)
+        let documentUrl = null;
+        if (req.files && req.files.document) {
+            // Upload to Cloudinary
+            const cloudinaryResponse = await uploadToCloudinary(req.files.document[0].buffer, req.files.document[0].originalname);
+            documentUrl = cloudinaryResponse.secure_url;
         }
-
-        // Upload to Cloudinary
-        const fileBuffer = req.files.document[0].buffer;
-        // Basic base64 conversion for Cloudinary upload (simplified)
-        const base64Image = Buffer.from(fileBuffer).toString('base64');
-        const dataURI = `data:${req.files.document[0].mimetype};base64,${base64Image}`;
-
-        // Assume cloudinary is imported, need to add import
-        // Create upload options
-        const uploadOptions = {
-            folder: 'land_records',
-            resource_type: 'auto'
-        };
-
-        // For PDFs, use 'raw' resource type to prevent image conversion issues
-        if (req.files.document[0].mimetype === 'application/pdf') {
-            uploadOptions.resource_type = 'raw';
-        }
-
-        // If cloudinary util exports the v2 instance directly:
-        // const cloudinaryResponse = await cloudinary.uploader.upload(dataURI, uploadOptions);
-
-        // Use our custom helper instead to handle buffers/streams properly
-        const cloudinaryResponse = await uploadToCloudinary(req.files.document[0].buffer, req.files.document[0].originalname);
-
-        const documentUrl = cloudinaryResponse.secure_url;
 
         // Check if survey number exists
         const existingLand = await Land.findOne({ surveyNumber });
@@ -44,15 +21,44 @@ export const addLandRecord = async (req, res) => {
             return res.status(409).json({ success: false, message: 'Land with this Survey Number already exists' });
         }
 
-        // Verify Farmer exists
-        const farmer = await User.findById(farmerId);
-        if (!farmer || farmer.role !== 'FARMER') {
-            return res.status(404).json({ success: false, message: 'Invalid Farmer ID' });
+        // Determine Farmer and Officer IDs based on who is submitting
+        let finalFarmerId, finalOfficerId;
+
+        if (req.userRole === 'FARMER') {
+            finalFarmerId = req.userId;
+            finalOfficerId = officerId; // Must be selected by Farmer
+            if (!finalOfficerId) return res.status(400).json({ success: false, message: 'Please select an Officer' });
+
+            // Validate Date for Farmer
+            if (!verificationDate) return res.status(400).json({ success: false, message: 'Please select a Verification Slot' });
+
+            // Check Slot Availability (Double Check)
+            const dateStart = new Date(verificationDate);
+            dateStart.setHours(0, 0, 0, 0);
+            const dateEnd = new Date(verificationDate);
+            dateEnd.setHours(23, 59, 59, 999);
+
+            const count = await Land.countDocuments({
+                officerId: finalOfficerId,
+                verificationDate: { $gte: dateStart, $lte: dateEnd }
+            });
+
+            if (count >= 5) {
+                return res.status(400).json({ success: false, message: 'Selected slot is full. Please choose another date.' });
+            }
+
+        } else if (req.userRole === 'OFFICER') {
+            // Legacy/Admin flow support
+            finalOfficerId = req.userId;
+            finalFarmerId = farmerId;
+            if (!finalFarmerId) return res.status(400).json({ success: false, message: 'Farmer ID is required' });
+        } else {
+            return res.status(403).json({ success: false, message: 'Unauthorized role' });
         }
 
         const newLand = new Land({
-            farmerId,
-            officerId: req.userId, // From Auth Middleware
+            farmerId: finalFarmerId,
+            officerId: finalOfficerId,
             ownerName,
             surveyNumber,
             area,
@@ -60,6 +66,7 @@ export const addLandRecord = async (req, res) => {
             landType,
             address,
             documentUrl,
+            verificationDate: verificationDate || null,
             status: 'LAND_PENDING_ADMIN_APPROVAL'
         });
 
@@ -67,7 +74,7 @@ export const addLandRecord = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'Land record added successfully! Sent for Admin Approval.',
+            message: 'Land record application submitted successfully!',
             land: newLand
         });
 
@@ -77,10 +84,66 @@ export const addLandRecord = async (req, res) => {
     }
 };
 
-// Get Pending Lands (Admin Only)
+// Get Available Slots (Public or Protected)
+export const getAvailableSlots = async (req, res) => {
+    try {
+        const { officerId } = req.params;
+        if (!officerId) return res.status(400).json({ success: false, message: 'Officer ID is required' });
+
+        const slots = [];
+        const today = new Date();
+        let currentDay = new Date(today);
+        currentDay.setDate(today.getDate()); // Start from TODAY
+
+        // Find next 3 business days
+        while (slots.length < 3) {
+            // Skip Weekend (0=Sun, 6=Sat) - simplified
+            const day = currentDay.getDay();
+            if (day !== 0 && day !== 6) {
+                // Check database count
+                const dateStart = new Date(currentDay);
+                dateStart.setHours(0, 0, 0, 0);
+                const dateEnd = new Date(currentDay);
+                dateEnd.setHours(23, 59, 59, 999);
+
+                const count = await Land.countDocuments({
+                    officerId,
+                    verificationDate: { $gte: dateStart, $lte: dateEnd }
+                });
+
+                if (count < 5) {
+                    slots.push({
+                        date: dateStart.toISOString(),
+                        available: 5 - count
+                    });
+                }
+            }
+            currentDay.setDate(currentDay.getDate() + 1);
+        }
+
+        res.status(200).json({ success: true, slots });
+
+    } catch (error) {
+        console.error('Get Slots Error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch slots', error: error.message });
+    }
+};
+
+// Get Pending Lands (Admin/Officer Only)
 export const getPendingLands = async (req, res) => {
     try {
-        const lands = await Land.find({ status: 'LAND_PENDING_ADMIN_APPROVAL' })
+        let filter = { status: 'LAND_PENDING_ADMIN_APPROVAL' };
+
+        // If Officer, only show assigned lands
+        if (req.userRole === 'OFFICER') {
+            filter.officerId = req.userId;
+            filter.verificationDocument = null; // Only show where Officer HASN'T uploaded doc yet
+        } else if (req.userRole === 'ADMIN') {
+            // Admin only sees lands that have been verified by Officer (Document Uploaded)
+            filter.verificationDocument = { $ne: null };
+        }
+
+        const lands = await Land.find(filter)
             .populate('farmerId', 'name email mobile')
             .populate('officerId', 'name email district');
 
@@ -95,24 +158,29 @@ export const getPendingLands = async (req, res) => {
     }
 };
 
-// Verify/Approve Land (Admin Only) -> Updates Status & Hash
+// Verify/Approve Land (Admin/Officer) -> Updates Status & Hash
 export const verifyLandRecord = async (req, res) => {
     try {
         const { id } = req.params;
         const { status, landHash, txHash, rejectionReason } = req.body;
 
-        // If Approving, Hash and TxHash are required
-        if (status === 'LAND_APPROVED' && (!landHash || !txHash)) {
-            return res.status(400).json({ success: false, message: 'Land Hash and Transaction Hash are required for approval' });
+        const updateData = { status };
+
+        // Handle Verification Report Upload
+        if (req.files && req.files.verificationDocument) {
+            const result = await uploadToCloudinary(req.files.verificationDocument[0].buffer, req.files.verificationDocument[0].originalname);
+            updateData.verificationDocument = result.secure_url;
         }
 
-        const updateData = { status };
         if (status === 'LAND_APPROVED') {
+            if (!landHash || !txHash) {
+                return res.status(400).json({ success: false, message: 'Land Hash and Transaction Hash are required for approval' });
+            }
             updateData.landHash = landHash;
             updateData.txHash = txHash;
             updateData.blockchainTimestamp = new Date();
         } else if (status === 'LAND_REJECTED') {
-            updateData.rejectionReason = rejectionReason || 'Rejected by Admin';
+            updateData.rejectionReason = rejectionReason || 'Rejected by Officer';
         }
 
         const land = await Land.findByIdAndUpdate(
@@ -149,6 +217,8 @@ export const getAllLands = async (req, res) => {
         // Farmer can only see their own lands
         if (req.userRole === 'FARMER') {
             filter.farmerId = req.userId;
+        } else if (req.userRole === 'OFFICER') {
+            filter.officerId = req.userId;
         }
 
         const lands = await Land.find(filter)

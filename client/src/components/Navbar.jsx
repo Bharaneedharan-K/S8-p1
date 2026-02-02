@@ -112,6 +112,7 @@ export const Navbar = () => {
                         {user?.status === 'FARMER_PENDING_VERIFICATION' && (
                           <NavLink to="/farmer/verify">Verify ID</NavLink>
                         )}
+                        <NavLink to="/farmer/add-land">Book Slot</NavLink>
                         <NavLink to="/farmer/lands">My Land</NavLink>
                         <NavLink to="/farmer/schemes">Schemes</NavLink>
                         <NavLink to="/farmer/applications">My Applications</NavLink>
@@ -231,6 +232,7 @@ export const Navbar = () => {
                         {user?.status === 'FARMER_PENDING_VERIFICATION' && (
                           <NavLink to="/farmer/verify" mobile>Verify Identity</NavLink>
                         )}
+                        <NavLink to="/farmer/add-land" mobile>Book Slot</NavLink>
                         <NavLink to="/farmer/lands" mobile>My Land</NavLink>
                         <NavLink to="/farmer/schemes" mobile>Schemes</NavLink>
                         <NavLink to="/farmer/applications" mobile>My Applications</NavLink>

@@ -7,7 +7,8 @@ import {
     verifyLandRecord,
     getAllLands,
     getLandByHash,
-    getLandBySurveyNumber
+    getLandBySurveyNumber,
+    getAvailableSlots // Import
 } from '../controllers/landController.js';
 
 const router = express.Router();
@@ -18,28 +19,31 @@ router.get('/public/verify/:hash', getLandByHash);
 // Public: Get by Survey Number
 router.get('/public/survey/:surveyNumber', getLandBySurveyNumber);
 
-// Officer: Add Land
+// Get Available Slots
+router.get('/slots/:officerId', authMiddleware, getAvailableSlots);
+
+// Add Land (Officer OR Farmer)
 router.post(
     '/add',
     authMiddleware,
-    authorize('OFFICER'),
     upload.fields([{ name: 'document', maxCount: 1 }]),
     addLandRecord
 );
 
-// Admin: Get Pending Lands
+// Admin/Officer: Get Pending Lands
 router.get(
     '/pending',
     authMiddleware,
-    authorize('ADMIN'),
+    authorize('ADMIN', 'OFFICER'),
     getPendingLands
 );
 
-// Admin: Verify/Approve Land (Push hash to DB after Blockchain success)
+// Admin/Officer: Verify/Approve Land
 router.patch(
     '/verify/:id',
     authMiddleware,
-    authorize('ADMIN'),
+    authorize('ADMIN', 'OFFICER'),
+    upload.fields([{ name: 'verificationDocument', maxCount: 1 }]),
     verifyLandRecord
 );
 

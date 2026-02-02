@@ -88,6 +88,14 @@ function App() {
             }
           />
           <Route
+            path="/farmer/add-land"
+            element={
+              <PrivateRoute requiredRole="FARMER">
+                <AddLandPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/farmer/schemes"
             element={
               <PrivateRoute requiredRole="FARMER">

@@ -39,7 +39,15 @@ const landSchema = new mongoose.Schema(
         },
         documentUrl: {
             type: String,
-            required: true, // Cloudinary URL
+            required: false, // Cloudinary URL (Optional for Book Slot)
+        },
+        verificationDate: {
+            type: Date,
+            default: null,
+        },
+        verificationDocument: {
+            type: String, // Cloudinary URL for Officer's report
+            default: null,
         },
         status: {
             type: String,

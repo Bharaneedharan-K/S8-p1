@@ -194,6 +194,10 @@ export const ManageOfficersPage = () => {
                 </div>
               </div>
               <div>
+                <label className="block text-sm font-bold text-[#5C6642] mb-1">Area (Taluk/Block)</label>
+                <input type="text" name="area" className="input-modern" onChange={handleChange} value={formData.area} placeholder="e.g. North Taluk" />
+              </div>
+              <div>
                 <label className="block text-sm font-bold text-[#5C6642] mb-1">Mobile Number</label>
                 <input
                   type="text"
@@ -276,6 +280,16 @@ export const ManageOfficersPage = () => {
                   >
                     {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#5C6642] mb-1">Area (Taluk/Block)</label>
+                  <input
+                    type="text"
+                    className="input-modern"
+                    value={editForm.area}
+                    onChange={(e) => setEditForm({ ...editForm, area: e.target.value })}
+                    placeholder="e.g. North Taluk"
+                  />
                 </div>
 
                 <div className="flex gap-4 pt-4">

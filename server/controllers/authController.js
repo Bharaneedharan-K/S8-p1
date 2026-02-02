@@ -154,7 +154,7 @@ export const getCurrentUser = async (req, res) => {
 // Create Officer (Admin Only)
 export const createOfficer = async (req, res) => {
   try {
-    const { name, email, mobile, district, password } = req.body;
+    const { name, email, mobile, district, area, password } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -169,8 +169,10 @@ export const createOfficer = async (req, res) => {
       name,
       email,
       mobile,
+      mobile,
       password,
       district,
+      area,
       role: 'OFFICER',
       status: 'OFFICER_ACTIVE',
     });
@@ -219,6 +221,15 @@ export const getAllUsers = async (req, res) => {
       if (role) filter.role = role;
       if (district) filter.district = district;
       if (status) filter.status = status;
+    } else if (req.userRole === 'FARMER') {
+      // Farmer can see Officers in their district
+      if (role === 'OFFICER') {
+        filter.role = 'OFFICER';
+        // Optional: Restrict to Farmer's district or allow searching any district
+        if (district) filter.district = district;
+      } else {
+        return res.status(403).json({ success: false, message: 'Farmers can only view Officers.' });
+      }
     } else {
       return res.status(403).json({
         success: false,
@@ -345,12 +356,14 @@ export const getProfileStats = async (req, res) => {
 // Update user details (Admin only for now)
 export const updateUser = async (req, res) => {
   try {
-    const { name, mobile, district, status } = req.body;
+    const { name, mobile, district, area, status } = req.body;
     const updates = {};
 
     if (name) updates.name = name;
     if (mobile) updates.mobile = mobile;
+    if (mobile) updates.mobile = mobile;
     if (district) updates.district = district;
+    if (area) updates.area = area;
     if (status) updates.status = status;
 
     const user = await User.findByIdAndUpdate(

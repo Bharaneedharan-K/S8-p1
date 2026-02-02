@@ -80,10 +80,10 @@ export const VerifyLandPage = () => {
             setError('');
 
             // 1. Generate Hash (Using simple string concat for demo, usually use precise hashing or Merkle tree)
-            // Ideally, use a library like crypto-js. For now, we simulate a unique hash based on content.
             const dataString = `${land.surveyNumber}-${land.area}-${land.address}-${land.ownerName}`;
-            // Use ethers.id (Keccak256) which is standard for Ethereum
             const landHash = ethers.id(dataString);
+
+
 
             const confirm = window.confirm(`Verifying Land: ${land.surveyNumber}\nHash: ${landHash.slice(0, 10)}...\n\nConfirm to mint to Blockchain?`);
             if (!confirm) {
@@ -103,11 +103,16 @@ export const VerifyLandPage = () => {
             await tx.wait();
             console.log('Transaction mined');
 
-            // 3. Backend Update (Store Hash and TxHash)
-            await apiClient.patch(`/land/verify/${land._id}`, {
-                status: 'LAND_APPROVED',
-                landHash: landHash,
-                txHash: tx.hash
+            // 3. Backend Update (Store Hash, TxHash & verificationDocument)
+            // MUST usage FormData for file upload
+            const updateData = new FormData();
+            updateData.append('status', 'LAND_APPROVED');
+            updateData.append('landHash', landHash);
+            updateData.append('txHash', tx.hash);
+
+
+            await apiClient.patch(`/land/verify/${land._id}`, updateData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
 
             setSuccess(`Land ${land.surveyNumber} Successfully Verified & Minted!`);
@@ -124,11 +129,15 @@ export const VerifyLandPage = () => {
 
                 if (alreadyRegistered) {
                     try {
-                        // Optimistic sync - In real app, we should read from blockchain first to verify hash match
-                        await apiClient.patch(`/land/verify/${land._id}`, {
-                            status: 'LAND_APPROVED',
-                            landHash: 'SYNCED_FROM_BLOCKCHAIN', // or fetch real hash if possible
-                            txHash: 'PREVIOUSLY_MINTED'
+                        const updateData = new FormData();
+                        updateData.append('status', 'LAND_APPROVED');
+                        updateData.append('landHash', 'SYNCED_FROM_BLOCKCHAIN');
+                        updateData.append('txHash', 'PREVIOUSLY_MINTED');
+
+
+
+                        await apiClient.patch(`/land/verify/${land._id}`, updateData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
                         });
                         setSuccess('Database forcefully synced with Blockchain!');
                         fetchPendingLands();
@@ -236,15 +245,18 @@ export const VerifyLandPage = () => {
                                     </p>
                                     <div className="flex items-center justify-between pt-2">
                                         <button
-                                            onClick={() => setViewingDocument(land.documentUrl)}
+                                            onClick={() => setViewingDocument(land.verificationDocument || land.documentUrl)}
                                             className="text-[#AEB877] font-bold text-sm hover:underline flex items-center gap-1"
                                         >
-                                            📄 View Document
+                                            📄 View Land Document
                                         </button>
                                         <div className="text-[#9CA385] text-xs">
                                             Verified by: {land.officerId?.name}
                                         </div>
                                     </div>
+
+                                    {/* Verification Details */}
+
                                 </div>
 
                                 <div className="flex gap-4">
@@ -281,43 +293,45 @@ export const VerifyLandPage = () => {
             </div>
 
             {/* Document Viewer Modal */}
-            {viewingDocument && (
-                <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                    <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                        <div className="fixed inset-0 bg-[#2C3318]/40 transition-opacity backdrop-blur-sm" aria-hidden="true" onClick={() => setViewingDocument(null)}></div>
-                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                        <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg leading-6 font-bold text-[#2C3318]" id="modal-title">
-                                        Land Document Preview
-                                    </h3>
-                                    <button onClick={() => setViewingDocument(null)} className="text-[#9CA385] hover:text-[#5C6642] text-2xl">×</button>
+            {
+                viewingDocument && (
+                    <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                        <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                            <div className="fixed inset-0 bg-[#2C3318]/40 transition-opacity backdrop-blur-sm" aria-hidden="true" onClick={() => setViewingDocument(null)}></div>
+                            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                            <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-lg leading-6 font-bold text-[#2C3318]" id="modal-title">
+                                            Land Document Preview
+                                        </h3>
+                                        <button onClick={() => setViewingDocument(null)} className="text-[#9CA385] hover:text-[#5C6642] text-2xl">×</button>
+                                    </div>
+                                    <div className="bg-[#FCFDF5] rounded-xl border border-[#AEB877]/20 p-4 flex justify-center items-center min-h-[300px]">
+                                        {viewingDocument.endsWith('.pdf') ? (
+                                            <iframe
+                                                src={`https://docs.google.com/gview?url=${viewingDocument}&embedded=true`}
+                                                className="w-full h-96 rounded-lg"
+                                                title="doc"
+                                            ></iframe>
+                                        ) : (
+                                            <img src={viewingDocument} className="max-h-[500px] w-auto object-contain rounded-lg shadow-sm" alt="doc" />
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="bg-[#FCFDF5] rounded-xl border border-[#AEB877]/20 p-4 flex justify-center items-center min-h-[300px]">
-                                    {viewingDocument.endsWith('.pdf') ? (
-                                        <iframe
-                                            src={`https://docs.google.com/gview?url=${viewingDocument}&embedded=true`}
-                                            className="w-full h-96 rounded-lg"
-                                            title="doc"
-                                        ></iframe>
-                                    ) : (
-                                        <img src={viewingDocument} className="max-h-[500px] w-auto object-contain rounded-lg shadow-sm" alt="doc" />
-                                    )}
+                                <div className="bg-[#FFFBB1]/20 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+                                    <a href={viewingDocument} target="_blank" rel="noreferrer" className="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-[#AEB877] text-base font-bold text-white hover:bg-[#8B9850] focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                                        Download Original
+                                    </a>
+                                    <button type="button" onClick={() => setViewingDocument(null)} className="mt-3 w-full inline-flex justify-center rounded-xl border border-[#AEB877]/30 shadow-sm px-4 py-2 bg-white text-base font-medium text-[#4A5532] hover:bg-[#FFFBB1]/30 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Close Preview
+                                    </button>
                                 </div>
-                            </div>
-                            <div className="bg-[#FFFBB1]/20 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
-                                <a href={viewingDocument} target="_blank" rel="noreferrer" className="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-[#AEB877] text-base font-bold text-white hover:bg-[#8B9850] focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                                    Download Original
-                                </a>
-                                <button type="button" onClick={() => setViewingDocument(null)} className="mt-3 w-full inline-flex justify-center rounded-xl border border-[#AEB877]/30 shadow-sm px-4 py-2 bg-white text-base font-medium text-[#4A5532] hover:bg-[#FFFBB1]/30 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                    Close Preview
-                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };

@@ -16,7 +16,7 @@ dotenv.config();
 
 const app = express();
 
-// Database connection
+// Database connection 
 await db();
 
 // Middleware

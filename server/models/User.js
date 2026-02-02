@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema(
         return this.role === 'FARMER' || this.role === 'OFFICER';
       },
     },
+    area: {
+      type: String, // Taluk or Block for Officer
+      default: '',
+    },
     address: {
       type: String,
       trim: true,
