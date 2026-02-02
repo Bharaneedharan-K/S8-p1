@@ -40,6 +40,20 @@ contract LandRegistry {
         emit LandRegistered(_surveyNumber, _landHash, block.timestamp, msg.sender);
     }
 
+    event LandTransferred(string indexed surveyNumber, string newLandHash, uint256 timestamp, address indexed updatedBy);
+
+    function transferLand(string memory _surveyNumber, string memory _newLandHash) public {
+        require(lands[_surveyNumber].isRegistered, "Land not found");
+        
+        // In a real system, we'd check msg.sender == lands[_surveyNumber].owner
+        // But here Admin manages it, so we allow the update.
+        
+        lands[_surveyNumber].landHash = _newLandHash;
+        lands[_surveyNumber].timestamp = block.timestamp;
+        
+        emit LandTransferred(_surveyNumber, _newLandHash, block.timestamp, msg.sender);
+    }
+
     function getLand(string memory _surveyNumber) public view returns (uint256, string memory, string memory, address, uint256) {
         require(lands[_surveyNumber].isRegistered, "Land not found");
         Land memory l = lands[_surveyNumber];

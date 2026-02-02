@@ -164,6 +164,16 @@ export const verifyLandRecord = async (req, res) => {
         const { id } = req.params;
         const { status, landHash, txHash, rejectionReason } = req.body;
 
+        // Security Check: Verify User has permission for THIS specific land
+        const existingLand = await Land.findById(id);
+        if (!existingLand) return res.status(404).json({ success: false, message: 'Land record not found' });
+
+        if (req.userRole === 'OFFICER') {
+            if (existingLand.officerId.toString() !== req.userId) {
+                return res.status(403).json({ success: false, message: 'You are not authorized to verify this land record.' });
+            }
+        }
+
         const updateData = { status };
 
         // Handle Verification Report Upload

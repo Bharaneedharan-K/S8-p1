@@ -22,6 +22,7 @@ import { ManageSchemesPage } from './pages/ManageSchemesPage';
 
 import { MyApplicationsPage } from './pages/MyApplicationsPage';
 import { SchemeApplicationsPage } from './pages/SchemeApplicationsPage';
+import { TransferRequestsPage } from './pages/TransferRequestsPage'; // Import
 import './index.css';
 
 function App() {
@@ -201,6 +202,14 @@ function App() {
             element={
               <PrivateRoute requiredRole="ADMIN">
                 <BlockchainLogsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/transfer-requests"
+            element={
+              <PrivateRoute>
+                <TransferRequestsPage />
               </PrivateRoute>
             }
           />

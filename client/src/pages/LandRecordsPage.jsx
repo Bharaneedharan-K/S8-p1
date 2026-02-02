@@ -8,11 +8,16 @@ export const LandRecordsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    const [showTransferModal, setShowTransferModal] = useState(false);
+    const [selectedLand, setSelectedLand] = useState(null);
+    const [transferData, setTransferData] = useState({ buyerEmail: '', saleDeed: null });
+    const [transferLoading, setTransferLoading] = useState(false);
+    const [successMsg, setSuccessMsg] = useState('');
+
     useEffect(() => {
         const fetchLands = async () => {
             try {
                 setLoading(true);
-                // Backend automatically filters based on role (Farmer -> Own lands, Officer -> All/District in future)
                 const res = await apiClient.get('/land');
                 setLands(res.data.lands || []);
             } catch (err) {
@@ -24,6 +29,54 @@ export const LandRecordsPage = () => {
         };
         fetchLands();
     }, [token]);
+
+    const [officers, setOfficers] = useState([]);
+
+    const handleTransferClick = async (land) => {
+        setSelectedLand(land);
+        setShowTransferModal(true);
+        setTransferData({ buyerEmail: '', saleDeed: null, officerId: '' });
+        setError('');
+        setSuccessMsg('');
+
+        // Fetch Officers in Land's District
+        try {
+            const res = await apiClient.get(`/auth/users?role=OFFICER&district=${land.district}&status=OFFICER_ACTIVE`);
+            setOfficers(res.data.users || []);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleTransferSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedLand) return;
+
+        try {
+            setTransferLoading(true);
+            const formData = new FormData();
+            formData.append('landId', selectedLand._id);
+            formData.append('buyerEmail', transferData.buyerEmail);
+            formData.append('saleDeed', transferData.saleDeed);
+            if (transferData.officerId) formData.append('officerId', transferData.officerId);
+
+            await apiClient.post('/transfer/initiate', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            setSuccessMsg('Transfer Request Initiated Successfully!');
+            setTimeout(() => {
+                setShowTransferModal(false);
+                setSuccessMsg('');
+            }, 2000);
+
+        } catch (err) {
+            console.error(err);
+            setError(err.response?.data?.message || 'Failed to initiate transfer');
+        } finally {
+            setTransferLoading(false);
+        }
+    };
 
     const getStatusBadge = (status) => {
         switch (status) {
@@ -136,9 +189,113 @@ export const LandRecordsPage = () => {
                                     >
                                         📄 View Document
                                     </a>
+
+                                    {/* Transfer Button (Only for Farmer & Approved Lands) */}
+                                    {user?.role === 'FARMER' && land.status === 'LAND_APPROVED' && (
+                                        <button
+                                            onClick={() => handleTransferClick(land)}
+                                            className="mt-3 block w-full text-center py-2 bg-[#2C3318] text-white font-bold rounded-xl hover:bg-[#4A5532] transition-colors text-sm"
+                                        >
+                                            🔁 Transfer Ownership
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Transfer Modal */}
+                {showTransferModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2C3318]/60 backdrop-blur-sm">
+                        <div className="bg-white rounded-3xl shadow-xl w-full max-w-lg p-8 border border-[#AEB877]/20 anim-scale-in">
+                            <div className="flex justify-between items-center mb-6 border-b border-[#E2E6D5] pb-4">
+                                <h2 className="text-2xl font-bold text-[#2C3318]">Transfer Ownership</h2>
+                                <button onClick={() => setShowTransferModal(false)} className="text-[#9CA385] hover:text-[#2C3318] text-xl">✕</button>
+                            </div>
+
+                            {successMsg ? (
+                                <div className="p-4 bg-green-50 text-green-700 rounded-xl border border-green-200 text-center font-bold mb-4">
+                                    {successMsg}
+                                </div>
+                            ) : (
+                                <form onSubmit={handleTransferSubmit} className="space-y-4">
+                                    {error && <div className="text-red-500 text-sm font-bold text-center">{error}</div>}
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-[#5C6642] mb-1">Buyer's Email</label>
+                                        <input
+                                            type="email"
+                                            required
+                                            value={transferData.buyerEmail}
+                                            onChange={(e) => setTransferData({ ...transferData, buyerEmail: e.target.value })}
+                                            className="input-modern w-full"
+                                            placeholder="Enter buyer's registered email"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-[#5C6642] mb-1">Upload Sale Deed</label>
+                                        <input
+                                            type="file"
+                                            required
+                                            onChange={(e) => setTransferData({ ...transferData, saleDeed: e.target.files[0] })}
+                                            className="block w-full text-sm text-[#5C6642] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#AEB877] file:text-[#2C3318] hover:file:bg-[#8B9850]"
+                                        />
+                                        <p className="text-xs text-[#9CA385] mt-1">Legally binding sale agreement.</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-[#5C6642] mb-1">Select Verification Officer <span className="text-red-500">*</span></label>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-40 overflow-y-auto pr-2 custom-scrollbar border border-[#AEB877]/20 rounded-xl p-2 bg-[#F2F5E6]">
+                                            {officers.length === 0 ? (
+                                                <p className="text-sm text-gray-500 italic col-span-2 text-center py-2">No active officers in {selectedLand.district}.</p>
+                                            ) : (
+                                                officers.map(off => (
+                                                    <div
+                                                        key={off._id}
+                                                        onClick={() => setTransferData({ ...transferData, officerId: off._id })}
+                                                        className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center gap-2 ${transferData.officerId === off._id
+                                                            ? 'bg-[#2C3318] text-white border-[#2C3318]'
+                                                            : 'bg-white text-[#2C3318] border-[#E2E6D5] hover:border-[#AEB877]'
+                                                            }`}
+                                                    >
+                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${transferData.officerId === off._id ? 'bg-[#AEB877] text-[#2C3318]' : 'bg-[#AEB877]/20 text-[#4A5532]'
+                                                            }`}>
+                                                            {off.name.charAt(0)}
+                                                        </div>
+                                                        <div className="overflow-hidden">
+                                                            <p className="font-bold text-xs truncate">{off.name}</p>
+                                                            <p className={`text-[10px] font-bold truncate ${transferData.officerId === off._id ? 'text-[#AEB877]' : 'text-[#5C6642]'
+                                                                }`}>
+                                                                📍 {off.area || 'General'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-4 flex gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowTransferModal(false)}
+                                            className="flex-1 py-3 border border-[#AEB877] text-[#5C6642] font-bold rounded-xl"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={transferLoading || !transferData.officerId}
+                                            className="flex-1 py-3 bg-[#2C3318] text-white font-bold rounded-xl hover:bg-[#4A5532] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {transferLoading ? 'Processing...' : 'Initiate Transfer'}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

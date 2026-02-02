@@ -115,6 +115,7 @@ export const Navbar = () => {
                         <NavLink to="/farmer/add-land">Book Slot</NavLink>
                         <NavLink to="/farmer/lands">My Land</NavLink>
                         <NavLink to="/farmer/schemes">Schemes</NavLink>
+                        <NavLink to="/transfer-requests">Transfers</NavLink>
                         <NavLink to="/farmer/applications">My Applications</NavLink>
                         <NavLink to="/farmer/profile">Profile</NavLink>
                       </>
@@ -126,6 +127,7 @@ export const Navbar = () => {
                         <NavLink to="/officer/farmers">Verifications</NavLink>
                         <NavLink to="/officer/add-land">Add Land Record</NavLink>
                         <NavLink to="/officer/lands">Land Records</NavLink>
+                        <NavLink to="/transfer-requests">Transfers</NavLink>
                       </>
                     )}
 
@@ -135,6 +137,7 @@ export const Navbar = () => {
                         <NavLink to="/admin/farmers">Farmers</NavLink>
                         <NavLink to="/admin/officers">Officers</NavLink>
                         <NavLink to="/admin/verify-land">Verify Land</NavLink>
+                        <NavLink to="/transfer-requests">Transfers</NavLink>
                         <NavLink to="/admin/schemes">Schemes</NavLink>
                         <NavLink to="/admin/applications">Applications</NavLink>
                         <NavLink to="/admin/logs">Audit Logs</NavLink>
@@ -234,6 +237,7 @@ export const Navbar = () => {
                         )}
                         <NavLink to="/farmer/add-land" mobile>Book Slot</NavLink>
                         <NavLink to="/farmer/lands" mobile>My Land</NavLink>
+                        <NavLink to="/transfer-requests" mobile>Transfers</NavLink>
                         <NavLink to="/farmer/schemes" mobile>Schemes</NavLink>
                         <NavLink to="/farmer/applications" mobile>My Applications</NavLink>
                         <NavLink to="/farmer/profile" mobile>My Profile</NavLink>
@@ -246,6 +250,7 @@ export const Navbar = () => {
                         <NavLink to="/officer/farmers" mobile>Verify Farmers</NavLink>
                         <NavLink to="/officer/add-land" mobile>Add Land Record</NavLink>
                         <NavLink to="/officer/lands" mobile>Land Records</NavLink>
+                        <NavLink to="/transfer-requests" mobile>Transfers</NavLink>
                       </>
                     )}
 
@@ -255,6 +260,7 @@ export const Navbar = () => {
                         <NavLink to="/admin/farmers" mobile>Manage Farmers</NavLink>
                         <NavLink to="/admin/officers" mobile>Manage Officers</NavLink>
                         <NavLink to="/admin/verify-land" mobile>Verify Land</NavLink>
+                        <NavLink to="/transfer-requests" mobile>Transfers</NavLink>
                         <NavLink to="/admin/schemes" mobile>Schemes</NavLink>
                         <NavLink to="/admin/applications" mobile>Applications</NavLink>
                       </>

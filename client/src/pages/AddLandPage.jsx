@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import apiClient from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { LAND_TYPES } from '../utils/constants'; // Keep LAND_TYPES as it's used in the form
+import { LAND_TYPES, TN_DISTRICTS } from '../utils/constants';
 
 export const AddLandPage = () => {
     const { token, user } = useContext(AuthContext);
@@ -438,7 +438,24 @@ export const AddLandPage = () => {
                                     </h3>
 
                                     <div className="mb-6">
-                                        <label className="block text-xs font-bold text-[#5C6642] uppercase mb-2">Available Officers in {user?.district}</label>
+                                        <label className="block text-xs font-bold text-[#5C6642] uppercase mb-2">Select District</label>
+                                        <select
+                                            value={formData.district}
+                                            onChange={(e) => {
+                                                const newDistrict = e.target.value;
+                                                setFormData(prev => ({ ...prev, district: newDistrict, officerId: '' }));
+                                                setAvailableSlots([]);
+                                                fetchOfficersInDistrict(newDistrict);
+                                            }}
+                                            className="input-modern mb-4 bg-white"
+                                        >
+                                            <option value="">-- Choose District --</option>
+                                            {TN_DISTRICTS.map(d => (
+                                                <option key={d} value={d}>{d}</option>
+                                            ))}
+                                        </select>
+
+                                        <label className="block text-xs font-bold text-[#5C6642] uppercase mb-2">Available Officers in {formData.district || '...'}</label>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                                             {officers.length === 0 ? (
                                                 <p className="text-sm text-gray-500 italic col-span-2 text-center py-4">No active officers found in this district.</p>
@@ -452,15 +469,15 @@ export const AddLandPage = () => {
                                                             : 'bg-white border-[#E2E6D5] text-[#2C3318] hover:border-[#AEB877] hover:bg-[#FFFBB1]/30'
                                                             }`}
                                                     >
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${formData.officerId === off._id ? 'bg-[#AEB877] text-[#2C3318]' : 'bg-[#AEB877]/20 text-[#4A5532]'
+                                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-base shrink-0 ${formData.officerId === off._id ? 'bg-[#AEB877] text-[#2C3318]' : 'bg-[#AEB877]/20 text-[#4A5532]'
                                                             }`}>
                                                             {off.name.charAt(0)}
                                                         </div>
                                                         <div className="overflow-hidden">
                                                             <p className="font-bold text-sm truncate">{off.name}</p>
-                                                            <p className={`text-[10px] uppercase font-bold tracking-wider truncate ${formData.officerId === off._id ? 'text-[#AEB877]' : 'text-[#9CA385]'
+                                                            <p className={`text-xs font-bold truncate flex items-center gap-1 ${formData.officerId === off._id ? 'text-[#AEB877]' : 'text-[#5C6642]'
                                                                 }`}>
-                                                                {off.area ? off.area : 'Nil'}
+                                                                📍 {off.area ? off.area : 'General'}
                                                             </p>
                                                         </div>
                                                         {formData.officerId === off._id && <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#AEB877]"></div>}
