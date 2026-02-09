@@ -9,7 +9,9 @@ export const createScheme = async (req, res) => {
         const {
             schemeCode, schemeName, description, eligibilityText,
             minLandArea, maxLandArea, allowedLandTypes, allowedDistricts,
-            benefitAmount, startDate, endDate, status
+            benefitAmount, startDate, endDate, status,
+            schemeType, fundingPattern, documentsRequired, applicationProcess,
+            casteEligibility, genderEligibility, ageMin, ageMax
         } = req.body;
 
         if (!startDate) {
@@ -35,6 +37,18 @@ export const createScheme = async (req, res) => {
             startDate: new Date(startDate),
             endDate: endDate ? new Date(endDate) : null,
             status: status || 'ACTIVE',
+
+            // New Fields
+            schemeType: schemeType || 'STATE',
+            fundingPattern: fundingPattern || '100% State',
+            documentsRequired: Array.isArray(documentsRequired) ? documentsRequired : [],
+            applicationProcess: applicationProcess || 'Online',
+            casteEligibility: Array.isArray(casteEligibility) ? casteEligibility : ['ANY'],
+            genderEligibility: genderEligibility || 'ANY',
+            ageLimit: {
+                min: Number(ageMin) || 18,
+                max: Number(ageMax) || 100
+            },
             createdBy: req.userId
         };
 
@@ -46,6 +60,16 @@ export const createScheme = async (req, res) => {
 
     } catch (error) {
         console.error('❌ Create Scheme Fail:', error);
+
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(val => val.message);
+            return res.status(400).json({ success: false, message: 'Validation Error: ' + messages.join(', ') });
+        }
+
+        if (error.code === 11000) {
+            return res.status(400).json({ success: false, message: 'Scheme Code already exists' });
+        }
+
         res.status(500).json({ success: false, message: 'Creating scheme failed', error: error.message });
     }
 };
@@ -72,6 +96,9 @@ export const updateScheme = async (req, res) => {
 
         res.status(200).json({ success: true, message: 'Scheme updated', scheme });
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ success: false, message: 'Scheme Code already exists' });
+        }
         res.status(500).json({ success: false, message: 'Update failed', error: error.message });
     }
 };
@@ -81,10 +108,7 @@ export const getActiveSchemes = async (req, res) => {
     try {
         const today = new Date();
         const schemes = await Scheme.find({
-            status: 'ACTIVE',
-            // Only show schemes that started and haven't expired
-            startDate: { $lte: today },
-            $or: [{ endDate: null }, { endDate: { $gte: today } }]
+            status: 'ACTIVE'
         }).sort({ createdAt: -1 });
 
         res.status(200).json({ success: true, count: schemes.length, schemes });

@@ -21,6 +21,10 @@ const schemeApplicationSchema = new mongoose.Schema(
             type: String,
             required: true
         },
+        documents: {
+            type: [String],
+            default: []
+        },
         applicationDate: {
             type: Date,
             default: Date.now

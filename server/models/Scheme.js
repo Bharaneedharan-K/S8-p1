@@ -55,6 +55,38 @@ const schemeSchema = new mongoose.Schema(
             enum: ['ACTIVE', 'INACTIVE'],
             default: 'ACTIVE'
         },
+        // --- Realistic Government Scheme Extensions ---
+        schemeType: {
+            type: String,
+            enum: ['CENTRAL', 'STATE', 'JOINT'],
+            default: 'STATE'
+        },
+        fundingPattern: {
+            type: String,
+            default: '100% State' // e.g. "60:40", "100% Central"
+        },
+        documentsRequired: {
+            type: [String],
+            default: [] // e.g. ["Aadhar", "Bank Passbook", "Land Record"]
+        },
+        applicationProcess: {
+            type: String,
+            default: 'Online application via Welfora portal.'
+        },
+        // Demographics
+        casteEligibility: {
+            type: [String],
+            default: ['ANY'] // e.g. ["SC", "ST", "General"]
+        },
+        genderEligibility: {
+            type: String,
+            enum: ['ANY', 'MALE', 'FEMALE'],
+            default: 'ANY'
+        },
+        ageLimit: {
+            min: { type: Number, default: 18 },
+            max: { type: Number, default: 100 }
+        },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',

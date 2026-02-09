@@ -1,6 +1,7 @@
 import SchemeApplication from '../models/SchemeApplication.js';
 import Scheme from '../models/Scheme.js';
 import Land from '../models/Land.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 // Farmer: Apply for Scheme
 export const applyForScheme = async (req, res) => {
@@ -42,7 +43,16 @@ export const applyForScheme = async (req, res) => {
             }
         }
 
-        // 6. Check for duplicate application
+        // 6. Handle Documents Upload
+        let documentUrls = [];
+        if (req.files && req.files.documents) {
+            const uploadPromises = req.files.documents.map(file =>
+                uploadToCloudinary(file.buffer, file.originalname).then(res => res.secure_url)
+            );
+            documentUrls = await Promise.all(uploadPromises);
+        }
+
+        // 7. Check for duplicate application
         const existingApp = await SchemeApplication.findOne({ schemeId, landId });
         if (existingApp) {
             return res.status(409).json({ success: false, message: 'Application already submitted for this land and scheme.' });
@@ -54,6 +64,7 @@ export const applyForScheme = async (req, res) => {
             schemeId,
             landId,
             district: land.district,
+            documents: documentUrls,
             status: 'PENDING'
         });
 
@@ -70,8 +81,8 @@ export const applyForScheme = async (req, res) => {
 export const getMyApplications = async (req, res) => {
     try {
         const applications = await SchemeApplication.find({ farmerId: req.userId })
-            .populate('schemeId', 'schemeName benefitAmount')
-            .populate('landId', 'surveyNumber area')
+            .populate('schemeId', 'schemeName benefitAmount schemeCode schemeType fundingPattern')
+            .populate('landId', 'surveyNumber area district landType')
             .sort({ createdAt: -1 });
 
         res.status(200).json({ success: true, count: applications.length, applications });
@@ -83,10 +94,11 @@ export const getMyApplications = async (req, res) => {
 // Admin: Get All Applications (with filtering)
 export const getAllApplications = async (req, res) => {
     try {
-        const { status, schemeId } = req.query;
+        const { status, schemeId, district } = req.query;
         let filter = {};
-        if (status) filter.status = status;
+        if (status && status !== 'ALL') filter.status = status;
         if (schemeId) filter.schemeId = schemeId;
+        if (district) filter.district = district;
 
         const applications = await SchemeApplication.find(filter)
             .populate('farmerId', 'name mobile')
