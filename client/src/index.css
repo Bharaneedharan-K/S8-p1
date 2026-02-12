@@ -269,17 +269,15 @@ body {
 @keyframes robotBlink {
 
   0%,
-  45%,
-  55%,
+  48%,
+  52%,
   100% {
     transform: scaleY(1);
   }
 
   50% {
-    transform: scaleY(0.15);
+    transform: scaleY(0.1);
   }
-
-  /* Slightly softer blink */
 }
 
 @keyframes robotAntenna {
@@ -322,7 +320,8 @@ body {
 }
 
 .animate-robot-blink {
-  animation: robotBlink 4s infinite;
+  animation: robotBlink 3s infinite;
+  /* Changed to 3s */
   transform-origin: center;
 }
 
