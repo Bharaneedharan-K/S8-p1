@@ -7,6 +7,7 @@ import farmerRoutes from './routes/farmer.js';
 import landRoutes from './routes/land.js';
 import schemeRoutes from './routes/scheme.js';
 import transferRoutes from './routes/transfer.js';
+import chatRoutes from './routes/chat.js';
 import applicationRoutes from './routes/application.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import User from './models/User.js';
@@ -32,7 +33,8 @@ app.use('/api/farmer', farmerRoutes);
 app.use('/api/land', landRoutes);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/applications', applicationRoutes);
-app.use('/api/transfer', transferRoutes); // Register
+app.use('/api/transfer', transferRoutes);
+app.use('/api/chat', chatRoutes); // AI Chatbot
 
 // Health check
 app.get('/api/health', (req, res) => {
