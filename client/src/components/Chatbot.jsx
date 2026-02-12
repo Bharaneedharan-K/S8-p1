@@ -71,7 +71,7 @@ const Chatbot = () => {
             {!isOpen && (
                 <button
                     onClick={toggleChat}
-                    className="fixed bottom-6 right-6 w-16 h-16 bg-[#0B3D91] text-white rounded-full shadow-2xl hover:bg-[#092C6B] transition-all flex items-center justify-center text-3xl z-50 ring-4 ring-blue-50/50"
+                    className="fixed bottom-8 right-14 w-16 h-16 bg-[#0B3D91] text-white rounded-full shadow-2xl hover:bg-[#092C6B] transition-all flex items-center justify-center text-3xl z-50 ring-4 ring-blue-50/50"
                     aria-label="Open Chat Assistant"
                 >
                     <RiRobot2Line />
@@ -81,7 +81,7 @@ const Chatbot = () => {
             {/* Chat Window */}
             {isOpen && (
                 <div
-                    className="fixed bottom-6 right-6 w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col z-50 animate-slideUp font-sans"
+                    className="fixed bottom-8 right-14 w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col z-50 animate-slideUp font-sans"
                     style={{ height: '550px', maxHeight: '85vh' }}
                 >
                     {/* Header - Matches Navbar Color #0B3D91 */}
