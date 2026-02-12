@@ -70,7 +70,7 @@ export const LandingPage = () => {
             </div>
 
             {/* Right Visual (Abstract UI Card) */}
-            <div className="hidden lg:block relative animate-slideInRight">
+            <div className="hidden lg:block relative animate-slideInRight -mt-32">
               <div className="relative z-10 bg-white backdrop-blur-xl border border-[#0B3D91]/10 p-8 rounded-[2.5rem] shadow-2xl shadow-blue-900/10 transform rotate-2 hover:rotate-0 transition-transform duration-700 ease-out">
                 {/* Fake UI Header */}
                 <div className="flex items-center justify-between mb-8 border-b border-[#F4F6F9] pb-6">
@@ -123,13 +123,13 @@ export const LandingPage = () => {
 
       {/* Visual Image Section */}
       <div className="relative py-12 lg:py-20 group overflow-hidden">
-        <div className="absolute inset-0 w-full h-full bg-[#0B3D91]">
+        <div className="absolute inset-0 w-full h-full bg-black">
           <img
-            src="https://images.unsplash.com/photo-1625246333195-5848b44910e8?q=80&w=2571&auto=format&fit=crop"
+            src="https://images.unsplash.com/photo-1628352081506-83c43123ed6d?q=80&w=2796&auto=format&fit=crop"
             alt="Agriculture Field"
-            className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-[2s]"
+            className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-[2s]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B3D91] to-transparent opacity-90"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B3D91] to-transparent opacity-60"></div>
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
