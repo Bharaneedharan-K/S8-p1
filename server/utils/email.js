@@ -1,22 +1,37 @@
 import nodemailer from 'nodemailer';
 
 // Create transporter (using Gmail or other email service)
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER || 'your-email@gmail.com',
-    pass: process.env.EMAIL_PASSWORD || 'your-app-password',
-  },
-});
+let transporter;
 
-// Verify connection
-transporter.verify((error, success) => {
-  if (error) {
-    console.log('Email service connection error:', error);
-  } else {
-    console.log('Email service is ready to send emails');
+const getTransporter = () => {
+  if (!transporter) {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      console.error('❌ EMAIL CONFIG MISSING in .env');
+    }
+
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
   }
-});
+  return transporter;
+};
+
+// Verify connection (Lazy)
+const verifyTransporter = async () => {
+  try {
+    const t = getTransporter();
+    await t.verify();
+    console.log('✅ Email service is ready');
+  } catch (error) {
+    console.log('⚠️ Email service connection warning:', error.message);
+  }
+};
+// Trigger verification independently so it doesn't block imports
+setTimeout(verifyTransporter, 2000);
 
 /**
  * Send officer credentials email
@@ -125,45 +140,38 @@ export const sendOfficerCredentials = async (recipientEmail, officerName, passwo
           <div class="content">
             <p>Dear <strong>${officerName}</strong>,</p>
 
-            <p>Welcome to the Land Verification & Scheme Application System! Your officer account has been successfully created by the administrator.</p>
+            <p>Your account for the <strong>Welfora Land Verification System</strong> has been successfully created.</p>
 
-            <p>Your login credentials are provided below:</p>
+            <p>Please use the credentials below to log in:</p>
 
             <div class="credentials-box">
               <div class="credential-item">
-                <div class="label">📧 Email Address</div>
+                <div class="label">Username (Email)</div>
                 <div class="value">${recipientEmail}</div>
               </div>
 
               <div class="credential-item">
-                <div class="label">🔐 Password</div>
+                <div class="label">Password</div>
                 <div class="value">${password}</div>
+                <div style="margin-top:5px; font-size:12px; color:#cbd5e1; font-style:italic;">(Please change this after your first login)</div>
               </div>
             </div>
 
-            <p><a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" class="button">Login to Dashboard</a></p>
+            <p><strong>Instructions:</strong></p>
+            <ol style="color:white; padding-left:20px;">
+              <li>Go to the <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" style="color:#4ade80;">Officer Login Portal</a>.</li>
+              <li>Enter your username and password.</li>
+              <li>Complete your profile setup.</li>
+            </ol>
 
-            <div class="warning">
-              <strong>⚠️ Important Security Notice:</strong><br>
-              Please change your password immediately after first login. Keep your credentials secure and never share them with anyone.
-            </div>
+            <p>If you have any issues, please contact the administrator immediately.</p>
 
-            <p>
-              Your responsibilities as an officer include:<br>
-              • Verifying farmer accounts and land documents<br>
-              • Recording and validating land information<br>
-              • Processing scheme applications<br>
-              • Maintaining data integrity
-            </p>
-
-            <p>If you have any questions or need assistance, please contact the administrator.</p>
-
-            <p>Best regards,<br><strong>Land Verification System</strong></p>
+            <p>Best regards,<br><strong>Welfora Admin Team</strong></p>
           </div>
 
           <div class="footer">
             <p>This is an automated email. Please do not reply to this message.</p>
-            <p>© 2026 Land Verification & Scheme Application System. All rights reserved.</p>
+            <p>© 2026 Welfora Land Portal. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -171,13 +179,13 @@ export const sendOfficerCredentials = async (recipientEmail, officerName, passwo
     `;
 
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'noreply@land-verification.gov',
+      from: process.env.EMAIL_USER || 'noreply@welfora.gov.in',
       to: recipientEmail,
-      subject: '🌾 Your Land Verification System Officer Account Credentials',
+      subject: '🔐 Verify Your Officer Account - Welfora Land Portal',
       html: htmlContent,
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    const info = await getTransporter().sendMail(mailOptions);
     console.log('Officer credentials email sent:', info.response);
     return { success: true, messageId: info.messageId };
   } catch (error) {

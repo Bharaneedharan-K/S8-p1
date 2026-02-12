@@ -154,7 +154,7 @@ export const getCurrentUser = async (req, res) => {
 // Create Officer (Admin Only)
 export const createOfficer = async (req, res) => {
   try {
-    const { name, email, mobile, district, area, password } = req.body;
+    const { name, email, mobile, district, area, password, sendEmail } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -165,10 +165,26 @@ export const createOfficer = async (req, res) => {
       });
     }
 
+    // Strict Email Logic: If sendEmail is true, try sending FIRST
+    if (sendEmail) {
+      try {
+        console.log(`📧 Attempting to send credentials to ${email}...`);
+        await sendOfficerCredentials(email, name, password);
+        console.log(`✅ Email sent successfully to ${email}`);
+      } catch (emailError) {
+        console.error(`❌ Email failed:`, emailError.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to send verification email. Officer account NOT created.',
+          error: emailError.message
+        });
+      }
+    }
+
+    // If email succeeded (or wasn't requested), create the user
     const officer = new User({
       name,
       email,
-      mobile,
       mobile,
       password,
       district,
@@ -179,19 +195,11 @@ export const createOfficer = async (req, res) => {
 
     await officer.save();
 
-    // Send credentials email to officer
-    try {
-      await sendOfficerCredentials(email, name, password);
-      console.log(`✅ Credentials email sent to ${email}`);
-    } catch (emailError) {
-      console.error(`⚠️ Failed to send email to ${email}:`, emailError.message);
-      // Don't fail the officer creation if email fails
-      // Just log the error and continue
-    }
-
     res.status(201).json({
       success: true,
-      message: 'Officer created successfully and credentials sent to email',
+      message: sendEmail
+        ? 'Officer created and credentials emailed successfully!'
+        : 'Officer created successfully (Email skipped).',
       officer: officer.toJSON(),
     });
   } catch (error) {

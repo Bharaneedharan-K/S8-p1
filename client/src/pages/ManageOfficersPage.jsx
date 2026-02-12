@@ -22,7 +22,9 @@ export const ManageOfficersPage = () => {
     email: '',
     password: '',
     district: '',
-    mobile: ''
+    mobile: '',
+    area: '', // Initialize area to empty string
+    sendEmail: false // Add default state
   });
 
   const DISTRICTS = TN_DISTRICTS;
@@ -74,7 +76,7 @@ export const ManageOfficersPage = () => {
       setSuccess(msg);
       // Removed window.alert as requested
       setShowForm(false);
-      setFormData({ name: '', email: '', password: '', district: '', mobile: '' });
+      setFormData({ name: '', email: '', password: '', district: '', mobile: '', sendEmail: false });
       fetchOfficers();
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -216,6 +218,21 @@ export const ManageOfficersPage = () => {
               <div className="md:col-span-2">
                 <label className="block text-sm font-bold text-[#555555] mb-1">Password</label>
                 <input type="password" name="password" required className="input-modern" onChange={handleChange} value={formData.password} placeholder="Set secure password" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100 cursor-pointer hover:bg-blue-100 transition-colors">
+                  <input
+                    type="checkbox"
+                    name="sendEmail"
+                    checked={formData.sendEmail}
+                    onChange={(e) => setFormData({ ...formData, sendEmail: e.target.checked })}
+                    className="w-5 h-5 text-[#0B3D91] rounded focus:ring-[#0B3D91]"
+                  />
+                  <div>
+                    <span className="font-bold text-[#0B3D91] block">Send Credentials via Email</span>
+                    <span className="text-xs text-[#555555]">If checked, account will only be created if email is sent successfully.</span>
+                  </div>
+                </label>
               </div>
               <div className="md:col-span-2 flex justify-end">
                 <button type="submit" className="px-8 py-3 bg-[#0B3D91] hover:bg-[#092C6B] text-white font-bold rounded-xl shadow-lg transition-transform active:scale-95">
