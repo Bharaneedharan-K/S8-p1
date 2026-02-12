@@ -250,3 +250,87 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #607D8B;
 }
+
+/* ============ ROBOT ANIMATIONS ============ */
+@keyframes robotFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+
+  /* Reduced from -3px */
+}
+
+@keyframes robotBlink {
+
+  0%,
+  45%,
+  55%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(0.15);
+  }
+
+  /* Slightly softer blink */
+}
+
+@keyframes robotAntenna {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-5deg);
+  }
+
+  /* Reduced from -10deg */
+  75% {
+    transform: rotate(5deg);
+  }
+
+  /* Reduced from 10deg */
+}
+
+@keyframes robotPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+
+  /* Subtler pulse */
+}
+
+.animate-robot-float {
+  animation: robotFloat 3s ease-in-out infinite;
+}
+
+.animate-robot-blink {
+  animation: robotBlink 4s infinite;
+  transform-origin: center;
+}
+
+.animate-robot-antenna {
+  animation: robotAntenna 2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.animate-robot-pulse {
+  animation: robotPulse 2s ease-in-out infinite;
+}

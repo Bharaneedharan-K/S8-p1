@@ -3,6 +3,7 @@ import apiClient from '../services/api';
 // Using modern React Icons (Ri) for a cleaner look
 import { RiRobot2Line, RiSendPlaneFill, RiSubtractLine } from 'react-icons/ri';
 import ReactMarkdown from 'react-markdown';
+import AnimatedRobot from './AnimatedRobot'; // Import Custom Robot
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -71,10 +72,11 @@ const Chatbot = () => {
             {!isOpen && (
                 <button
                     onClick={toggleChat}
-                    className="fixed bottom-8 right-14 w-16 h-16 bg-[#0B3D91] text-white rounded-full shadow-2xl hover:bg-[#092C6B] transition-all flex items-center justify-center text-3xl z-50 ring-4 ring-blue-50/50"
+                    className="fixed bottom-8 right-14 w-16 h-16 bg-[#0B3D91] text-white rounded-full shadow-2xl hover:bg-[#092C6B] transition-all flex items-center justify-center z-50 ring-4 ring-blue-50/50 group"
                     aria-label="Open Chat Assistant"
                 >
-                    <RiRobot2Line />
+                    {/* Animated Robot Icon */}
+                    <AnimatedRobot className="w-10 h-10 text-white group-hover:scale-110 transition-transform duration-300" />
                 </button>
             )}
 
@@ -87,14 +89,14 @@ const Chatbot = () => {
                     {/* Header - Matches Navbar Color #0B3D91 */}
                     <div className="bg-[#0B3D91] p-4 flex items-center justify-between text-white shadow-md">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md border border-white/10 shadow-inner">
-                                <RiRobot2Line className="text-xl" />
+                            <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md border border-white/10 shadow-inner overflow-hidden">
+                                <AnimatedRobot className="w-8 h-8 text-white" isThinking={loading} />
                             </div>
                             <div>
                                 <h3 className="font-bold text-base tracking-wide">Welfora AI</h3>
                                 <div className="flex items-center gap-1.5 opacity-90">
                                     <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                                    <span className="text-xs font-medium">Online</span>
+                                    <span className="text-xs font-medium">{loading ? 'Thinking...' : 'Online'}</span>
                                 </div>
                             </div>
                         </div>
