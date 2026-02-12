@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FaLeaf, FaSignOutAlt, FaBars, FaTimes, FaChevronDown, FaLock } from 'react-icons/fa';
 
 export const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -45,16 +46,24 @@ export const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   // Desktop Nav Link Component
-  const NavLink = ({ to, children, mobile = false }) => {
+  const NavLink = ({ to, children, mobile = false, locked = false }) => {
     const active = isActive(to);
 
     if (mobile) {
+      if (locked) {
+        return (
+          <div className="flex justify-between items-center px-4 py-3 rounded-lg text-base font-bold text-gray-400 cursor-not-allowed bg-gray-50 opacity-70">
+            <span>{children}</span>
+            <FaLock className="text-sm" />
+          </div>
+        );
+      }
       return (
         <Link
           to={to}
-          className={`block px-4 py-3 rounded-xl text-base font-bold transition-all ${active
-            ? 'bg-[#AEB877] text-white'
-            : 'text-[#4A5532] hover:bg-[#FFFBB1] hover:text-[#2C3318]'
+          className={`block px-4 py-3 rounded-lg text-base font-bold transition-all ${active
+            ? 'bg-[#0B3D91] text-white'
+            : 'text-[#555555] hover:bg-gray-100'
             }`}
         >
           {children}
@@ -62,26 +71,39 @@ export const Navbar = () => {
       );
     }
 
+    if (locked) {
+      return (
+        <span
+          className="relative px-4 py-2 text-sm font-bold rounded-lg cursor-not-allowed group overflow-hidden"
+          title="Verification Pending"
+        >
+          <span className="opacity-30 blur-[1px] select-none text-white">{children}</span>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <FaLock className="text-white/60 text-xs shadow-sm drop-shadow-md" />
+          </div>
+        </span>
+      );
+    }
+
     return (
       <Link
         to={to}
-        className={`relative px-4 py-2 text-sm font-bold rounded-lg transition-all ${active ? 'text-white' : 'text-[#D8E983] hover:text-white hover:bg-white/10'
+        className={`relative px-4 py-2 text-sm font-bold rounded-lg transition-all ${active ? 'text-white bg-white/10' : 'text-white/70 hover:text-white hover:bg-white/5'
           }`}
       >
         {children}
-        {active && (
-          <span className="absolute bottom-1 left-4 right-4 h-0.5 bg-[#FFFBB1] rounded-full"></span>
-        )}
       </Link>
     );
   };
+
+  const isFarmerUnverified = user?.role === 'FARMER' && user?.status !== 'FARMER_VERIFIED';
 
   return (
     <>
       <nav
         className={`fixed w-full z-50 transition-all duration-300 ${scrolled || mobileMenuOpen
-          ? 'bg-[#2C3318] shadow-lg border-b border-[#AEB877]/20 py-2'
-          : 'bg-[#2C3318] py-3'
+          ? 'bg-[#0B3D91] shadow-lg border-b border-white/10 py-2'
+          : 'bg-[#0B3D91] py-3'
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -89,14 +111,15 @@ export const Navbar = () => {
             {/* Logo */}
             <div className="flex items-center">
               <Link to="/" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 bg-[#AEB877] rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-black/20 group-hover:scale-105 transition-transform text-white border border-white/10">
-                  🌾
+                <div className="w-10 h-10 flex items-center justify-center">
+                  {/* Custom Logo: Simple White Leaf */}
+                  <FaLeaf className="w-8 h-8 text-white group-hover:scale-110 transition-transform duration-300" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xl font-extrabold text-white tracking-tight leading-none group-hover:text-[#AEB877] transition-colors">
+                  <span className="text-xl font-black text-white tracking-tight leading-none">
                     WELFORA
                   </span>
-                  <span className="text-[10px] font-bold text-[#A5C89E] uppercase tracking-widest">
+                  <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">
                     Government of India
                   </span>
                 </div>
@@ -110,25 +133,23 @@ export const Navbar = () => {
                   <NavLink to="/login">Login</NavLink>
                   <Link
                     to="/register"
-                    className="ml-4 bg-[#AEB877] hover:bg-[#8B9850] text-[#2C3318] font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-black/10 transition-all active:scale-95"
+                    className="ml-4 bg-white text-[#0B3D91] hover:bg-gray-100 font-bold py-2.5 px-6 rounded-lg shadow-sm transition-all active:scale-95"
                   >
                     Register Farmer
                   </Link>
                 </>
               ) : (
                 <>
-                  <div className="flex bg-[#1e2411] rounded-xl px-1 py-1 mr-4 border border-white/5">
+                  <div className="flex bg-[#082A66] rounded-lg px-1 py-1 mr-4 border border-white/5">
                     {user?.role === 'FARMER' && (
                       <>
                         <NavLink to="/dashboard">Dashboard</NavLink>
-                        {user?.status === 'FARMER_PENDING_VERIFICATION' && (
-                          <NavLink to="/farmer/verify">Verify ID</NavLink>
-                        )}
-                        <NavLink to="/farmer/add-land">Book Slot</NavLink>
-                        <NavLink to="/farmer/lands">My Land</NavLink>
-                        <NavLink to="/farmer/schemes">Schemes</NavLink>
-                        <NavLink to="/transfer-requests">Transfers</NavLink>
-                        <NavLink to="/farmer/applications">My Applications</NavLink>
+                        {/* Verify ID link removed as per request */}
+                        <NavLink to="/farmer/add-land" locked={isFarmerUnverified}>Book Slot</NavLink>
+                        <NavLink to="/farmer/lands" locked={isFarmerUnverified}>My Land</NavLink>
+                        <NavLink to="/farmer/schemes" locked={isFarmerUnverified}>Schemes</NavLink>
+                        <NavLink to="/transfer-requests" locked={isFarmerUnverified}>Transfers</NavLink>
+                        <NavLink to="/farmer/applications" locked={isFarmerUnverified}>My Applications</NavLink>
                         <NavLink to="/farmer/profile">Profile</NavLink>
                       </>
                     )}
@@ -161,29 +182,29 @@ export const Navbar = () => {
                   <div className="relative">
                     <button
                       onClick={() => setDropdownOpen(!dropdownOpen)}
-                      className="flex items-center gap-3 p-1.5 pl-3 pr-2 rounded-full border border-white/10 hover:border-[#AEB877] hover:bg-white/5 transition-all group"
+                      className="flex items-center gap-3 p-1.5 pl-3 pr-2 rounded-full border border-white/10 hover:bg-white/5 transition-all group"
                     >
                       <div className="text-right hidden lg:block">
-                        <p className="text-xs font-bold text-white group-hover:text-[#AEB877]">{user?.name}</p>
-                        <p className="text-[10px] text-[#A5C89E] uppercase">{user?.role}</p>
+                        <p className="text-xs font-bold text-white">{user?.name}</p>
+                        <p className="text-[10px] text-white/70 uppercase">{user?.role}</p>
                       </div>
-                      <div className="w-9 h-9 bg-[#AEB877] text-[#2C3318] rounded-full flex items-center justify-center font-bold text-sm shadow-md">
+                      <div className="w-9 h-9 bg-white text-[#0B3D91] rounded-full flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-105 transition-transform">
                         {user?.name?.charAt(0)}
                       </div>
-                      <span className="text-[#A5C89E] text-xs">▼</span>
+                      <FaChevronDown className={`text-white/70 text-xs transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {dropdownOpen && (
-                      <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl shadow-black/20 border border-[#AEB877]/20 py-2 animate-fadeIn origin-top-right ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                        <div className="px-4 py-3 border-b border-gray-50 lg:hidden">
-                          <p className="text-sm font-semibold text-[#2C3318]">{user?.name}</p>
-                          <p className="text-xs text-[#5C6642]">{user?.email}</p>
+                      <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg border border-[#E0E0E0] py-2 animate-fadeIn origin-top-right z-50">
+                        <div className="px-4 py-3 border-b border-gray-100 lg:hidden">
+                          <p className="text-sm font-semibold text-[#222222]">{user?.name}</p>
+                          <p className="text-xs text-[#555555]">{user?.email}</p>
                         </div>
                         <button
                           onClick={handleLogout}
-                          className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium transition-colors flex items-center gap-2"
+                          className="w-full text-left px-4 py-2.5 text-sm text-[#D32F2F] hover:bg-red-50 font-medium transition-colors flex items-center gap-2"
                         >
-                          <span>🚪</span> Sign Out
+                          <FaSignOutAlt /> Sign Out
                         </button>
                       </div>
                     )}
@@ -200,9 +221,9 @@ export const Navbar = () => {
                 aria-label="Toggle Menu"
               >
                 {mobileMenuOpen ? (
-                  <span className="text-2xl">✕</span>
+                  <FaTimes className="text-2xl" />
                 ) : (
-                  <span className="text-2xl">☰</span>
+                  <FaBars className="text-2xl" />
                 )}
               </button>
             </div>
@@ -211,7 +232,7 @@ export const Navbar = () => {
 
         {/* Mobile Menu Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-[#FCFDF5] border-t border-[#AEB877]/20 min-h-screen animate-fadeIn absolute w-full top-full left-0 z-40">
+          <div className="md:hidden bg-white border-t border-gray-100 min-h-screen animate-fadeIn absolute w-full top-full left-0 z-40">
             <div className="px-4 pt-6 pb-24 space-y-4">
               {!isAuthenticated ? (
                 <>
@@ -227,14 +248,14 @@ export const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <div className="px-4 py-4 bg-white rounded-xl mb-6 flex items-center gap-4 border border-[#AEB877]/20 shadow-sm">
-                    <div className="w-12 h-12 bg-[#AEB877] text-[#2C3318] rounded-full flex items-center justify-center font-bold text-lg shadow-sm">
+                  <div className="px-4 py-4 bg-[#F4F6F9] rounded-xl mb-6 flex items-center gap-4 border border-[#E0E0E0] shadow-sm">
+                    <div className="w-12 h-12 bg-[#0B3D91] text-white rounded-full flex items-center justify-center font-bold text-lg shadow-sm">
                       {user?.name?.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-bold text-[#2C3318] text-lg">{user?.name}</p>
-                      <p className="text-sm text-[#5C6642]">{user?.email}</p>
-                      <span className="inline-block mt-1 px-2 py-0.5 bg-[#F2F5E6] border border-[#AEB877]/30 rounded-md text-xs font-bold text-[#4A5532]">
+                      <p className="font-bold text-[#222222] text-lg">{user?.name}</p>
+                      <p className="text-sm text-[#555555]">{user?.email}</p>
+                      <span className="inline-block mt-1 px-2 py-0.5 bg-white border border-gray-200 rounded-md text-xs font-bold text-[#0B3D91]">
                         {user?.role}
                       </span>
                     </div>
@@ -247,11 +268,11 @@ export const Navbar = () => {
                         {user?.status === 'FARMER_PENDING_VERIFICATION' && (
                           <NavLink to="/farmer/verify" mobile>Verify Identity</NavLink>
                         )}
-                        <NavLink to="/farmer/add-land" mobile>Book Slot</NavLink>
-                        <NavLink to="/farmer/lands" mobile>My Land</NavLink>
-                        <NavLink to="/transfer-requests" mobile>Transfers</NavLink>
-                        <NavLink to="/farmer/schemes" mobile>Schemes</NavLink>
-                        <NavLink to="/farmer/applications" mobile>My Applications</NavLink>
+                        <NavLink to="/farmer/add-land" mobile locked={isFarmerUnverified}>Book Slot</NavLink>
+                        <NavLink to="/farmer/lands" mobile locked={isFarmerUnverified}>My Land</NavLink>
+                        <NavLink to="/transfer-requests" mobile locked={isFarmerUnverified}>Transfers</NavLink>
+                        <NavLink to="/farmer/schemes" mobile locked={isFarmerUnverified}>Schemes</NavLink>
+                        <NavLink to="/farmer/applications" mobile locked={isFarmerUnverified}>My Applications</NavLink>
                         <NavLink to="/farmer/profile" mobile>My Profile</NavLink>
                       </>
                     )}
@@ -279,12 +300,12 @@ export const Navbar = () => {
                     )}
                   </div>
 
-                  <div className="pt-8 mt-8 border-t border-[#AEB877]/20">
+                  <div className="pt-8 mt-8 border-t border-gray-100">
                     <button
                       onClick={handleLogout}
-                      className="w-full py-4 text-center text-red-600 font-bold bg-red-50 hover:bg-red-100 rounded-xl transition-colors shadow-sm"
+                      className="w-full py-4 text-center text-[#D32F2F] font-bold bg-red-50 hover:bg-red-100 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
                     >
-                      🚪 Log Out
+                      <FaSignOutAlt /> Log Out
                     </button>
                   </div>
                 </>
@@ -294,7 +315,7 @@ export const Navbar = () => {
         )}
       </nav>
       {/* Spacer for fixed navbar */}
-      <div className="h-[72px] bg-[#2C3318]"></div>
+      <div className="h-[64px]"></div>
     </>
   );
 };

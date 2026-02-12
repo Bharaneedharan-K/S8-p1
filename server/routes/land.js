@@ -8,10 +8,14 @@ import {
     getAllLands,
     getLandByHash,
     getLandBySurveyNumber,
-    getAvailableSlots // Import
+    getAvailableSlots, // Import
+    resetLandStatus // Import
 } from '../controllers/landController.js';
 
 const router = express.Router();
+
+// Dev Utility: Reset Land Status
+router.patch('/reset/:id', resetLandStatus);
 
 // Public: Verify by Hash
 router.get('/public/verify/:hash', getLandByHash);

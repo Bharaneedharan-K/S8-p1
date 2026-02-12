@@ -162,32 +162,32 @@ const BlockchainLogsContent = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F2F5E6] py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[#F4F6F9] py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-6 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-[#2C3318]">Blockchain Audit Trail</h1>
-                        <p className="text-[#5C6642]">Immutable Ledger of Land Registrations</p>
+                        <h1 className="gov-h1 mb-1">Blockchain Audit Trail</h1>
+                        <p className="text-[#555555]">Immutable Ledger of Land Registrations</p>
                     </div>
                     <button
                         onClick={fetchLogs}
                         disabled={loading}
-                        className="px-6 py-2 bg-[#2C3318] text-white font-bold rounded-xl hover:bg-[#4A5532] transition-colors disabled:opacity-50"
+                        className="px-6 py-2 bg-[#222222] text-white font-bold rounded-xl hover:bg-black transition-colors disabled:opacity-50 shadow-md"
                     >
                         {loading ? 'Fetching...' : '🔄 Refresh Logs'}
                     </button>
                 </div>
 
                 {/* Debug Box */}
-                <div className="mb-6 bg-black/90 p-4 rounded-xl text-green-400 font-mono text-xs max-h-48 overflow-y-auto border border-green-900 shadow-inner">
-                    <div className="font-bold text-white border-b border-green-800 pb-1 mb-2 sticky top-0 bg-black/90">LIVE LOGS:</div>
+                <div className="mb-6 bg-[#222222] p-4 rounded-xl text-green-400 font-mono text-xs max-h-48 overflow-y-auto border border-[#444444] shadow-inner">
+                    <div className="font-bold text-white border-b border-[#444444] pb-1 mb-2 sticky top-0 bg-[#222222]">LIVE LOGS:</div>
                     {logs.map((L, i) => <div key={i}>{L}</div>)}
                 </div>
 
                 {/* Info Alert about Indexed Strings */}
-                <div className="mb-6 bg-blue-50 border border-blue-200 p-4 rounded-xl text-sm text-blue-800">
-                    <p className="font-bold">ℹ️ Note on Survey Numbers:</p>
-                    <p>
+                <div className="mb-6 bg-blue-50 border border-blue-200 p-4 rounded-xl text-sm text-[#0B3D91]">
+                    <p className="font-bold flex items-center gap-2"><span>ℹ️</span> Note on Survey Numbers:</p>
+                    <p className="mt-1">
                         In Ethereum logs, <b>indexed strings</b> are hashed (Keccak-256).
                         If you see a long hash in the "Survey No." column, that is the cryptographic proof of the survey number.
                         (To see the plain text, we would need to un-index the parameter in the smart contract).
@@ -196,41 +196,41 @@ const BlockchainLogsContent = () => {
 
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#AEB877]/20">
-                        <p className="text-[#5C6642] font-bold text-xs uppercase">Total Records</p>
-                        <p className="text-4xl font-bold text-[#2C3318]">{stats.totalLands} 📄</p>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E0E0E0]">
+                        <p className="text-[#555555] font-bold text-xs uppercase tracking-wider">Total Records</p>
+                        <p className="text-4xl font-bold text-[#0B3D91]">{stats.totalLands} 📄</p>
                     </div>
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#AEB877]/20">
-                        <p className="text-[#5C6642] font-bold text-xs uppercase">Block Height</p>
-                        <p className="text-4xl font-bold text-[#2C3318]">#{stats.lastBlock} 🧱</p>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E0E0E0]">
+                        <p className="text-[#555555] font-bold text-xs uppercase tracking-wider">Block Height</p>
+                        <p className="text-4xl font-bold text-[#222222]">#{stats.lastBlock} 🧱</p>
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-[#AEB877]/20 overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-sm border border-[#E0E0E0] overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-[#FFFBB1]">
+                            <thead className="bg-[#F9FAFB]">
                                 <tr>
-                                    <th className="px-6 py-4 text-[#4A5532] text-xs font-bold uppercase">Time</th>
-                                    <th className="px-6 py-4 text-[#4A5532] text-xs font-bold uppercase">Survey No. (Topic Hash)</th>
-                                    <th className="px-6 py-4 text-[#4A5532] text-xs font-bold uppercase">Record Hash</th>
-                                    <th className="px-6 py-4 text-[#4A5532] text-xs font-bold uppercase">Block</th>
+                                    <th className="px-6 py-4 text-[#555555] text-xs font-bold uppercase tracking-wider">Time</th>
+                                    <th className="px-6 py-4 text-[#555555] text-xs font-bold uppercase tracking-wider">Survey No. (Topic Hash)</th>
+                                    <th className="px-6 py-4 text-[#555555] text-xs font-bold uppercase tracking-wider">Record Hash</th>
+                                    <th className="px-6 py-4 text-[#555555] text-xs font-bold uppercase tracking-wider">Block</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#AEB877]/10">
+                            <tbody className="divide-y divide-[#E0E0E0]">
                                 {events.map((evt) => (
-                                    <tr key={evt.txHash} className="hover:bg-[#F2F5E6]/30 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#5C6642] font-mono">{evt.timestamp}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap font-bold text-[#2C3318] font-mono text-xs" title="Indexed String Hash">{evt.surveyNumber}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap font-mono text-xs text-blue-600 max-w-[150px] truncate" title={evt.landHash}>{evt.landHash}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap font-bold text-[#2C3318]">#{evt.blockNumber}</td>
+                                    <tr key={evt.txHash} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#555555] font-mono">{evt.timestamp}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap font-bold text-[#222222] font-mono text-xs" title="Indexed String Hash">{evt.surveyNumber}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap font-mono text-xs text-[#0B3D91] max-w-[150px] truncate" title={evt.landHash}>{evt.landHash}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap font-bold text-[#222222]">#{evt.blockNumber}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                         {events.length === 0 && (
-                            <div className="p-8 text-center text-gray-500">
+                            <div className="p-8 text-center text-[#999999]">
                                 No logs found. Check console or click refresh.
                             </div>
                         )}

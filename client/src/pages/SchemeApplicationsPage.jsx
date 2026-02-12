@@ -70,21 +70,21 @@ export const SchemeApplicationsPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#E2E6D5] py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[#F4F6F9] py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-[#2C3318]">Applications Review</h1>
-                        <p className="text-[#5C6642] mt-1">Manage and verify farmer scheme applications.</p>
+                        <h1 className="text-3xl font-bold text-[#222222]">Applications Review</h1>
+                        <p className="text-[#555555] mt-1">Manage and verify farmer scheme applications.</p>
                     </div>
                 </div>
 
                 {/* Filters Bar */}
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-[#AEB877]/20 mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-[#E0E0E0] mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-xs font-bold text-[#9CA385] uppercase mb-1">Status</label>
+                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Status</label>
                         <select
-                            className="w-full p-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg text-sm font-bold text-[#2C3318] focus:outline-none focus:border-[#AEB877]"
+                            className="w-full p-2 bg-[#F9FAFB] border border-[#E0E0E0] rounded-lg text-sm font-bold text-[#222222] focus:outline-none focus:border-[#0B3D91]"
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                         >
@@ -95,9 +95,9 @@ export const SchemeApplicationsPage = () => {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-[#9CA385] uppercase mb-1">Filter by Scheme</label>
+                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Filter by Scheme</label>
                         <select
-                            className="w-full p-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg text-sm font-bold text-[#2C3318] focus:outline-none focus:border-[#AEB877]"
+                            className="w-full p-2 bg-[#F9FAFB] border border-[#E0E0E0] rounded-lg text-sm font-bold text-[#222222] focus:outline-none focus:border-[#0B3D91]"
                             value={schemeFilter}
                             onChange={(e) => setSchemeFilter(e.target.value)}
                         >
@@ -106,9 +106,9 @@ export const SchemeApplicationsPage = () => {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-[#9CA385] uppercase mb-1">Filter by District</label>
+                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Filter by District</label>
                         <select
-                            className="w-full p-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg text-sm font-bold text-[#2C3318] focus:outline-none focus:border-[#AEB877]"
+                            className="w-full p-2 bg-[#F9FAFB] border border-[#E0E0E0] rounded-lg text-sm font-bold text-[#222222] focus:outline-none focus:border-[#0B3D91]"
                             value={districtFilter}
                             onChange={(e) => setDistrictFilter(e.target.value)}
                         >
@@ -120,41 +120,41 @@ export const SchemeApplicationsPage = () => {
 
                 {/* Applications Grid */}
                 {loading ? (
-                    <div className="text-center py-12 text-[#5C6642]">Loading applications...</div>
+                    <div className="text-center py-12 text-[#555555]">Loading applications...</div>
                 ) : apps.length === 0 ? (
-                    <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-[#AEB877]/30">
+                    <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-[#E0E0E0]">
                         <p className="text-4xl mb-4">📂</p>
-                        <p className="text-[#5C6642] font-bold text-lg">No applications found matching filters.</p>
+                        <p className="text-[#555555] font-bold text-lg">No applications found matching filters.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {apps.map(app => (
-                            <div key={app._id} className="bg-white rounded-xl p-4 shadow-sm border border-[#AEB877]/20 flex flex-col hover:shadow-md transition-shadow relative overflow-hidden">
+                            <div key={app._id} className="bg-white rounded-xl p-4 shadow-sm border border-[#E0E0E0] flex flex-col hover:shadow-md transition-shadow relative overflow-hidden">
                                 {/* Header: Status & Farmer */}
-                                <div className="flex justify-between items-start mb-3 border-b border-[#F2F5E6] pb-2">
+                                <div className="flex justify-between items-start mb-3 border-b border-[#F4F6F9] pb-2">
                                     <div>
-                                        <h3 className="font-bold text-[#2C3318] text-lg">{app.farmerId?.name}</h3>
-                                        <p className="text-xs text-[#5C6642] font-mono">{app.farmerId?.mobile}</p>
+                                        <h3 className="font-bold text-[#0B3D91] text-lg">{app.farmerId?.name}</h3>
+                                        <p className="text-xs text-[#555555] font-mono">{app.farmerId?.mobile}</p>
                                     </div>
                                     <StatusBadge status={app.status} />
                                 </div>
 
                                 {/* Scheme Info */}
-                                <div className="mb-3 bg-[#FFFBB1]/10 p-2 rounded-lg border border-[#AEB877]/10">
-                                    <h4 className="text-[10px] font-bold text-[#9CA385] uppercase mb-1">Applying For</h4>
-                                    <p className="font-bold text-[#2C3318] text-sm leading-tight">{app.schemeId?.schemeName}</p>
+                                <div className="mb-3 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                                    <h4 className="text-[10px] font-bold text-[#555555] uppercase mb-1">Applying For</h4>
+                                    <p className="font-bold text-[#222222] text-sm leading-tight">{app.schemeId?.schemeName}</p>
                                     <div className="flex gap-3 mt-1 text-xs">
-                                        <span>Benefit: <b className="text-[#4A5532]">₹{app.schemeId?.benefitAmount}</b></span>
+                                        <span>Benefit: <b className="text-[#2E8B57]">₹{app.schemeId?.benefitAmount}</b></span>
                                     </div>
                                 </div>
 
                                 {/* Land Info */}
-                                <div className="mb-3 pl-2 border-l-2 border-[#AEB877]/20">
+                                <div className="mb-3 pl-2 border-l-2 border-[#0B3D91]/20">
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="text-lg">🚜</span>
                                         <div>
-                                            <p className="text-xs font-bold text-[#2C3318]">Survey {app.landId?.surveyNumber}</p>
-                                            <p className="text-[10px] text-[#5C6642]">{app.landId?.area} Acres, {app.district}</p>
+                                            <p className="text-xs font-bold text-[#222222]">Survey {app.landId?.surveyNumber}</p>
+                                            <p className="text-[10px] text-[#555555]">{app.landId?.area} Acres, {app.district}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -164,7 +164,7 @@ export const SchemeApplicationsPage = () => {
                                     <div className="mb-4">
                                         <div className="flex flex-wrap gap-1">
                                             {app.documents.map((doc, i) => (
-                                                <a key={i} href={doc} target="_blank" rel="noreferrer" className="px-2 py-0.5 bg-gray-50 border border-gray-200 rounded text-[10px] font-bold text-[#5C6642] hover:bg-[#2C3318] hover:text-white transition-colors">
+                                                <a key={i} href={doc} target="_blank" rel="noreferrer" className="px-2 py-0.5 bg-gray-50 border border-gray-200 rounded text-[10px] font-bold text-[#0B3D91] hover:bg-[#0B3D91] hover:text-white transition-colors">
                                                     📄 Doc {i + 1}
                                                 </a>
                                             ))}
@@ -179,25 +179,25 @@ export const SchemeApplicationsPage = () => {
                                             <button
                                                 onClick={() => handleReview(app._id, 'APPROVED')}
                                                 disabled={processingId === app._id}
-                                                className="flex-1 py-1.5 bg-[#2C3318] hover:bg-[#4A5532] text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
+                                                className="flex-1 py-1.5 bg-[#2E8B57] hover:bg-[#236B42] text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
                                             >
                                                 Approve
                                             </button>
                                             <button
                                                 onClick={() => handleReview(app._id, 'REJECTED')}
                                                 disabled={processingId === app._id}
-                                                className="flex-1 py-1.5 bg-white border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold rounded-lg transition-colors shadow-sm"
+                                                className="flex-1 py-1.5 bg-white border border-[#D32F2F] text-[#D32F2F] hover:bg-red-50 text-xs font-bold rounded-lg transition-colors shadow-sm"
                                             >
                                                 Reject
                                             </button>
                                         </div>
                                     ) : (
                                         <div className="text-center bg-gray-50 p-2 rounded-lg border border-gray-100">
-                                            <p className="text-[10px] font-bold text-[#9CA385] uppercase">
+                                            <p className="text-[10px] font-bold text-[#555555] uppercase">
                                                 {app.status === 'APPROVED' ? 'Verified & Approved' : 'Rejected'}
                                             </p>
                                             {app.adminRemarks && (
-                                                <p className="text-[10px] text-[#5C6642] italic truncate" title={app.adminRemarks}>"{app.adminRemarks}"</p>
+                                                <p className="text-[10px] text-[#555555] italic truncate" title={app.adminRemarks}>"{app.adminRemarks}"</p>
                                             )}
                                         </div>
                                     )}

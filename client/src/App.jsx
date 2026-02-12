@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
-import { PrivateRoute, PublicRoute } from './components/ProtectedRoute';
+import { PrivateRoute, PublicRoute, VerifiedRoute } from './components/ProtectedRoute';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -84,7 +84,9 @@ function App() {
             path="/farmer/lands"
             element={
               <PrivateRoute requiredRole="FARMER">
-                <LandRecordsPage />
+                <VerifiedRoute>
+                  <LandRecordsPage />
+                </VerifiedRoute>
               </PrivateRoute>
             }
           />
@@ -92,7 +94,9 @@ function App() {
             path="/farmer/add-land"
             element={
               <PrivateRoute requiredRole="FARMER">
-                <AddLandPage />
+                <VerifiedRoute>
+                  <AddLandPage />
+                </VerifiedRoute>
               </PrivateRoute>
             }
           />
@@ -100,7 +104,9 @@ function App() {
             path="/farmer/schemes"
             element={
               <PrivateRoute requiredRole="FARMER">
-                <SchemesPage />
+                <VerifiedRoute>
+                  <SchemesPage />
+                </VerifiedRoute>
               </PrivateRoute>
             }
           />
@@ -108,7 +114,9 @@ function App() {
             path="/farmer/applications"
             element={
               <PrivateRoute requiredRole="FARMER">
-                <MyApplicationsPage />
+                <VerifiedRoute>
+                  <MyApplicationsPage />
+                </VerifiedRoute>
               </PrivateRoute>
             }
           />
@@ -209,7 +217,9 @@ function App() {
             path="/transfer-requests"
             element={
               <PrivateRoute>
-                <TransferRequestsPage />
+                <VerifiedRoute>
+                  <TransferRequestsPage />
+                </VerifiedRoute>
               </PrivateRoute>
             }
           />

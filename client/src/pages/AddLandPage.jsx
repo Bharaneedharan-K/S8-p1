@@ -3,6 +3,7 @@ import apiClient from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { LAND_TYPES, TN_DISTRICTS } from '../utils/constants';
+import { FaCalendarAlt, FaMapMarkerAlt, FaUserTie, FaCheckCircle, FaSpinner, FaTimes, FaPlus, FaSearch, FaLeaf } from 'react-icons/fa';
 
 export const AddLandPage = () => {
     const { token, user } = useContext(AuthContext);
@@ -63,7 +64,6 @@ export const AddLandPage = () => {
 
     const fetchPendingAppointments = async () => {
         try {
-            // Reusing the getPendingLands endpoint which filters by officerId
             const res = await apiClient.get('/land/pending');
             setPendingAppointments(res.data.lands || []);
         } catch (err) {
@@ -82,7 +82,6 @@ export const AddLandPage = () => {
 
     const fetchOfficersInDistrict = async (district) => {
         try {
-            // Fetch Officers for the District
             const res = await apiClient.get(`/auth/users?role=OFFICER&district=${district}&status=OFFICER_ACTIVE`);
             setOfficers(res.data.users || []);
         } catch (err) {
@@ -118,7 +117,6 @@ export const AddLandPage = () => {
         setVerifiedFarmer(null);
 
         try {
-            // Officer can only search farmers in their district
             const res = await apiClient.get(`/auth/users?role=FARMER&district=${user?.district}`);
             const farmers = res.data.users || [];
             const foundFarmer = farmers.find(u => u.email === searchEmail);
@@ -154,23 +152,14 @@ export const AddLandPage = () => {
             return;
         }
 
-        /* Document Upload Removed
-        if (!file) {
-            setError('Please upload the land document (PDF/Image).');
-            return;
-        } 
-        */
-
         const data = new FormData();
         Object.keys(formData).forEach(key => {
             data.append(key, formData[key]);
         });
 
-        // If updating (Officer verifying), add status and check for existing hash if verifying
         if (selectedLandId) {
-            data.append('status', 'LAND_PENDING_ADMIN_APPROVAL'); // Keep existing status or update to 'VERIFIED_BY_OFFICER' if we had that state
-            // For now, we are just uploading the document, so status remains pending admin approval or we can assume this is the 'Verification' step.
-            data.append('verificationDocument', file); // Field name expected by verifyLandRecord
+            data.append('status', 'LAND_PENDING_ADMIN_APPROVAL');
+            data.append('verificationDocument', file);
         } else if (file) {
             data.append('document', file);
         }
@@ -179,18 +168,16 @@ export const AddLandPage = () => {
             setLoading(true);
 
             if (selectedLandId) {
-                // UPDATE / VERIFY Existing Record
                 await apiClient.patch(`/land/verify/${selectedLandId}`, data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 setSuccess('Verification Report Uploaded Successfully!');
             } else {
-                // CREATE New Record
                 await apiClient.post('/land/add', data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 setSuccess(isFarmer
-                    ? 'Application Submitted! Officer will visit on scheduled date.'
+                    ? 'Slot Booked Successfully! Application Submitted.'
                     : 'Land record added successfully! Sent for Admin Approval.'
                 );
             }
@@ -200,14 +187,13 @@ export const AddLandPage = () => {
                 setTimeout(() => {
                     setViewMode('list');
                     setSuccess('');
-                    // Reset Form
                     resetForm();
                 }, 2000);
             } else {
-                await fetchPendingAppointments(); // Refresh officer list
+                await fetchPendingAppointments();
                 setTimeout(() => {
                     setSuccess('');
-                    setViewMode('list'); // Close modal
+                    setViewMode('list');
                     resetForm();
                 }, 2000);
             }
@@ -235,378 +221,459 @@ export const AddLandPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#E2E6D5] pt-12 pb-12 px-4 sm:px-6 lg:px-8 relative">
+        <div className="min-h-screen bg-[#F4F6F9] pt-12 pb-12 px-4 sm:px-6 lg:px-8 relative">
             {/* Toast Notifications */}
             <div className="fixed top-24 right-5 z-50 flex flex-col gap-2 pointer-events-none">
                 {error && (
-                    <div className="pointer-events-auto bg-white border-l-4 border-red-500 shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight">
-                        <h4 className="font-bold text-red-600">Error</h4>
-                        <p className="text-red-500 text-sm">{error}</p>
+                    <div className="pointer-events-auto bg-white border-l-4 border-[#D32F2F] shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight flex items-center gap-3">
+                        <FaTimes className="text-[#D32F2F]" />
+                        <div>
+                            <h4 className="font-bold text-[#D32F2F] text-sm">Error</h4>
+                            <p className="text-[#555555] text-xs">{error}</p>
+                        </div>
                     </div>
                 )}
                 {success && (
-                    <div className="pointer-events-auto bg-white border-l-4 border-[#AEB877] shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight">
-                        <h4 className="font-bold text-[#4A5532]">Success</h4>
-                        <p className="text-[#5C6642] text-sm">{success}</p>
+                    <div className="pointer-events-auto bg-white border-l-4 border-[#1B5E20] shadow-2xl rounded-r-xl px-6 py-4 animate-slideInRight flex items-center gap-3">
+                        <FaCheckCircle className="text-[#1B5E20]" />
+                        <div>
+                            <h4 className="font-bold text-[#1B5E20] text-sm">Success</h4>
+                            <p className="text-[#555555] text-xs">{success}</p>
+                        </div>
                     </div>
                 )}
             </div>
 
-            {/* FARMER LANDING VIEW: MY BOOKINGS LIST */}
-            {isFarmer && (
-                <div className="w-full max-w-7xl mx-auto">
-                    <div className="flex justify-between items-center mb-8">
-                        <div>
-                            <h1 className="text-3xl font-bold text-[#2C3318]">My Booked Slots</h1>
-                            <p className="text-[#5C6642]">Track your land verification appointments.</p>
-                        </div>
-                        <button
-                            onClick={() => setViewMode('form')}
-                            className="px-6 py-3 bg-[#AEB877] hover:bg-[#8B9850] text-[#2C3318] font-bold rounded-xl shadow-lg transition-transform active:scale-95 flex items-center gap-2"
-                        >
-                            <span>+ Book New Slot</span>
-                        </button>
-                    </div>
-
-                    {myBookings.length === 0 ? (
-                        <div className="text-center py-16 bg-white rounded-3xl shadow-sm border border-[#AEB877]/20">
-                            <div className="text-6xl mb-4">🗓️</div>
-                            <h3 className="text-xl font-bold text-[#2C3318] mb-2">No Slots Booked Yet</h3>
-                            <p className="text-[#5C6642] mb-6">Schedule your first land verification appointment now.</p>
+            <div className="w-full max-w-7xl mx-auto">
+                {/* FARMER LANDING VIEW: MY BOOKINGS */}
+                {isFarmer && viewMode === 'list' && (
+                    <div className="animate-fadeIn">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold text-[#222222] tracking-tight">My Booked Slots</h1>
+                                <p className="text-[#555555] mt-1">Manage your upcoming land verification appointments.</p>
+                            </div>
                             <button
                                 onClick={() => setViewMode('form')}
-                                className="px-8 py-3 bg-[#2C3318] text-white font-bold rounded-xl hover:bg-[#4A5532]"
+                                className="px-6 py-3 bg-[#0B3D91] hover:bg-[#092C6B] text-white font-bold rounded-xl shadow-lg transition-transform active:scale-95 flex items-center gap-2 group"
                             >
-                                Book Verification Slot
+                                <FaPlus className="text-xs group-hover:rotate-90 transition-transform" /> <span>Book New Slot</span>
                             </button>
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {myBookings.map(landing => (
-                                <div key={landing._id} className="bg-white p-6 rounded-2xl shadow-sm border border-[#AEB877]/20 hover:shadow-md transition-shadow relative overflow-hidden">
-                                    <div className={`absolute top-0 right-0 px-4 py-1 text-xs font-bold rounded-bl-xl ${landing.status === 'LAND_APPROVED' ? 'bg-[#E6F4EA] text-green-800' :
-                                        landing.status === 'LAND_REJECTED' ? 'bg-red-50 text-red-800' :
-                                            'bg-[#FFFBB1] text-[#705A06]'
-                                        }`}>
-                                        {landing.status === 'LAND_APPROVED' ? 'VERIFIED' : landing.status === 'LAND_REJECTED' ? 'REJECTED' : 'PENDING'}
-                                    </div>
 
-                                    <h3 className="text-xl font-bold text-[#2C3318] mt-2 mb-1">{landing.surveyNumber}</h3>
-                                    <p className="text-sm text-[#5C6642] mb-4">{landing.address.substring(0, 40)}...</p>
-
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex items-center gap-2 text-[#4A5532]">
-                                            <span>👮‍♂️</span>
-                                            <span className="font-bold">{landing.officerId?.name || 'Officer'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-[#4A5532]">
-                                            <span>🗓️</span>
-                                            <span className="font-mono bg-[#F2F5E6] px-2 py-0.5 rounded">
-                                                {landing.verificationDate ? new Date(landing.verificationDate).toLocaleDateString() : 'Date Pending'}
-                                            </span>
-                                        </div>
-                                    </div>
+                        {myBookings.length === 0 ? (
+                            <div className="text-center py-20 bg-white rounded-3xl border border-[#E0E0E0] shadow-sm flex flex-col items-center">
+                                <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center text-[#0B3D91] text-3xl mb-4">
+                                    <FaCalendarAlt />
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* OFFICER VIEW: PENDING APPOINTMENTS LIST */}
-            {isOfficer && viewMode === 'list' && (
-                <div className="w-full max-w-7xl mx-auto">
-                    <div className="flex justify-between items-center mb-8">
-                        <div>
-                            <h1 className="text-3xl font-bold text-[#2C3318]">Scheduled Verifications</h1>
-                            <p className="text-[#5C6642]">Pending farmers assigned to you.</p>
-                        </div>
-                    </div>
-
-                    {pendingAppointments.length === 0 ? (
-                        <div className="text-center py-16 bg-white rounded-3xl shadow-sm border border-[#AEB877]/20">
-                            <div className="text-6xl mb-4">🗓️</div>
-                            <h3 className="text-xl font-bold text-[#2C3318] mb-2">No Pending Appointments</h3>
-                            <p className="text-[#5C6642]">You have no scheduled land verifications.</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {pendingAppointments.map(land => (
-                                <div
-                                    key={land._id}
-                                    onClick={() => {
-                                        setFormData({
-                                            ownerName: land.ownerName,
-                                            surveyNumber: land.surveyNumber,
-                                            area: land.area,
-                                            district: land.district,
-                                            landType: land.landType,
-                                            address: land.address,
-                                            officerId: land.officerId?._id || '',
-                                            verificationDate: land.verificationDate || ''
-                                        });
-                                        setSelectedLandId(land._id);
-                                        setViewMode('form');
-                                    }}
-                                    className="bg-white p-6 rounded-2xl shadow-sm border border-[#AEB877]/20 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
+                                <h3 className="text-xl font-bold text-[#222222] mb-2">No Slots Booked Yet</h3>
+                                <p className="text-[#555555] mb-6 max-w-md">You haven't scheduled any verifications. Book a slot to get your land records verified by an officer.</p>
+                                <button
+                                    onClick={() => setViewMode('form')}
+                                    className="px-8 py-3 bg-[#0B3D91] text-white font-bold rounded-xl hover:bg-[#092C6B] shadow-md transition-all"
                                 >
-                                    <div className="absolute top-0 right-0 px-4 py-1 bg-[#FFFBB1] text-[#705A06] text-xs font-bold rounded-bl-xl">
-                                        ACTION REQUIRED
-                                    </div>
-                                    <h3 className="text-xl font-bold text-[#2C3318] mt-2 mb-1">{land.surveyNumber}</h3>
-                                    <p className="text-sm text-[#5C6642] mb-4">{land.ownerName}</p>
-
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex items-center gap-2 text-[#4A5532]">
-                                            <span>📞</span>
-                                            <span className="font-mono">{land.farmerId?.mobile || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-[#4A5532]">
-                                            <span>📍</span>
-                                            <span>{land.address.substring(0, 30)}...</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-[#4A5532] mt-3 pt-3 border-t border-[#F2F5E6]">
-                                            <span className="bg-[#AEB877] text-[#2C3318] px-2 py-0.5 rounded text-xs font-bold uppercase">
-                                                {land.verificationDate ? new Date(land.verificationDate).toLocaleDateString() : 'No Date'}
+                                    Book Verification Slot
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {myBookings.map(landing => (
+                                    <div key={landing._id} className="bg-white rounded-2xl border border-[#E0E0E0] shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
+                                        <div className="p-5 border-b border-[#F4F6F9] flex justify-between items-center bg-[#F9FAFB]">
+                                            <span className="font-bold text-[#222222] flex items-center gap-2">
+                                                Survey: {landing.surveyNumber}
                                             </span>
-                                            <span className="text-xs text-[#9CA385] ml-auto group-hover:text-[#AEB877]">Click to Verify →</span>
+                                            <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase tracking-wider ${landing.status === 'LAND_APPROVED' ? 'bg-green-100 text-green-800' :
+                                                landing.status === 'LAND_REJECTED' ? 'bg-red-100 text-red-800' :
+                                                    landing.verificationDocument ? 'bg-purple-100 text-purple-800' :
+                                                        'bg-yellow-100 text-yellow-800'
+                                                }`}>
+                                                {landing.status === 'LAND_APPROVED' ? 'Verified & Minted' :
+                                                    landing.status === 'LAND_REJECTED' ? 'Rejected' :
+                                                        landing.verificationDocument ? 'Pending Admin Approval' :
+                                                            'Scheduled (Officer Pending)'}
+                                            </span>
                                         </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
+                                        <div className="p-5">
+                                            <div className="flex items-start gap-3 mb-4">
+                                                <div className="w-10 h-10 rounded-full bg-blue-50 text-[#0B3D91] flex items-center justify-center shrink-0">
+                                                    <FaUserTie />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-[#999999] uppercase font-bold">Officer</p>
+                                                    <p className="font-bold text-[#222222]">{landing.officerId?.name || 'Officer Not Assigned'}</p>
+                                                    <p className="text-xs text-[#555555]">{landing.district} District</p>
+                                                </div>
+                                            </div>
 
-            {/* FORM VIEW (Farmer or Officer) - MODAL OVERLAY */}
-            {viewMode === 'form' && (
-                <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2C3318]/60 backdrop-blur-sm ${!isFarmer ? 'relative bg-transparent backdrop-blur-0' : ''}`}>
-                    <div className={`bg-white rounded-3xl shadow-xl w-full max-w-2xl p-8 border border-[#AEB877]/20 max-h-[90vh] overflow-y-auto animate-fadeIn ${!isFarmer ? 'shadow-none border-0' : ''}`}>
-                        <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-10 pb-4 border-b border-[#E2E6D5]">
-                            <h2 className="text-2xl font-bold text-[#2C3318]">
-                                {isFarmer ? 'Book Verification Slot' : (selectedLandId ? 'Verify Land Record' : 'Add New Land Record')}
-                            </h2>
-                            <button
-                                onClick={() => setViewMode('list')}
-                                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F2F5E6] text-[#5C6642] hover:bg-[#E2E6D5] hover:text-[#2C3318] transition-colors"
-                            >
-                                ✕
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-6">
-
-                            {/* Officer: Search NOT shown if editing existing appointment */}
-                            {isOfficer && !selectedLandId && (
-                                <div className="p-5 bg-[#F2F5E6] rounded-2xl border border-[#AEB877]/30">
-                                    <label className="block text-sm font-bold text-[#5C6642] mb-2">Find Farmer (Email)</label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="email"
-                                            value={searchEmail}
-                                            onChange={(e) => setSearchEmail(e.target.value)}
-                                            className="input-modern flex-1 bg-white"
-                                            placeholder="farmer@example.com"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={handleSearchFarmer}
-                                            disabled={searchingFarmer}
-                                            className="px-6 py-2 bg-[#2C3318] text-white font-bold rounded-xl hover:bg-[#4A5532] disabled:opacity-50"
-                                        >
-                                            {searchingFarmer ? '...' : 'Verify'}
-                                        </button>
-                                    </div>
-                                    {verifiedFarmer && (
-                                        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-                                            <span className="text-2xl">👨‍🌾</span>
-                                            <div>
-                                                <p className="font-bold text-green-800">{verifiedFarmer.name}</p>
-                                                <p className="text-xs text-green-600">{verifiedFarmer.mobile} | {verifiedFarmer.district}</p>
+                                            <div className="bg-[#F4F6F9] p-3 rounded-xl flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-xs text-[#999999] uppercase font-bold">Date</p>
+                                                    <p className="font-bold text-[#0B3D91] flex items-center gap-1">
+                                                        <FaCalendarAlt />
+                                                        {landing.verificationDate ? new Date(landing.verificationDate).toLocaleDateString() : 'Pending'}
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-xs text-[#999999] uppercase font-bold">Area</p>
+                                                    <p className="font-bold text-[#222222]">{landing.area} Ac</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Farmer: Officer Selection & Slot Booking */}
-                            {isFarmer && (
-                                <div className="p-5 bg-[#F2F5E6] rounded-2xl border border-[#AEB877]/30">
-                                    <h3 className="font-bold text-[#2C3318] mb-4 flex items-center gap-2">
-                                        <span className="bg-[#AEB877] text-[#2C3318] p-1 rounded text-xs">STEP 1</span> Select Officer
-                                    </h3>
-
-                                    <div className="mb-6">
-                                        <label className="block text-xs font-bold text-[#5C6642] uppercase mb-2">Select District</label>
-                                        <select
-                                            value={formData.district}
-                                            onChange={(e) => {
-                                                const newDistrict = e.target.value;
-                                                setFormData(prev => ({ ...prev, district: newDistrict, officerId: '' }));
-                                                setAvailableSlots([]);
-                                                fetchOfficersInDistrict(newDistrict);
-                                            }}
-                                            className="input-modern mb-4 bg-white"
-                                        >
-                                            <option value="">-- Choose District --</option>
-                                            {TN_DISTRICTS.map(d => (
-                                                <option key={d} value={d}>{d}</option>
-                                            ))}
-                                        </select>
-
-                                        <label className="block text-xs font-bold text-[#5C6642] uppercase mb-2">Available Officers in {formData.district || '...'}</label>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                                            {officers.length === 0 ? (
-                                                <p className="text-sm text-gray-500 italic col-span-2 text-center py-4">No active officers found in this district.</p>
-                                            ) : (
-                                                officers.map(off => (
-                                                    <div
-                                                        key={off._id}
-                                                        onClick={() => handleOfficerChange({ target: { value: off._id } })}
-                                                        className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center gap-3 relative ${formData.officerId === off._id
-                                                            ? 'bg-[#2C3318] border-[#2C3318] text-white shadow-md'
-                                                            : 'bg-white border-[#E2E6D5] text-[#2C3318] hover:border-[#AEB877] hover:bg-[#FFFBB1]/30'
-                                                            }`}
-                                                    >
-                                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-base shrink-0 ${formData.officerId === off._id ? 'bg-[#AEB877] text-[#2C3318]' : 'bg-[#AEB877]/20 text-[#4A5532]'
-                                                            }`}>
-                                                            {off.name.charAt(0)}
-                                                        </div>
-                                                        <div className="overflow-hidden">
-                                                            <p className="font-bold text-sm truncate">{off.name}</p>
-                                                            <p className={`text-xs font-bold truncate flex items-center gap-1 ${formData.officerId === off._id ? 'text-[#AEB877]' : 'text-[#5C6642]'
-                                                                }`}>
-                                                                📍 {off.area ? off.area : 'General'}
-                                                            </p>
-                                                        </div>
-                                                        {formData.officerId === off._id && <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#AEB877]"></div>}
-                                                    </div>
-                                                ))
-                                            )}
-                                        </div>
                                     </div>
-
-                                    {formData.officerId && (
-                                        <div className="animate-fadeIn">
-                                            <h3 className="font-bold text-[#2C3318] mb-3 flex items-center gap-2 border-t border-[#AEB877]/20 pt-4">
-                                                <span className="bg-[#AEB877] text-[#2C3318] p-1 rounded text-xs">STEP 2</span> Select Date
-                                            </h3>
-                                            {slotsLoading ? (
-                                                <div className="flex justify-center py-4">
-                                                    <div className="animate-spin h-6 w-6 border-2 border-[#AEB877] border-t-transparent rounded-full"></div>
-                                                </div>
-                                            ) : availableSlots.length === 0 ? (
-                                                <p className="text-sm text-red-500 bg-red-50 p-3 rounded-lg border border-red-100 text-center">No slots available for this officer.</p>
-                                            ) : (
-                                                <div className="flex flex-wrap gap-2">
-                                                    {availableSlots.map(slot => (
-                                                        <button
-                                                            key={slot.date}
-                                                            type="button"
-                                                            onClick={() => setFormData({ ...formData, verificationDate: slot.date })}
-                                                            className={`px-4 py-2 rounded-xl border text-sm font-bold transition-all flex flex-col items-center min-w-[80px] ${formData.verificationDate === slot.date
-                                                                ? 'bg-[#2C3318] text-white border-[#2C3318] ring-2 ring-[#AEB877] ring-offset-1'
-                                                                : 'bg-white text-[#5C6642] border-[#AEB877]/30 hover:bg-[#FFFBB1] hover:border-[#AEB877]'
-                                                                }`}
-                                                        >
-                                                            <span>{new Date(slot.date).getDate()}</span>
-                                                            <span className="text-[10px] uppercase opacity-80">{new Date(slot.date).toLocaleString('default', { month: 'short' })}</span>
-                                                            <span className={`text-[9px] mt-1 px-1.5 rounded-full ${formData.verificationDate === slot.date ? 'bg-[#AEB877] text-[#2C3318]' : 'bg-[#F2F5E6] text-[#5C6642]'
-                                                                }`}>{slot.available} Left</span>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Common Land Details */}
-                            <div>
-                                <h3 className="font-bold text-[#2C3318] mb-4 flex items-center gap-2">
-                                    <span className="bg-[#AEB877] text-[#2C3318] p-1 rounded text-xs">DETAILS</span> Land Information
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-[#5C6642] uppercase mb-1">Owner Name</label>
-                                        <input type="text" name="ownerName" value={formData.ownerName} onChange={handleChange} className="input-modern bg-gray-50" readOnly={isFarmer || (isOfficer && verifiedFarmer && !selectedLandId)} required />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-[#5C6642] uppercase mb-1">Survey Number</label>
-                                        <input type="text" name="surveyNumber" value={formData.surveyNumber} onChange={handleChange} className="input-modern" placeholder="e.g. 123/4A" required />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-[#5C6642] uppercase mb-1">Area (Acres)</label>
-                                        <input type="number" name="area" value={formData.area} onChange={handleChange} className="input-modern" placeholder="e.g. 2.5" step="0.01" required />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-[#5C6642] uppercase mb-1">Land Type</label>
-                                        <select name="landType" value={formData.landType} onChange={handleChange} className="input-modern">
-                                            {LAND_TYPES.map(type => (
-                                                <option key={type} value={type}>{type}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-xs font-bold text-[#5C6642] uppercase mb-1">Full Address</label>
-                                        <textarea name="address" required className="input-modern h-20 resize-none" onChange={handleChange} placeholder="Complete physical address of the land..." value={formData.address}></textarea>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
+                        )}
+                    </div>
+                )}
 
-                            {/* Officer Verification Upload */}
-                            {isOfficer && selectedLandId && (
-                                <div className="mb-6 p-4 bg-[#F2F5E6] rounded-xl border border-dashed border-[#AEB877]">
-                                    <label className="block text-sm font-bold text-[#2C3318] mb-2 flex items-center gap-2">
-                                        <span>📄</span> Upload Land Document
-                                    </label>
-                                    <input
-                                        type="file"
-                                        onChange={handleFileChange}
-                                        className="block w-full text-sm text-[#5C6642]
-                                        file:mr-4 file:py-2 file:px-4
-                                        file:rounded-full file:border-0
-                                        file:text-xs file:font-semibold
-                                        file:bg-[#2C3318] file:text-white
-                                        file:cursor-pointer hover:file:bg-[#4A5532]"
-                                        required
-                                    />
-                                    <p className="text-xs text-[#9CA385] mt-2">Upload the signed field inspection report (PDF/Image).</p>
+                {/* OFFICER VIEW: LIST (Same as previous but polished containers) */}
+                {isOfficer && viewMode === 'list' && (
+                    <div className="animate-fadeIn">
+                        <div className="mb-8">
+                            <h1 className="text-3xl font-bold text-[#222222] tracking-tight">Scheduled Verifications</h1>
+                            <p className="text-[#555555]">Manage your assigned field verification appointments.</p>
+                        </div>
+
+                        {pendingAppointments.length === 0 ? (
+                            <div className="text-center py-20 bg-white rounded-3xl border border-[#E0E0E0] shadow-sm">
+                                <div className="text-4xl mb-4">📋</div>
+                                <h3 className="text-xl font-bold text-[#222222]">No Pending Appointments</h3>
+                                <p className="text-[#555555]">Your schedule is clear for now.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {pendingAppointments.map(land => (
+                                    <div
+                                        key={land._id}
+                                        onClick={() => {
+                                            setFormData({
+                                                ownerName: land.ownerName,
+                                                surveyNumber: land.surveyNumber,
+                                                area: land.area,
+                                                district: land.district,
+                                                landType: land.landType,
+                                                address: land.address,
+                                                officerId: land.officerId?._id || '',
+                                                verificationDate: land.verificationDate || ''
+                                            });
+                                            setSelectedLandId(land._id);
+                                            setViewMode('form');
+                                        }}
+                                        className="bg-white rounded-2xl border border-[#E0E0E0] shadow-sm hover:shadow-lg transition-all cursor-pointer group relative overflow-hidden"
+                                    >
+                                        <div className="absolute top-0 right-0 px-4 py-1.5 bg-[#0B3D91] text-white text-[10px] font-bold uppercase tracking-wider rounded-bl-xl">
+                                            Action Required
+                                        </div>
+                                        <div className="p-6">
+                                            <h3 className="text-2xl font-bold text-[#222222] mb-1">{land.surveyNumber}</h3>
+                                            <p className="text-sm text-[#555555] mb-4 font-medium">{land.ownerName}</p>
+
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-3 text-sm text-[#555555]">
+                                                    <span className="w-8 h-8 rounded-full bg-blue-50 text-[#0B3D91] flex items-center justify-center shrink-0"><FaMapMarkerAlt /></span>
+                                                    <span className="line-clamp-1">{land.address}</span>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-sm text-[#555555]">
+                                                    <span className="w-8 h-8 rounded-full bg-blue-50 text-[#0B3D91] flex items-center justify-center shrink-0"><FaCalendarAlt /></span>
+                                                    <span className="font-bold text-[#222222]">
+                                                        {land.verificationDate ? new Date(land.verificationDate).toLocaleDateString() : 'Date Not Set'}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-5 pt-4 border-t border-[#F4F6F9] flex justify-between items-center">
+                                                <span className="text-xs font-bold text-[#999999] uppercase">Status: Pending Verification</span>
+                                                <span className="text-xs font-bold text-[#0B3D91] group-hover:underline">Process Now →</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* FORM VIEW Modal */}
+                {viewMode === 'form' && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-scaleIn flex flex-col">
+                            {/* Header */}
+                            <div className="px-8 py-6 border-b border-[#F4F6F9] sticky top-0 bg-white z-10 flex justify-between items-center">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-[#222222] tracking-tight">
+                                        {isFarmer ? 'Book Verification Slot' : (selectedLandId ? 'Verify Land Record' : 'Add New Land Record')}
+                                    </h2>
+                                    <p className="text-sm text-[#555555]">
+                                        {isFarmer ? 'Complete the steps below to schedule.' : 'Fill in the details to proceed.'}
+                                    </p>
                                 </div>
-                            )}
-
-                            <div className="flex justify-end gap-3 pt-4 border-t border-[#E2E6D5]">
                                 <button
-                                    type="button"
                                     onClick={() => {
-                                        isFarmer ? setViewMode('list') : (selectedLandId ? setViewMode('list') : navigate('/dashboard'));
+                                        setViewMode('list');
                                         if (selectedLandId) resetForm();
                                     }}
-                                    className="px-6 py-3 rounded-xl border border-[#AEB877]/30 text-[#4A5532] font-bold hover:bg-[#F2F5E6] transition-colors"
+                                    className="p-2 bg-[#F4F6F9] hover:bg-red-50 hover:text-red-500 rounded-full transition-colors text-[#555555]"
                                 >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={loading || (isFarmer && !formData.verificationDate)}
-                                    className="px-8 py-3 bg-[#AEB877] text-[#2C3318] font-bold rounded-xl shadow-lg hover:bg-[#8B9850] transition-transform active:scale-95 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed flex items-center gap-2"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <span className="animate-spin h-4 w-4 border-2 border-[#2C3318] border-t-transparent rounded-full"></span>
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        selectedLandId ? 'Submit Report' : 'Confirm Appointment'
-                                    )}
+                                    <FaTimes />
                                 </button>
                             </div>
-                        </form>
-                    </div >
-                </div>
-            )}
-        </div >
+
+                            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                                {/* Officer Search Section */}
+                                {isOfficer && !selectedLandId && (
+                                    <div className="bg-[#F4F6F9] p-6 rounded-2xl border border-[#E0E0E0]">
+                                        <label className="block text-xs font-bold text-[#555555] uppercase tracking-wider mb-3">Find Farmer by Email</label>
+                                        <div className="flex gap-3">
+                                            <div className="relative flex-1">
+                                                <input
+                                                    type="email"
+                                                    value={searchEmail}
+                                                    onChange={(e) => setSearchEmail(e.target.value)}
+                                                    className="w-full pl-10 pr-4 py-3 bg-white border border-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/20 focus:border-[#0B3D91] transition-all"
+                                                    placeholder="farmer@example.com"
+                                                />
+                                                <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#999999]" />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={handleSearchFarmer}
+                                                disabled={searchingFarmer}
+                                                className="px-6 py-3 bg-[#0B3D91] text-white font-bold rounded-xl hover:bg-[#092C6B] disabled:opacity-50 transition-colors"
+                                            >
+                                                {searchingFarmer ? 'Searching...' : 'Search'}
+                                            </button>
+                                        </div>
+                                        {verifiedFarmer && (
+                                            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-4 animate-fadeIn">
+                                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg shadow-sm">👨‍🌾</div>
+                                                <div>
+                                                    <p className="font-bold text-green-900">{verifiedFarmer.name}</p>
+                                                    <p className="text-xs text-green-700 font-medium">{verifiedFarmer.mobile} • {verifiedFarmer.district}</p>
+                                                </div>
+                                                <FaCheckCircle className="ml-auto text-green-600" />
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Farmer Step 1: Officer Selection */}
+                                {isFarmer && (
+                                    <div className="space-y-6">
+                                        <div>
+                                            <h3 className="font-bold text-[#222222] mb-4 flex items-center gap-2">
+                                                <span className="w-6 h-6 rounded-full bg-[#0B3D91] text-white flex items-center justify-center text-xs">1</span>
+                                                Select District & Officer
+                                            </h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div>
+                                                    <label className="block text-xs font-bold text-[#555555] uppercase tracking-wider mb-2">District</label>
+                                                    <select
+                                                        value={formData.district}
+                                                        onChange={(e) => {
+                                                            const newDistrict = e.target.value;
+                                                            setFormData(prev => ({ ...prev, district: newDistrict, officerId: '' }));
+                                                            setAvailableSlots([]);
+                                                            fetchOfficersInDistrict(newDistrict);
+                                                        }}
+                                                        className="w-full p-3 bg-[#F9FAFB] border border-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B3D91] transition-all font-medium"
+                                                    >
+                                                        <option value="">-- Select District --</option>
+                                                        {TN_DISTRICTS.map(d => (
+                                                            <option key={d} value={d}>{d}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-4">
+                                                <label className="block text-xs font-bold text-[#555555] uppercase tracking-wider mb-3">Available Officers</label>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-56 overflow-y-auto custom-scrollbar pr-2">
+                                                    {officers.length === 0 ? (
+                                                        <div className="col-span-2 text-center py-6 bg-[#F9FAFB] rounded-xl border border-dashed border-[#E0E0E0]">
+                                                            <p className="text-sm text-[#999999]">No officers found in {formData.district}.</p>
+                                                        </div>
+                                                    ) : (
+                                                        officers.map(off => (
+                                                            <div
+                                                                key={off._id}
+                                                                onClick={() => handleOfficerChange({ target: { value: off._id } })}
+                                                                className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center gap-3 relative ${formData.officerId === off._id
+                                                                    ? 'bg-[#0B3D91] border-[#0B3D91] text-white shadow-md transform scale-[1.02]'
+                                                                    : 'bg-white border-[#E0E0E0] text-[#222222] hover:border-[#0B3D91]/50 hover:bg-blue-50'
+                                                                    }`}
+                                                            >
+                                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-base shrink-0 border-2 ${formData.officerId === off._id ? 'bg-white text-[#0B3D91] border-transparent' : 'bg-gray-100 text-[#555555] border-white'
+                                                                    }`}>
+                                                                    {off.name.charAt(0)}
+                                                                </div>
+                                                                <div className="overflow-hidden">
+                                                                    <p className="font-bold text-sm truncate">{off.name}</p>
+                                                                    <p className={`text-[10px] font-bold uppercase tracking-wide truncate ${formData.officerId === off._id ? 'text-blue-200' : 'text-[#999999]'
+                                                                        }`}>
+                                                                        {off.area || 'General Area'}
+                                                                    </p>
+                                                                </div>
+                                                                {formData.officerId === off._id && <FaCheckCircle className="absolute top-2 right-2 text-white text-xs" />}
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Step 2: Date Selection */}
+                                        {formData.officerId && (
+                                            <div className="animate-fadeIn pt-4 border-t border-[#F4F6F9]">
+                                                <h3 className="font-bold text-[#222222] mb-4 flex items-center gap-2">
+                                                    <span className="w-6 h-6 rounded-full bg-[#0B3D91] text-white flex items-center justify-center text-xs">2</span>
+                                                    Select Verification Date
+                                                </h3>
+                                                {slotsLoading ? (
+                                                    <div className="flex items-center gap-2 text-[#0B3D91] font-bold">
+                                                        <FaSpinner className="animate-spin" /> Loading slots...
+                                                    </div>
+                                                ) : availableSlots.length === 0 ? (
+                                                    <p className="text-sm text-red-500 bg-red-50 p-4 rounded-xl border border-red-100 flex items-center gap-2">
+                                                        <FaTimes /> No slots available for this officer currently.
+                                                    </p>
+                                                ) : (
+                                                    <div className="flex flex-wrap gap-3">
+                                                        {availableSlots.map(slot => (
+                                                            <button
+                                                                key={slot.date}
+                                                                type="button"
+                                                                onClick={() => setFormData({ ...formData, verificationDate: slot.date })}
+                                                                className={`px-4 py-3 rounded-xl border text-sm font-bold transition-all flex flex-col items-center min-w-[90px] ${formData.verificationDate === slot.date
+                                                                    ? 'bg-[#0B3D91] text-white border-[#0B3D91] ring-4 ring-[#0B3D91]/20 shadow-lg'
+                                                                    : 'bg-white text-[#555555] border-[#E0E0E0] hover:border-[#0B3D91] hover:shadow-md'
+                                                                    }`}
+                                                            >
+                                                                <span className="text-xl leading-none mb-1">{new Date(slot.date).getDate()}</span>
+                                                                <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">{new Date(slot.date).toLocaleString('default', { month: 'short' })}</span>
+                                                                <span className={`text-[9px] mt-2 px-2 py-0.5 rounded-full ${formData.verificationDate === slot.date ? 'bg-white/20 text-white' : 'bg-green-50 text-green-700'
+                                                                    }`}>
+                                                                    {slot.available} Left
+                                                                </span>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Land Details Section */}
+                                <div className="pt-6 border-t border-[#F4F6F9]">
+                                    <h3 className="font-bold text-[#222222] mb-6 flex items-center gap-2">
+                                        <span className={`w-6 h-6 rounded-full text-white flex items-center justify-center text-xs ${isFarmer ? 'bg-[#0B3D91]' : 'hidden'}`}>{isFarmer ? '3' : ''}</span>
+                                        {isFarmer ? 'Land Details' : 'Land Information'}
+                                    </h3>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-[#555555] uppercase tracking-wider">Owner Name</label>
+                                            <input
+                                                type="text"
+                                                name="ownerName"
+                                                value={formData.ownerName}
+                                                onChange={handleChange}
+                                                className="w-full p-3 bg-[#F9FAFB] border border-[#E0E0E0] rounded-xl font-bold text-[#222222] focus:outline-none"
+                                                readOnly={isFarmer || (isOfficer && verifiedFarmer && !selectedLandId)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-[#555555] uppercase tracking-wider">Survey Number</label>
+                                            <input
+                                                type="text"
+                                                name="surveyNumber"
+                                                value={formData.surveyNumber}
+                                                onChange={handleChange}
+                                                className="w-full p-3 bg-white border border-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/30 focus:border-[#0B3D91] transition-all"
+                                                placeholder="e.g. 123/4A"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-[#555555] uppercase tracking-wider">Area (Acres)</label>
+                                            <input
+                                                type="number"
+                                                name="area"
+                                                value={formData.area}
+                                                onChange={handleChange}
+                                                className="w-full p-3 bg-white border border-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/30 focus:border-[#0B3D91] transition-all"
+                                                placeholder="e.g. 2.5"
+                                                step="0.01"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-[#555555] uppercase tracking-wider">Land Type</label>
+                                            <select
+                                                name="landType"
+                                                value={formData.landType}
+                                                onChange={handleChange}
+                                                className="w-full p-3 bg-white border border-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B3D91] transition-all"
+                                            >
+                                                {LAND_TYPES.map(type => (
+                                                    <option key={type} value={type}>{type}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="md:col-span-2 space-y-1">
+                                            <label className="text-xs font-bold text-[#555555] uppercase tracking-wider">Full Address</label>
+                                            <textarea
+                                                name="address"
+                                                required
+                                                className="w-full p-3 bg-white border border-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/30 focus:border-[#0B3D91] transition-all min-h-[100px] resize-none"
+                                                placeholder="Complete physical address of the land..."
+                                                value={formData.address}
+                                                onChange={handleChange}
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Officer Verification Upload */}
+                                {isOfficer && selectedLandId && (
+                                    <div className="p-6 bg-[#F4F6F9] rounded-2xl border border-dashed border-[#E0E0E0]">
+                                        <label className="block text-sm font-bold text-[#222222] mb-3">Upload Verification Report</label>
+                                        <input
+                                            type="file"
+                                            onChange={handleFileChange}
+                                            className="block w-full text-sm text-[#555555] file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#0B3D91] file:text-white hover:file:bg-[#092C6B] file:cursor-pointer cursor-pointer"
+                                            required
+                                        />
+                                        <p className="text-xs text-[#999999] mt-2">Upload the signed field inspection report (PDF or Image).</p>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-4 pt-4 border-t border-[#F4F6F9]">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            isFarmer ? setViewMode('list') : (selectedLandId ? setViewMode('list') : navigate('/dashboard'));
+                                            if (selectedLandId) resetForm();
+                                        }}
+                                        className="flex-1 py-3.5 border border-[#E0E0E0] text-[#555555] font-bold rounded-xl hover:bg-[#F4F6F9] transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={loading || (isFarmer && !formData.verificationDate)}
+                                        className="flex-[2] py-3.5 bg-[#0B3D91] text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:bg-[#092C6B] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]"
+                                    >
+                                        {loading ? <FaSpinner className="animate-spin" /> : (selectedLandId ? 'Submit Report' : 'Confirm & Book')}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 };

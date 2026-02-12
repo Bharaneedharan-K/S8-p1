@@ -233,6 +233,7 @@ export const getAllLands = async (req, res) => {
 
         const lands = await Land.find(filter)
             .populate('farmerId', 'name mobile')
+            .populate('officerId', 'name mobile district') // Added officer population
             .sort({ createdAt: -1 });
 
         res.status(200).json({ success: true, count: lands.length, lands });
@@ -270,7 +271,7 @@ export const getLandBySurveyNumber = async (req, res) => {
     try {
         const { surveyNumber } = req.params;
         const land = await Land.findOne({ surveyNumber, status: 'LAND_APPROVED' })
-            .select('ownerName surveyNumber area district address status landHash txHash createdAt');
+            .select('ownerName surveyNumber area district address status landHash txHash createdAt _id');
 
         if (!land) {
             return res.status(404).json({ success: false, message: 'Survey Number not found or not yet approved.' });
@@ -282,5 +283,28 @@ export const getLandBySurveyNumber = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Fetch failed', error: error.message });
+    }
+};
+// Dev: Reset Land Status (To fix Blockchain Reset issues)
+export const resetLandStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const land = await Land.findByIdAndUpdate(
+            id,
+            {
+                status: 'LAND_PENDING_ADMIN_APPROVAL',
+                landHash: null,
+                txHash: null,
+                verificationDocument: null // Optional: keep or clear based on pref. Clearing to force re-verify.
+            },
+            { new: true }
+        );
+
+        if (!land) return res.status(404).json({ success: false, message: 'Land not found' });
+
+        res.status(200).json({ success: true, message: 'Land status reset successfully. You can now re-verify it.', land });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Reset failed', error: error.message });
     }
 };

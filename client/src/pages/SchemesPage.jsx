@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import apiClient from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { FaTractor, FaSeedling, FaFileContract, FaSpinner, FaCheckCircle, FaExclamationCircle, FaTimes } from 'react-icons/fa';
+import { FaTractor, FaSeedling, FaFileContract, FaSpinner, FaCheckCircle, FaExclamationCircle, FaTimes, FaRupeeSign, FaArrowRight, FaFilter } from 'react-icons/fa';
 
 export const SchemesPage = () => {
     const { token, user } = useContext(AuthContext);
     const [schemes, setSchemes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedScheme, setSelectedScheme] = useState(null);
-    const [lands, setLands] = useState([]); // User's verified lands for application
+    const [lands, setLands] = useState([]);
     const [selectedLand, setSelectedLand] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [documents, setDocuments] = useState(null);
@@ -25,8 +25,7 @@ export const SchemesPage = () => {
         try {
             setLoading(true);
             const res = await apiClient.get('/schemes/active');
-            const schemesList = res.data.schemes || [];
-            setSchemes(Array.isArray(schemesList) ? schemesList : []);
+            setSchemes(Array.isArray(res.data.schemes) ? res.data.schemes : []);
         } catch (error) {
             console.error('Error fetching schemes:', error);
         } finally {
@@ -37,9 +36,7 @@ export const SchemesPage = () => {
     const fetchUserLands = async () => {
         try {
             const res = await apiClient.get('/land');
-            // Only allow applying with VERIFIED lands
-            const landsList = res.data.lands || [];
-            const verifiedLands = landsList.filter(l => l.status === 'LAND_APPROVED');
+            const verifiedLands = (res.data.lands || []).filter(l => l.status === 'LAND_APPROVED');
             setLands(verifiedLands);
         } catch (error) {
             console.error('Error fetching lands:', error);
@@ -83,10 +80,10 @@ export const SchemesPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#E2E6D5] py-8 px-4 sm:px-6 lg:px-8 relative">
+        <div className="min-h-screen bg-[#F4F6F9] py-12 px-4 sm:px-6 lg:px-8 relative">
             {/* Toast Notification */}
             {toast.message && (
-                <div className={`fixed top-24 right-5 z-50 px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transition-all transform animate-slideIn ${toast.type === 'success' ? 'bg-[#2C3318] text-[#D8E983]' : 'bg-red-100 text-red-800'
+                <div className={`fixed top-24 right-5 z-50 px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transition-all transform animate-slideIn ${toast.type === 'success' ? 'bg-[#1B5E20] text-white' : 'bg-[#D32F2F] text-white'
                     }`}>
                     {toast.type === 'success' ? <FaCheckCircle /> : <FaExclamationCircle />}
                     <span className="font-bold">{toast.message}</span>
@@ -94,236 +91,236 @@ export const SchemesPage = () => {
             )}
 
             <div className="max-w-7xl mx-auto">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-[#2C3318]">Government Schemes</h1>
-                    <p className="text-[#5C6642] mt-1">Browse and apply for available agricultural subsidies and benefits.</p>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-[#222222] tracking-tight">Government Schemes</h1>
+                        <p className="text-[#555555] mt-1 text-lg">Browse and apply for agricultural subsidies and benefits.</p>
+                    </div>
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-12 text-[#5C6642]">
-                        <FaSpinner className="animate-spin text-4xl mx-auto mb-4 text-[#AEB877]" />
-                        <p>Loading available schemes...</p>
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <div className="w-12 h-12 border-4 border-[#0B3D91]/30 border-t-[#0B3D91] rounded-full animate-spin mb-4"></div>
+                        <p className="text-[#555555] font-medium">Loading schemes...</p>
                     </div>
                 ) : schemes.length === 0 ? (
-                    <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-[#AEB877]/30">
-                        <p className="text-4xl mb-4">🌾</p>
-                        <p className="text-[#5C6642] font-bold text-lg">No active schemes available at the moment.</p>
-                        <p className="text-[#9CA385] text-sm mt-2">Please check back later for new announcements.</p>
+                    <div className="text-center py-20 bg-white rounded-3xl border border-[#E0E0E0] shadow-sm">
+                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">
+                            🌾
+                        </div>
+                        <h3 className="text-xl font-bold text-[#222222] mb-2">No Active Schemes</h3>
+                        <p className="text-[#555555]">Check back later for new government announcements.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {schemes.map(scheme => (
-                            <div key={scheme._id} className="bg-white rounded-2xl p-6 shadow-sm border border-[#AEB877]/10 hover:shadow-md transition-all flex flex-col group relative overflow-hidden">
-                                {/* Decorative bg element */}
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-[#F2F5E6] rounded-bl-full -mr-4 -mt-4 opacity-50 group-hover:scale-110 transition-transform"></div>
-
-                                <div className="mb-4 relative z-10">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase tracking-wider ${scheme.schemeType === 'CENTRAL' ? 'bg-orange-100 text-orange-800' :
-                                            scheme.schemeType === 'STATE' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                            <div key={scheme._id} className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-[#E0E0E0] flex flex-col overflow-hidden hover:-translate-y-1">
+                                <div className="p-6 pb-4 relative">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <span className={`px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider border ${scheme.schemeType === 'CENTRAL'
+                                            ? 'bg-orange-50 text-orange-700 border-orange-200'
+                                            : 'bg-blue-50 text-blue-700 border-blue-200'
                                             }`}>
                                             {scheme.schemeType}
                                         </span>
-                                        <span className="text-xs font-mono text-[#9CA385] bg-[#F2F5E6] px-2 py-1 rounded">{scheme.schemeCode}</span>
+                                        <span className="font-mono text-xs text-[#999999]">{scheme.schemeCode}</span>
                                     </div>
-                                    <h3 className="text-xl font-bold text-[#2C3318] mb-2 group-hover:text-[#AEB877] transition-colors leading-tight">{scheme.schemeName}</h3>
-                                    <p className="text-[#5C6642] text-sm line-clamp-3 leading-relaxed">{scheme.description}</p>
+
+                                    <h3 className="text-xl font-bold text-[#222222] mb-3 leading-tight group-hover:text-[#0B3D91] transition-colors line-clamp-2 min-h-[3.5rem]">
+                                        {scheme.schemeName}
+                                    </h3>
+                                    <p className="text-[#555555] text-sm line-clamp-3 leading-relaxed mb-4">
+                                        {scheme.description}
+                                    </p>
                                 </div>
 
-                                <div className="space-y-3 mb-6 flex-1 text-sm text-[#5C6642] relative z-10">
-                                    <div className="flex justify-between items-center py-2 border-t border-dashed border-[#AEB877]/20">
-                                        <span className="text-xs uppercase tracking-wide font-semibold text-[#9CA385]">Benefit</span>
-                                        <span className="font-bold text-[#2C3318] text-lg">₹{scheme.benefitAmount}</span>
+                                <div className="px-6 py-4 bg-[#F9FAFB] border-t border-[#F4F6F9] mt-auto">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div>
+                                            <p className="text-[10px] font-bold text-[#999999] uppercase">Benefit Amount</p>
+                                            <p className="text-lg font-black text-[#1B5E20] flex items-center">
+                                                <FaRupeeSign className="text-sm" /> {scheme.benefitAmount.toLocaleString()}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-bold text-[#999999] uppercase">Funding</p>
+                                            <p className="text-sm font-bold text-[#222222]">{scheme.fundingPattern}</p>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-xs uppercase tracking-wide font-semibold text-[#9CA385]">Funding</span>
-                                        <span className="font-bold text-[#4A5532] text-xs bg-[#F2F5E6] px-2 py-1 rounded-full">{scheme.fundingPattern}</span>
-                                    </div>
-                                </div>
 
-                                <button
-                                    onClick={() => setSelectedScheme(scheme)}
-                                    className="w-full py-3 bg-[#2C3318] text-white font-bold rounded-xl hover:bg-[#4A5532] transition-all shadow-md hover:shadow-xl active:scale-95"
-                                >
-                                    View Details & Apply
-                                </button>
+                                    <button
+                                        onClick={() => setSelectedScheme(scheme)}
+                                        className="w-full py-3 bg-white border border-[#0B3D91] text-[#0B3D91] font-bold rounded-xl hover:bg-[#0B3D91] hover:text-white transition-all shadow-sm flex items-center justify-center gap-2 group-hover:shadow-md"
+                                    >
+                                        View Details & Apply <FaArrowRight className="text-sm transition-transform group-hover:translate-x-1" />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
                 )}
 
-                {/* Detailed Modal */}
+                {/* Application Modal */}
                 {selectedScheme && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-                        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-scaleIn">
-                            {/* Modal Header */}
-                            <div className="p-6 bg-[#2C3318] text-white shrink-0 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-[#AEB877] rounded-full -mr-16 -mt-32 opacity-20 blur-3xl"></div>
-
+                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-scaleIn">
+                            {/* Header */}
+                            <div className="bg-[#0B3D91] p-6 text-white shrink-0 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
                                 <div className="relative z-10 flex justify-between items-start">
-                                    <div className="flex-1 pr-4">
+                                    <div className="pr-8">
                                         <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/20 mb-2">
                                             {selectedScheme.schemeType} SCHEME
                                         </span>
-                                        <h3 className="text-2xl font-bold leading-tight">{selectedScheme.schemeName}</h3>
-                                        <p className="text-[#A5C89E] text-sm mt-1 font-mono">{selectedScheme.schemeCode}</p>
+                                        <h2 className="text-2xl font-bold leading-tight">{selectedScheme.schemeName}</h2>
                                     </div>
-
-                                    <div className="flex flex-col items-end gap-3 z-20">
-                                        <button onClick={() => setSelectedScheme(null)} className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors backdrop-blur-md">
-                                            <FaTimes />
-                                        </button>
-                                        <div className="text-right bg-white/10 px-4 py-2 rounded-xl backdrop-blur-md border border-white/10">
-                                            <p className="text-3xl font-bold text-[#FFFBB1]">₹{selectedScheme.benefitAmount}</p>
-                                            <p className="text-[#A5C89E] text-[10px] uppercase tracking-wider text-center">Benefit Amount</p>
-                                        </div>
-                                    </div>
+                                    <button
+                                        onClick={() => setSelectedScheme(null)}
+                                        className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                                    >
+                                        <FaTimes />
+                                    </button>
                                 </div>
                             </div>
 
-                            {/* Modal Content */}
-                            <div className="p-6 overflow-y-auto customized-scrollbar bg-[#FAFAF5]">
-                                <div className="space-y-8">
-                                    {/* Description */}
-                                    <div>
-                                        <h4 className="flex items-center gap-2 text-xs font-bold text-[#AEB877] uppercase tracking-widest mb-3">
-                                            <FaFileContract /> Description
-                                        </h4>
-                                        <p className="text-[#2C3318] leading-relaxed text-sm bg-white p-4 rounded-xl border border-[#AEB877]/10 shadow-sm">
-                                            {selectedScheme.description}
-                                        </p>
-                                    </div>
-
-                                    {/* Criteria Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="bg-white p-5 rounded-xl border border-[#AEB877]/10 shadow-sm">
-                                            <h4 className="flex items-center gap-2 text-xs font-bold text-[#4A5532] uppercase mb-4">
-                                                <FaSeedling /> Eligibility Criteria
+                            {/* Content */}
+                            <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#F4F6F9] p-6 md:p-8">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                    <div className="md:col-span-2 space-y-6">
+                                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E0E0E0]">
+                                            <h4 className="text-sm font-bold text-[#0B3D91] uppercase mb-4 flex items-center gap-2">
+                                                <FaFileContract /> Scheme Description
                                             </h4>
-                                            <ul className="text-sm text-[#5C6642] space-y-3">
-                                                <li className="flex justify-between border-b border-dashed border-gray-100 pb-2">
-                                                    <span>Gender</span>
-                                                    <span className="font-bold text-[#2C3318]">{selectedScheme.genderEligibility}</span>
-                                                </li>
-                                                <li className="flex justify-between border-b border-dashed border-gray-100 pb-2">
-                                                    <span>Age Range</span>
-                                                    <span className="font-bold text-[#2C3318]">{selectedScheme.ageLimit?.min} - {selectedScheme.ageLimit?.max} Years</span>
-                                                </li>
-                                                <li className="flex justify-between border-b border-dashed border-gray-100 pb-2">
-                                                    <span>Caste</span>
-                                                    <span className="font-bold text-[#2C3318]">{selectedScheme.casteEligibility?.join(', ')}</span>
-                                                </li>
-                                                <li className="flex justify-between">
-                                                    <span>Min Land</span>
-                                                    <span className="font-bold text-[#2C3318]">{selectedScheme.minLandArea} Acres</span>
-                                                </li>
-                                            </ul>
+                                            <p className="text-[#555555] leading-relaxed text-sm">
+                                                {selectedScheme.description}
+                                            </p>
                                         </div>
 
-                                        <div className="bg-[#FFFBB1]/20 p-5 rounded-xl border border-[#AEB877]/10 shadow-sm">
-                                            <h4 className="flex items-center gap-2 text-xs font-bold text-[#4A5532] uppercase mb-4">
-                                                <FaFileContract /> Documents Required
+                                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E0E0E0]">
+                                            <h4 className="text-sm font-bold text-[#0B3D91] uppercase mb-4 flex items-center gap-2">
+                                                <FaSeedling /> Eligibility Criteria
                                             </h4>
-                                            <ul className="text-sm text-[#5C6642] space-y-2">
+                                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                                <div className="p-3 bg-[#F9FAFB] rounded-xl border border-[#F4F6F9]">
+                                                    <p className="text-xs text-[#999999] uppercase font-bold mb-1">Gender</p>
+                                                    <p className="font-semibold text-[#222222]">{selectedScheme.genderEligibility}</p>
+                                                </div>
+                                                <div className="p-3 bg-[#F9FAFB] rounded-xl border border-[#F4F6F9]">
+                                                    <p className="text-xs text-[#999999] uppercase font-bold mb-1">Age Limit</p>
+                                                    <p className="font-semibold text-[#222222]">{selectedScheme.ageLimit?.min} - {selectedScheme.ageLimit?.max} Years</p>
+                                                </div>
+                                                <div className="p-3 bg-[#F9FAFB] rounded-xl border border-[#F4F6F9] col-span-2">
+                                                    <p className="text-xs text-[#999999] uppercase font-bold mb-1">Min Land Area</p>
+                                                    <p className="font-semibold text-[#222222]">{selectedScheme.minLandArea} Acres</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="md:col-span-1 space-y-6">
+                                        <div className="bg-[#E8F5E9] p-6 rounded-2xl border border-[#C8E6C9]">
+                                            <p className="text-xs font-bold text-[#1B5E20] uppercase mb-1">Benefit Amount</p>
+                                            <p className="text-3xl font-black text-[#1B5E20]">₹{selectedScheme.benefitAmount.toLocaleString()}</p>
+                                            <p className="text-xs text-[#2E7D32] mt-2 font-medium">Direct Transfer</p>
+                                        </div>
+
+                                        <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#E0E0E0]">
+                                            <h4 className="text-xs font-bold text-[#555555] uppercase mb-3">Required Documents</h4>
+                                            <ul className="space-y-2">
                                                 {selectedScheme.documentsRequired?.length > 0 ? (
                                                     selectedScheme.documentsRequired.map((doc, i) => (
-                                                        <li key={i} className="flex items-start gap-2 bg-white px-3 py-2 rounded-lg border border-[#AEB877]/10">
-                                                            <div className="mt-0.5 w-1.5 h-1.5 rounded-full bg-[#AEB877] shrink-0"></div>
+                                                        <li key={i} className="text-sm text-[#555555] flex items-start gap-2">
+                                                            <FaCheckCircle className="text-[#0B3D91] mt-0.5 text-xs shrink-0" />
                                                             <span className="leading-tight">{doc}</span>
                                                         </li>
                                                     ))
                                                 ) : (
-                                                    <li className="italic text-gray-400">No specific documents listed.</li>
+                                                    <li className="text-sm text-[#999999] italic">No specific documents.</li>
                                                 )}
                                             </ul>
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Application Process */}
-                                    <div>
-                                        <h4 className="flex items-center gap-2 text-xs font-bold text-[#AEB877] uppercase tracking-widest mb-3">
-                                            How to Apply
-                                        </h4>
-                                        <div className="bg-[#F2F5E6] p-4 rounded-xl text-sm text-[#5C6642] whitespace-pre-line border border-[#AEB877]/20">
-                                            {selectedScheme.applicationProcess}
-                                        </div>
-                                    </div>
+                                {/* Application Form */}
+                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-[#E0E0E0] relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-1 h-full bg-[#0B3D91]"></div>
+                                    <h3 className="text-lg font-bold text-[#222222] mb-6 flex items-center gap-2">
+                                        <span className="w-6 h-6 rounded-full bg-[#0B3D91] text-white flex items-center justify-center text-xs">1</span>
+                                        Select Land & Apply
+                                    </h3>
 
-                                    {/* Application Form */}
-                                    <div className="bg-white border border-[#AEB877]/20 rounded-xl p-5 shadow-lg relative overflow-hidden transform transition-all hover:scale-[1.01]">
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-[#AEB877]"></div>
-                                        <h4 className="text-sm font-bold text-[#2C3318] mb-4 uppercase tracking-wider">Apply Now</h4>
-
-                                        <form onSubmit={handleApply} className="space-y-4">
-                                            <div>
-                                                <label className="block text-xs font-bold text-[#9CA385] uppercase mb-1.5">Select Land Record</label>
-                                                <div className="relative">
-                                                    <select
-                                                        value={selectedLand}
-                                                        onChange={(e) => setSelectedLand(e.target.value)}
-                                                        required
-                                                        className="w-full p-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877] focus:border-transparent font-semibold text-[#2C3318] appearance-none"
-                                                    >
-                                                        <option value="">-- Choose Verified Land --</option>
-                                                        {lands.map(land => (
-                                                            <option key={land._id} value={land._id}>
-                                                                Survey No: {land.surveyNumber} ({land.area} Acres) - {land.district}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#5C6642]">
-                                                        <FaTractor />
-                                                    </div>
-                                                </div>
-                                                {lands.length === 0 && (
-                                                    <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
-                                                        <FaExclamationCircle /> You need verified land records to apply.
-                                                    </p>
-                                                )}
+                                    <form onSubmit={handleApply} className="space-y-6">
+                                        <div>
+                                            <label className="block text-sm font-bold text-[#222222] mb-2">Select Verified Land Record <span className="text-red-500">*</span></label>
+                                            <div className="relative">
+                                                <select
+                                                    value={selectedLand}
+                                                    onChange={(e) => setSelectedLand(e.target.value)}
+                                                    required
+                                                    className="w-full pl-10 pr-4 py-3 bg-[#F9FAFB] border border-[#E0E0E0] rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/20 focus:border-[#0B3D91] appearance-none transition-all"
+                                                >
+                                                    <option value="">-- Choose Land --</option>
+                                                    {lands.map(land => (
+                                                        <option key={land._id} value={land._id}>
+                                                            Survey No: {land.surveyNumber} ({land.area} Ac) - {land.district}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <FaTractor className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#999999]" />
                                             </div>
+                                            {lands.length === 0 && (
+                                                <p className="text-xs text-red-500 mt-2 flex items-center gap-1 font-medium bg-red-50 p-2 rounded-lg">
+                                                    <FaExclamationCircle /> You have no verified lands to apply with.
+                                                </p>
+                                            )}
+                                        </div>
 
-                                            <div>
-                                                <label className="block text-xs font-bold text-[#9CA385] uppercase mb-1.5">Upload Documents (Optional)</label>
+                                        <div>
+                                            <label className="block text-sm font-bold text-[#222222] mb-2">Upload Additional Documents (Optional)</label>
+                                            <div className="relative border-2 border-dashed border-[#E0E0E0] rounded-xl p-6 text-center hover:bg-[#F9FAFB] transition-colors cursor-pointer group">
                                                 <input
                                                     type="file"
                                                     multiple
                                                     onChange={(e) => setDocuments(e.target.files)}
-                                                    className="w-full p-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-sm text-[#5C6642] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#2C3318] file:text-white hover:file:bg-[#4A5532]"
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                                 />
+                                                <div className="flex flex-col items-center">
+                                                    <div className="w-10 h-10 bg-blue-50 text-[#0B3D91] rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                                        <FaFileContract />
+                                                    </div>
+                                                    <p className="text-sm font-bold text-[#555555] group-hover:text-[#222222]">Click to Upload Files</p>
+                                                    <p className="text-xs text-[#999999] mt-1">PDF, JPG, PNG (Max 5MB)</p>
+                                                </div>
                                             </div>
+                                            {documents && (
+                                                <p className="text-xs text-[#0B3D91] font-bold mt-2 text-center">{documents.length} files selected</p>
+                                            )}
+                                        </div>
 
-                                            <div className="flex gap-4 pt-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setSelectedScheme(null)}
-                                                    className="flex-1 py-3 border-2 border-[#E2E6D5] text-[#5C6642] font-bold rounded-xl hover:bg-[#F2F5E6] hover:border-[#AEB877] transition-all"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    type="submit"
-                                                    disabled={submitting || !selectedLand}
-                                                    className="flex-2 w-full py-3 bg-[#2C3318] text-white font-bold rounded-xl hover:bg-[#4A5532] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
-                                                >
-                                                    {submitting ? (
-                                                        <>
-                                                            <FaSpinner className="animate-spin" /> Processing...
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            Confirm Application <FaCheckCircle />
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                        <div className="pt-4 flex gap-4">
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedScheme(null)}
+                                                className="flex-1 py-3 border border-[#E0E0E0] text-[#555555] font-bold rounded-xl hover:bg-[#F4F6F9] transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={submitting || !selectedLand}
+                                                className="flex-[2] py-3 bg-[#0B3D91] text-white font-bold rounded-xl hover:bg-[#092C6B] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                                            >
+                                                {submitting ? <FaSpinner className="animate-spin" /> : 'Confirm Application'}
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };

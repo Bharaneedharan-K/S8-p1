@@ -2,33 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============ CUSTOM PASTEL THEME VARIABLES ============ */
+@layer utilities {
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 1s ease-out forwards;
+  }
+
+  .animate-bounce-slow {
+    animation: bounce 3s infinite;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============ GOVERNMENT PORTAL THEME VARIABLES ============ */
 :root {
-  /* User Provided Palette */
-  --color-primary: #AEB877;
-  /* Olive - Main Action */
-  --color-secondary: #A5C89E;
-  /* Sage - Cards/Secondary */
-  --color-accent: #D8E983;
-  /* Lime - Highlights */
-  --color-highlight: #FFFBB1;
-  /* Pale Yellow - Backgrounds */
+  /* New Color Palette */
+  --color-primary: #0B3D91;
+  /* Primary Blue */
+  --color-secondary: #0B3D91;
+  /* Keeping secondary as blue for now, or maybe a lighter shade? User said Primary Blue. */
+  --color-success: #2E8B57;
+  /* Success Green */
+  --color-warning: #FF9933;
+  /* Warning Saffron */
+  --color-danger: #D32F2F;
+  /* Danger Red */
 
-  /* Derived Colors for Contrast */
-  --color-bg: #E2E6D5;
-  /* Significantly darker Olive/Sage tint for strong card contrast */
+  --color-bg: #F4F6F9;
+  /* Page Background (Light Grey) */
   --color-surface: #FFFFFF;
-  /* White Surface */
-  --color-text-main: #2C3318;
-  /* Dark Olive for text */
-  --color-text-muted: #5C6642;
-  /* Muted Olive */
+  /* Card Background */
 
-  /* Glassmorphism Variables */
-  --glass-bg: rgba(255, 255, 255, 0.82);
-  /* Increased opacity for better separation */
-  --glass-border: rgba(174, 184, 119, 0.3);
-  --glass-shadow: 0 4px 6px -1px rgba(44, 51, 24, 0.05), 0 2px 4px -1px rgba(44, 51, 24, 0.03);
+  --color-text-main: #222222;
+  /* Text Primary */
+  --color-text-muted: #555555;
+  /* Text Secondary */
+  --color-border: #E0E0E0;
+  /* Border Color */
+
+  /* Glassmorphism Variables - Toned down for professional look */
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(11, 61, 145, 0.1);
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 body {
@@ -37,7 +80,6 @@ body {
   color: var(--color-text-main);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  /* Removed fixed background pattern to reduce noise and improve card contrast */
 }
 
 /* ============ UTILITIES ============ */
@@ -45,60 +87,60 @@ body {
 
   /* Layout & Containers */
   .gov-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
   }
 
-  /* Glassmorphism Card - ENHANCED CONTRAST */
+  /* Professional Card */
   .glass-card {
-    @apply bg-white border border-[#AEB877]/20 shadow-md rounded-2xl transition-all duration-300;
-    /* Removed backdrop-blur for now to focus on solid contrast, can be re-added if opacity < 1 */
+    @apply bg-white border border-[#E0E0E0] shadow-sm rounded-xl transition-all duration-300;
   }
 
   .glass-card-hover {
-    @apply hover:shadow-xl hover:shadow-[#A5C89E]/20 hover:-translate-y-1;
+    @apply hover:shadow-md hover:-translate-y-0.5;
   }
 
   /* Typography */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#8B9850] to-[#6B8560];
+    @apply text-[#0B3D91];
+    /* Removed gradient for professional look */
   }
 
   .gov-h1 {
-    @apply text-3xl md:text-4xl font-extrabold text-[#2C3318] tracking-tight mb-6;
+    @apply text-3xl md:text-4xl font-extrabold text-[#222222] tracking-tight mb-6;
   }
 
   .gov-h2 {
-    @apply text-2xl font-bold text-[#4A5532] mb-4;
+    @apply text-2xl font-bold text-[#0B3D91] mb-4;
   }
 
   /* Interactive Elements */
   .btn-primary {
-    @apply inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-bold rounded-xl text-white shadow-md transform transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#AEB877];
-    background: linear-gradient(135deg, #AEB877 0%, #8B9850 100%);
-  }
-
-  .btn-primary:hover {
-    background: linear-gradient(135deg, #BCC880 0%, #9DAA60 100%);
-    @apply shadow-lg shadow-[#AEB877]/30;
+    @apply inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-bold rounded-xl text-white shadow-sm transform transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B3D91] bg-[#0B3D91] hover:bg-[#092C6B];
   }
 
   .btn-secondary {
-    @apply inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-bold rounded-xl text-[#2C3318] shadow-md transform transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#A5C89E];
-    background: linear-gradient(135deg, #A5C89E 0%, #8CAE85 100%);
-  }
-
-  .btn-secondary:hover {
-    background: linear-gradient(135deg, #B5D8AE 0%, #9EB890 100%);
-    @apply shadow-lg shadow-[#A5C89E]/30;
+    @apply inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-bold rounded-xl text-[#0B3D91] bg-[#E3F2FD] hover:bg-[#BBDEFB] shadow-sm transform transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B3D91];
   }
 
   .btn-outline {
-    @apply inline-flex justify-center items-center px-6 py-3 border-2 border-[#AEB877] text-base font-bold rounded-xl text-[#5C6642] bg-transparent hover:bg-[#FFFBB1]/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#AEB877];
+    @apply inline-flex justify-center items-center px-6 py-3 border-2 border-[#0B3D91] text-base font-bold rounded-xl text-[#0B3D91] bg-transparent hover:bg-[#F4F6F9] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B3D91];
+  }
+
+  .btn-success {
+    @apply bg-[#2E8B57] hover:bg-[#236B42] text-white;
+  }
+
+  .btn-danger {
+    @apply bg-[#D32F2F] hover:bg-[#B71C1C] text-white;
+  }
+
+  .btn-warning {
+    @apply bg-[#FF9933] hover:bg-[#E68A00] text-white;
   }
 
   /* Form Elements - Modernized */
   .input-modern {
-    @apply w-full px-4 py-3 bg-white border border-[#AEB877]/30 rounded-xl shadow-sm text-[#2C3318] placeholder-[#9CA385] focus:outline-none focus:ring-2 focus:ring-[#AEB877] focus:border-[#AEB877] transition-all;
+    @apply w-full px-4 py-3 bg-white border border-[#E0E0E0] rounded-xl shadow-sm text-[#222222] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0B3D91] focus:border-[#0B3D91] transition-all;
   }
 
   /* Badges */
@@ -107,15 +149,15 @@ body {
   }
 
   .badge-pending {
-    @apply bg-[#FFFBB1] text-[#8B9850] border border-[#AEB877];
+    @apply bg-[#FFF3E0] text-[#E65100] border border-[#FFCC80];
   }
 
   .badge-verified {
-    @apply bg-[#E6F4EA] text-[#4A5532] border border-[#A5C89E];
+    @apply bg-[#E8F5E9] text-[#1B5E20] border border-[#A5D6A7];
   }
 
   .badge-rejected {
-    @apply bg-red-50 text-red-700 border border-red-200;
+    @apply bg-[#FFEBEE] text-[#B71C1C] border border-[#FFCDD2];
   }
 
   /* Mobile Responsive Table Cards */
@@ -124,7 +166,7 @@ body {
   }
 
   .table-row-card {
-    @apply bg-white p-4 rounded-xl shadow-sm border border-[#AEB877]/20 space-y-2;
+    @apply bg-white p-4 rounded-xl shadow-sm border border-[#E0E0E0] space-y-2;
   }
 }
 
@@ -146,30 +188,34 @@ body {
 }
 
 @keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .animate-slideInRight {
-    animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+  animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
 }
 
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);
   }
+
   33% {
     transform: translate(30px, -50px) scale(1.1);
   }
+
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
+
   100% {
     transform: translate(0px, 0px) scale(1);
   }
@@ -193,14 +239,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F2F5E6;
+  background: #F4F6F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #AEB877;
+  background: #90A4AE;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8B9850;
+  background: #607D8B;
 }

@@ -113,40 +113,40 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] py-8 px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center relative">
+    <div className="min-h-[calc(100vh-80px)] py-8 px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center relative bg-[#F4F6F9]">
       {/* Background Decor */}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-[#FFFBB1]/60 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-[20%] right-[10%] w-80 h-80 bg-[#A5C89E]/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-[#0B3D91]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-[20%] right-[10%] w-80 h-80 bg-[#0B3D91]/5 rounded-full blur-3xl"></div>
       </div>
 
       <div className="w-full max-w-lg relative z-10">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-[#4A5532] tracking-tight">Create Account</h1>
-          <p className="text-[#5C6642] mt-2">Join the Digital Land Registry Portal</p>
+          <h1 className="text-3xl font-extrabold text-[#222222] tracking-tight">Create Account</h1>
+          <p className="text-[#555555] mt-2">Join the Digital Land Registry Portal</p>
         </div>
 
-        <div className="glass-card overflow-hidden">
+        <div className="glass-card overflow-hidden border border-[#E0E0E0] shadow-lg">
           {/* Progress Bar */}
-          <div className="bg-[#FCFDF5] border-b border-[#AEB877]/20 px-6 py-4">
+          <div className="bg-gray-50 border-b border-[#E0E0E0] px-6 py-4">
             <div className="flex justify-between mb-2">
               {['Basic Info', 'Location', 'Identity', 'Security'].map((label, index) => (
-                <span key={index} className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${step > index ? 'text-[#AEB877]' : step === index + 1 ? 'text-[#8B9850]' : 'text-slate-300'}`}>
+                <span key={index} className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${step > index ? 'text-[#0B3D91]' : step === index + 1 ? 'text-[#0B3D91]' : 'text-gray-400'}`}>
                   {label}
                 </span>
               ))}
             </div>
-            <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#D8E983] to-[#AEB877] transition-all duration-500 ease-out"
+                className="h-full bg-[#0B3D91] transition-all duration-500 ease-out"
                 style={{ width: `${(step / 4) * 100}%` }}
               ></div>
             </div>
           </div>
 
-          <div className="p-6 sm:p-8">
+          <div className="p-6 sm:p-8 bg-white">
             {(error || localError) && (
-              <div className="mb-6 bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm font-medium border border-red-100 flex items-center gap-2 animate-fadeIn">
+              <div className="mb-6 bg-red-50 text-[#D32F2F] px-4 py-3 rounded-xl text-sm font-medium border border-red-100 flex items-center gap-2 animate-fadeIn">
                 <span>⚠️</span> {error || localError}
               </div>
             )}
@@ -156,7 +156,7 @@ export const RegisterPage = () => {
               {step === 1 && (
                 <div className="space-y-4 animate-fadeIn">
                   <div>
-                    <label className="block text-sm font-bold text-[#4A5532] mb-1.5 ml-1">Full Name</label>
+                    <label className="block text-sm font-bold text-[#222222] mb-1.5 ml-1">Full Name</label>
                     <input
                       name="name"
                       type="text"
@@ -168,7 +168,7 @@ export const RegisterPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-[#4A5532] mb-1.5 ml-1">Email Address</label>
+                    <label className="block text-sm font-bold text-[#222222] mb-1.5 ml-1">Email Address</label>
                     <input
                       name="email"
                       type="email"
@@ -188,7 +188,7 @@ export const RegisterPage = () => {
               {step === 2 && (
                 <div className="space-y-4 animate-fadeIn">
                   <div>
-                    <label className="block text-sm font-bold text-[#4A5532] mb-1.5 ml-1">District</label>
+                    <label className="block text-sm font-bold text-[#222222] mb-1.5 ml-1">District</label>
                     <div className="relative">
                       <select
                         name="district"
@@ -199,11 +199,11 @@ export const RegisterPage = () => {
                         <option value="">Select District</option>
                         {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
                       </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#5C6642]">▼</div>
+                      <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#555555]">▼</div>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-[#4A5532] mb-1.5 ml-1">Mobile Number</label>
+                    <label className="block text-sm font-bold text-[#222222] mb-1.5 ml-1">Mobile Number</label>
                     <input
                       name="mobile"
                       type="tel"
@@ -226,8 +226,8 @@ export const RegisterPage = () => {
                 <div className="space-y-6 animate-fadeIn">
                   {/* Profile Photo Upload */}
                   <div>
-                    <label className="block text-sm font-bold text-[#4A5532] mb-2 ml-1">Profile Photo (Selfie)</label>
-                    <div className="relative border-2 border-dashed border-[#AEB877]/40 rounded-xl p-6 bg-[#FCFDF5] hover:bg-[#F4F9E6] transition-colors text-center cursor-pointer group">
+                    <label className="block text-sm font-bold text-[#222222] mb-2 ml-1">Profile Photo (Selfie)</label>
+                    <div className="relative border-2 border-dashed border-[#E0E0E0] rounded-xl p-6 bg-gray-50 hover:bg-[#F4F6F9] transition-colors text-center cursor-pointer group">
                       <input
                         type="file"
                         accept="image/*"
@@ -237,21 +237,21 @@ export const RegisterPage = () => {
                       <div className="flex flex-col items-center justify-center space-y-2">
                         {files.profilePhoto ? (
                           <>
-                            <div className="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-[#8B9850]">
+                            <div className="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-[#0B3D91]">
                               <img src={URL.createObjectURL(files.profilePhoto)} alt="Preview" className="w-full h-full object-cover" />
                             </div>
-                            <span className="text-sm font-semibold text-[#4A5532] flex items-center gap-1">
+                            <span className="text-sm font-semibold text-[#222222] flex items-center gap-1">
                               <FiCheck className="text-green-600" /> {files.profilePhoto.name}
                             </span>
-                            <span className="text-xs text-slate-500">Click to change</span>
+                            <span className="text-xs text-[#999999]">Click to change</span>
                           </>
                         ) : (
                           <>
-                            <div className="w-12 h-12 bg-[#E9F0C8] rounded-full flex items-center justify-center text-[#8B9850] group-hover:scale-110 transition-transform">
+                            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-[#0B3D91] group-hover:scale-110 transition-transform">
                               <FiUpload size={24} />
                             </div>
-                            <span className="text-sm font-medium text-[#5C6642]">Click to upload photo</span>
-                            <span className="text-xs text-slate-400">JPG, PNG max 5MB</span>
+                            <span className="text-sm font-medium text-[#555555]">Click to upload photo</span>
+                            <span className="text-xs text-[#999999]">JPG, PNG max 5MB</span>
                           </>
                         )}
                       </div>
@@ -260,8 +260,8 @@ export const RegisterPage = () => {
 
                   {/* Aadhaar Card Upload */}
                   <div>
-                    <label className="block text-sm font-bold text-[#4A5532] mb-2 ml-1">Aadhaar Card (ID Proof)</label>
-                    <div className="relative border-2 border-dashed border-[#AEB877]/40 rounded-xl p-6 bg-[#FCFDF5] hover:bg-[#F4F9E6] transition-colors text-center cursor-pointer group">
+                    <label className="block text-sm font-bold text-[#222222] mb-2 ml-1">Aadhaar Card (ID Proof)</label>
+                    <div className="relative border-2 border-dashed border-[#E0E0E0] rounded-xl p-6 bg-gray-50 hover:bg-[#F4F6F9] transition-colors text-center cursor-pointer group">
                       <input
                         type="file"
                         accept="image/*,application/pdf"
@@ -272,16 +272,16 @@ export const RegisterPage = () => {
                         {files.aadhaarCard ? (
                           <>
                             <FiCheck className="text-green-600 text-3xl mb-1" />
-                            <span className="text-sm font-semibold text-[#4A5532]">{files.aadhaarCard.name}</span>
-                            <span className="text-xs text-slate-500">Click to change</span>
+                            <span className="text-sm font-semibold text-[#222222]">{files.aadhaarCard.name}</span>
+                            <span className="text-xs text-[#999999]">Click to change</span>
                           </>
                         ) : (
                           <>
-                            <div className="w-12 h-12 bg-[#E9F0C8] rounded-full flex items-center justify-center text-[#8B9850] group-hover:scale-110 transition-transform">
+                            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-[#0B3D91] group-hover:scale-110 transition-transform">
                               <FiUpload size={24} />
                             </div>
-                            <span className="text-sm font-medium text-[#5C6642]">Click to upload Aadhaar</span>
-                            <span className="text-xs text-slate-400">JPG, PDF max 5MB</span>
+                            <span className="text-sm font-medium text-[#555555]">Click to upload Aadhaar</span>
+                            <span className="text-xs text-[#999999]">JPG, PDF max 5MB</span>
                           </>
                         )}
                       </div>
@@ -299,7 +299,7 @@ export const RegisterPage = () => {
               {step === 4 && (
                 <div className="space-y-4 animate-fadeIn">
                   <div>
-                    <label className="block text-sm font-bold text-[#4A5532] mb-1.5 ml-1">Password</label>
+                    <label className="block text-sm font-bold text-[#222222] mb-1.5 ml-1">Password</label>
                     <input
                       name="password"
                       type="password"
@@ -310,7 +310,7 @@ export const RegisterPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-[#4A5532] mb-1.5 ml-1">Confirm Password</label>
+                    <label className="block text-sm font-bold text-[#222222] mb-1.5 ml-1">Confirm Password</label>
                     <input
                       name="confirmPassword"
                       type="password"
@@ -322,7 +322,7 @@ export const RegisterPage = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-4 mt-6">
                     <button type="button" onClick={() => setStep(3)} className="btn-outline">Back</button>
-                    <button type="submit" disabled={loading} className="btn-secondary shadow-[#A5C89E]/20">
+                    <button type="submit" disabled={loading} className="btn-secondary shadow-sm">
                       {loading ? 'Creating...' : 'Create Account'}
                     </button>
                   </div>
@@ -332,9 +332,9 @@ export const RegisterPage = () => {
           </div>
         </div>
 
-        <p className="text-center text-sm text-[#5C6642] mt-8">
+        <p className="text-center text-sm text-[#555555] mt-8">
           Already have an account?{' '}
-          <Link to="/login" className="font-bold text-[#AEB877] hover:text-[#8B9850] hover:underline">
+          <Link to="/login" className="font-bold text-[#0B3D91] hover:text-[#092C6B] hover:underline">
             Login here
           </Link>
         </p>

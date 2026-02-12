@@ -144,10 +144,10 @@ export const ManageSchemesPage = () => {
     const filteredSchemes = schemes.filter(s => statusFilter === 'ALL' || s.status === statusFilter);
 
     return (
-        <div className="min-h-screen bg-[#F2F5E6] py-8 px-4 sm:px-6 lg:px-8 relative">
+        <div className="min-h-screen bg-[#F4F6F9] py-8 px-4 sm:px-6 lg:px-8 relative">
             {/* Toast */}
             {message.text && (
-                <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transition-all ${message.type === 'success' ? 'bg-[#2C3318] text-[#D8E983]' : 'bg-red-100 text-red-800'
+                <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transition-all ${message.type === 'success' ? 'bg-[#2E8B57] text-white' : 'bg-[#D32F2F] text-white'
                     }`}>
                     <span className="font-bold">{message.text}</span>
                 </div>
@@ -156,44 +156,44 @@ export const ManageSchemesPage = () => {
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-[#2C3318]">Manage Schemes</h1>
-                        <p className="text-[#5C6642]">Create and manage government subsidy schemes.</p>
+                        <h1 className="text-3xl font-bold text-[#222222]">Manage Schemes</h1>
+                        <p className="text-[#555555]">Create and manage government subsidy schemes.</p>
                     </div>
                     <div className="flex gap-4">
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-white border border-[#AEB877]/30 text-[#2C3318] font-bold rounded-xl px-4 py-3 focus:outline-none"
+                            className="bg-white border border-[#E0E0E0] text-[#222222] font-bold rounded-xl px-4 py-3 focus:outline-none shadow-sm"
                         >
                             <option value="ALL">All Status</option>
                             <option value="ACTIVE">Active Only</option>
                             <option value="INACTIVE">Inactive Only</option>
                         </select>
-                        <button onClick={handleCreateClick} className="px-6 py-3 bg-[#2C3318] text-white font-bold rounded-xl hover:bg-[#4A5532] shadow-lg flex items-center gap-2">
+                        <button onClick={handleCreateClick} className="px-6 py-3 bg-[#0B3D91] text-white font-bold rounded-xl hover:bg-[#092C6B] shadow-md flex items-center gap-2">
                             <FaPlus /> Create Scheme
                         </button>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm border border-[#AEB877]/20 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border border-[#E0E0E0] overflow-hidden">
                     <table className="w-full text-left">
-                        <thead className="bg-[#FFFBB1]">
+                        <thead className="bg-[#E3F2FD]">
                             <tr>
-                                <th className="px-6 py-4 text-[#4A5532] text-xs font-bold uppercase">Code</th>
-                                <th className="px-6 py-4 text-[#4A5532] text-xs font-bold uppercase">Name</th>
-                                <th className="px-6 py-4 text-[#4A5532] text-xs font-bold uppercase">Type</th>
-                                <th className="px-6 py-4 text-[#4A5532] text-xs font-bold uppercase">Status</th>
-                                <th className="px-6 py-4 text-[#4A5532] text-xs font-bold uppercase">Benefit</th>
-                                <th className="px-6 py-4 text-[#4A5532] text-xs font-bold uppercase">Actions</th>
+                                <th className="px-6 py-4 text-[#0B3D91] text-xs font-bold uppercase">Code</th>
+                                <th className="px-6 py-4 text-[#0B3D91] text-xs font-bold uppercase">Name</th>
+                                <th className="px-6 py-4 text-[#0B3D91] text-xs font-bold uppercase">Type</th>
+                                <th className="px-6 py-4 text-[#0B3D91] text-xs font-bold uppercase">Status</th>
+                                <th className="px-6 py-4 text-[#0B3D91] text-xs font-bold uppercase">Benefit</th>
+                                <th className="px-6 py-4 text-[#0B3D91] text-xs font-bold uppercase">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#AEB877]/10">
+                        <tbody className="divide-y divide-gray-100">
                             {filteredSchemes.map(s => (
-                                <tr key={s._id} className="hover:bg-[#F2F5E6]/30 transition-colors">
-                                    <td className="px-6 py-4 font-mono font-bold text-[#2C3318]">{s.schemeCode}</td>
+                                <tr key={s._id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-6 py-4 font-mono font-bold text-[#222222]">{s.schemeCode}</td>
                                     <td className="px-6 py-4">
-                                        <div className="font-bold text-[#2C3318]">{s.schemeName}</div>
-                                        <div className="text-xs text-[#5C6642]">{(s.description || '').substring(0, 40)}...</div>
+                                        <div className="font-bold text-[#222222]">{s.schemeName}</div>
+                                        <div className="text-xs text-[#555555]">{(s.description || '').substring(0, 40)}...</div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${s.schemeType === 'CENTRAL' ? 'bg-orange-100 text-orange-800' :
@@ -203,16 +203,16 @@ export const ManageSchemesPage = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded text-xs font-bold flex items-center gap-1 w-fit ${s.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                                        <span className={`px-2 py-1 rounded text-xs font-bold flex items-center gap-1 w-fit ${s.status === 'ACTIVE' ? 'bg-[#E8F5E9] text-[#1B5E20]' : 'bg-gray-100 text-gray-600'}`}>
                                             {s.status === 'ACTIVE' ? <FaCheck size={10} /> : <FaTimes size={10} />} {s.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 font-bold text-[#2C3318]">₹{s.benefitAmount}</td>
+                                    <td className="px-6 py-4 font-bold text-[#222222]">₹{s.benefitAmount}</td>
                                     <td className="px-6 py-4 flex gap-2">
-                                        <button onClick={() => handleEdit(s)} className="px-4 py-2 text-xs font-bold text-[#5C6642] bg-[#F2F5E6] rounded-lg hover:bg-[#AEB877] hover:text-[#2C3318] transition-colors">
+                                        <button onClick={() => handleEdit(s)} className="px-4 py-2 text-xs font-bold text-[#0B3D91] bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-[#092C6B] transition-colors">
                                             Edit
                                         </button>
-                                        <button onClick={() => handleToggleStatus(s)} className={`px-4 py-2 rounded-lg border text-xs font-bold transition-colors ${s.status === 'ACTIVE' ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-green-200 text-green-700 hover:bg-green-50'}`}>
+                                        <button onClick={() => handleToggleStatus(s)} className={`px-4 py-2 rounded-lg border text-xs font-bold transition-colors ${s.status === 'ACTIVE' ? 'border-[#D32F2F] text-[#D32F2F] hover:bg-red-50' : 'border-[#2E8B57] text-[#2E8B57] hover:bg-green-50'}`}>
                                             {s.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
                                         </button>
                                     </td>
@@ -220,7 +220,7 @@ export const ManageSchemesPage = () => {
                             ))}
                             {filteredSchemes.length === 0 && (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-8 text-center text-[#9CA385] italic">No schemes found.</td>
+                                    <td colSpan="6" className="px-6 py-8 text-center text-[#555555] italic">No schemes found.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -231,53 +231,64 @@ export const ManageSchemesPage = () => {
                 {showModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
                         <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
-                            <div className="p-6 border-b border-[#AEB877]/10 flex justify-between items-center bg-[#2C3318] text-white rounded-t-2xl">
+                            <div className="p-6 border-b border-[#E0E0E0] flex justify-between items-center bg-[#0B3D91] text-white rounded-t-2xl">
                                 <h3 className="text-xl font-bold">{editingId ? 'Edit Scheme Details' : 'Create New Government Scheme'}</h3>
-                                <button onClick={() => setShowModal(false)} className="text-2xl hover:text-[#AEB877] transition-colors">×</button>
+                                <button onClick={() => setShowModal(false)} className="text-2xl hover:text-gray-200 transition-colors">×</button>
                             </div>
 
-                            <div className="overflow-y-auto p-8 customized-scrollbar bg-[#FAFAF5]">
+                            <div className="overflow-y-auto p-8 customized-scrollbar bg-[#FAFAFA]">
                                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {/* Core Details */}
-                                    <div className="col-span-1 md:col-span-2 border-b border-[#AEB877]/20 pb-2 mb-2">
-                                        <h4 className="text-[#AEB877] font-bold uppercase tracking-widest text-xs">Core Information</h4>
+                                    <div className="col-span-1 md:col-span-2 border-b border-[#E0E0E0] pb-2 mb-2">
+                                        <h4 className="text-[#0B3D91] font-bold uppercase tracking-widest text-xs">Core Information</h4>
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Scheme Code</label>
-                                        <input name="schemeCode" placeholder="PM-KISAN" required onChange={handleChange} value={formData.schemeCode} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877] font-mono" readOnly={!!editingId} />
+                                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Scheme Code</label>
+                                        <input name="schemeCode" placeholder="PM-KISAN" required onChange={handleChange} value={formData.schemeCode} className="input-modern font-mono" readOnly={!!editingId} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Scheme Name</label>
-                                        <input name="schemeName" placeholder="Scheme Name" required onChange={handleChange} value={formData.schemeName} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877]" />
+                                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Scheme Name</label>
+                                        <input name="schemeName" placeholder="Scheme Name" required onChange={handleChange} value={formData.schemeName} className="input-modern" />
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Scheme Type</label>
-                                        <select name="schemeType" onChange={handleChange} value={formData.schemeType} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877]">
+                                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Scheme Type</label>
+                                        <select name="schemeType" onChange={handleChange} value={formData.schemeType} className="input-modern">
                                             <option value="STATE">State Scheme</option>
                                             <option value="CENTRAL">Central Scheme</option>
                                             <option value="JOINT">Joint (State + Central)</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Benefit Amount (₹)</label>
-                                        <input type="number" name="benefitAmount" placeholder="6000" onChange={handleChange} value={formData.benefitAmount} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877]" />
+                                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Benefit Amount (₹)</label>
+                                        <input type="number" name="benefitAmount" placeholder="6000" onChange={handleChange} value={formData.benefitAmount} className="input-modern" />
                                     </div>
 
                                     <div className="col-span-1 md:col-span-2">
-                                        <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Description</label>
-                                        <textarea name="description" placeholder="Scheme description..." required onChange={handleChange} value={formData.description} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877] h-24" />
+                                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Description</label>
+                                        <textarea name="description" placeholder="Scheme description..." required onChange={handleChange} value={formData.description} className="input-modern h-24" />
                                     </div>
 
                                     {/* Criteria */}
-                                    <div className="col-span-1 md:col-span-2 border-b border-[#AEB877]/20 pb-2 mb-2 mt-4">
-                                        <h4 className="text-[#AEB877] font-bold uppercase tracking-widest text-xs">Eligibility & Requirements</h4>
+                                    <div className="col-span-1 md:col-span-2 border-b border-[#E0E0E0] pb-2 mb-2 mt-4">
+                                        <h4 className="text-[#0B3D91] font-bold uppercase tracking-widest text-xs">Eligibility & Requirements</h4>
+                                    </div>
+
+                                    <div className="flex gap-4">
+                                        <div className="flex-1">
+                                            <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Min Land Area (Acres)</label>
+                                            <input type="number" step="0.01" name="minLandArea" placeholder="0" onChange={handleChange} value={formData.minLandArea} className="input-modern" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Max Land Area (Acres)</label>
+                                            <input type="number" step="0.01" name="maxLandArea" placeholder="No Limit" onChange={handleChange} value={formData.maxLandArea} className="input-modern" />
+                                        </div>
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Gender Eligibility</label>
-                                        <select name="genderEligibility" onChange={handleChange} value={formData.genderEligibility} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877]">
+                                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Gender Eligibility</label>
+                                        <select name="genderEligibility" onChange={handleChange} value={formData.genderEligibility} className="input-modern">
                                             <option value="ANY">Any Gender</option>
                                             <option value="MALE">Male Only</option>
                                             <option value="FEMALE">Female Only</option>
@@ -285,27 +296,27 @@ export const ManageSchemesPage = () => {
                                     </div>
                                     <div className="flex gap-4">
                                         <div className="flex-1">
-                                            <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Min Age</label>
-                                            <input type="number" name="ageMin" onChange={handleChange} value={formData.ageMin} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl" />
+                                            <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Min Age</label>
+                                            <input type="number" name="ageMin" onChange={handleChange} value={formData.ageMin} className="input-modern" />
                                         </div>
                                         <div className="flex-1">
-                                            <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Max Age</label>
-                                            <input type="number" name="ageMax" onChange={handleChange} value={formData.ageMax} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl" />
+                                            <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Max Age</label>
+                                            <input type="number" name="ageMax" onChange={handleChange} value={formData.ageMax} className="input-modern" />
                                         </div>
                                     </div>
 
                                     <div className="col-span-1 md:col-span-2">
-                                        <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Human Readable Eligibility Criteria (Required)</label>
-                                        <textarea name="eligibilityText" placeholder="e.g. Small and marginal farmers with land up to 2 hectares..." required onChange={handleChange} value={formData.eligibilityText} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877] h-24" />
+                                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Human Readable Eligibility Criteria (Required)</label>
+                                        <textarea name="eligibilityText" placeholder="e.g. Small and marginal farmers with land up to 2 hectares..." required onChange={handleChange} value={formData.eligibilityText} className="input-modern h-24" />
                                     </div>
 
                                     <div className="col-span-1 md:col-span-2">
-                                        <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Caste Eligibility</label>
+                                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Caste Eligibility</label>
                                         <div className="flex gap-3 flex-wrap">
                                             {['ANY', 'SC', 'ST', 'OBC', 'General'].map(caste => (
                                                 <label key={caste} className={`cursor-pointer px-3 py-2 rounded-lg border text-sm font-bold transition-all ${formData.casteEligibility.includes(caste)
-                                                    ? 'bg-[#AEB877] text-white border-[#AEB877]'
-                                                    : 'bg-white text-[#5C6642] border-[#AEB877]/30 hover:bg-[#F2F5E6]'
+                                                    ? 'bg-[#0B3D91] text-white border-[#0B3D91]'
+                                                    : 'bg-white text-[#555555] border-[#E0E0E0] hover:bg-gray-50'
                                                     }`}>
                                                     <input
                                                         type="checkbox"
@@ -328,35 +339,35 @@ export const ManageSchemesPage = () => {
                                     </div>
 
                                     {/* Docs & Process */}
-                                    <div className="col-span-1 md:col-span-2 border-b border-[#AEB877]/20 pb-2 mb-2 mt-4">
-                                        <h4 className="text-[#AEB877] font-bold uppercase tracking-widest text-xs">Process & Details</h4>
+                                    <div className="col-span-1 md:col-span-2 border-b border-[#E0E0E0] pb-2 mb-2 mt-4">
+                                        <h4 className="text-[#0B3D91] font-bold uppercase tracking-widest text-xs">Process & Details</h4>
                                     </div>
 
                                     <div className="col-span-1 md:col-span-2">
-                                        <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Documents Required (Comma Separated)</label>
-                                        <input name="documentsRequired" placeholder="e.g. Aadhar Card, Land Record" onChange={handleChange} value={formData.documentsRequired} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877]" />
+                                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Documents Required (Comma Separated)</label>
+                                        <input name="documentsRequired" placeholder="e.g. Aadhar Card, Land Record" onChange={handleChange} value={formData.documentsRequired} className="input-modern" />
                                     </div>
 
                                     <div className="col-span-1 md:col-span-2">
-                                        <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Application Process</label>
-                                        <textarea name="applicationProcess" placeholder="Step-by-step instructions..." onChange={handleChange} value={formData.applicationProcess} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#AEB877] h-20" />
+                                        <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Application Process</label>
+                                        <textarea name="applicationProcess" placeholder="Step-by-step instructions..." onChange={handleChange} value={formData.applicationProcess} className="input-modern h-20" />
                                     </div>
 
                                     <div className="flex gap-4">
                                         <div className="flex-1">
-                                            <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">Start Date</label>
-                                            <input type="date" name="startDate" required onChange={handleChange} value={formData.startDate} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl" />
+                                            <label className="block text-xs font-bold text-[#555555] uppercase mb-1">Start Date</label>
+                                            <input type="date" name="startDate" required onChange={handleChange} value={formData.startDate} className="input-modern" />
                                         </div>
                                         <div className="flex-1">
-                                            <label className="block text-xs font-bold text-[#4A5532] uppercase mb-1">End Date</label>
-                                            <input type="date" name="endDate" onChange={handleChange} value={formData.endDate} className="w-full p-3 bg-white border border-[#E2E6D5] rounded-xl" />
+                                            <label className="block text-xs font-bold text-[#555555] uppercase mb-1">End Date</label>
+                                            <input type="date" name="endDate" onChange={handleChange} value={formData.endDate} className="input-modern" />
                                         </div>
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="col-span-1 md:col-span-2 flex gap-4 pt-6 mt-4 border-t border-[#AEB877]/10">
+                                    <div className="col-span-1 md:col-span-2 flex gap-4 pt-6 mt-4 border-t border-[#E0E0E0]">
                                         <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">Cancel</button>
-                                        <button type="submit" className="flex-1 py-3 bg-[#2C3318] text-white font-bold rounded-xl hover:bg-[#4A5532] transition-colors shadow-lg">Save Scheme</button>
+                                        <button type="submit" className="flex-1 py-3 bg-[#0B3D91] text-white font-bold rounded-xl hover:bg-[#092C6B] transition-colors shadow-lg">Save Scheme</button>
                                     </div>
                                 </form>
                             </div>
