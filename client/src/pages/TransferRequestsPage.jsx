@@ -118,6 +118,7 @@ export const TransferRequestsPage = () => {
             const gasOptions = {
                 maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'),
                 maxFeePerGas: ethers.parseUnits('50', 'gwei'),
+                gasLimit: 500000 // Explicit limit to bypass estimation failure
             };
 
             // Check if land exists on blockchain
