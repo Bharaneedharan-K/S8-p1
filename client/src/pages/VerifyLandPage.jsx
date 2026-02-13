@@ -106,9 +106,11 @@ export const VerifyLandPage = () => {
             try {
                 // Amoy requires high gas price (30+ Gwei)
                 // Optimized to 30 Gwei to save cost but ensure success
+                // Added gasLimit to prevent 'missing revert data' estimation errors
                 tx = await contract.registerLand(land.surveyNumber, landHash, {
                     maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'),
                     maxFeePerGas: ethers.parseUnits('50', 'gwei'),
+                    gasLimit: 500000 // Explicit limit to bypass estimation failure
                 });
                 console.log('Transaction sent:', tx.hash);
             } catch (txError) {

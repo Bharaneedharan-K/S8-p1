@@ -19,10 +19,8 @@ const main = async () => {
     );
 
     try {
-        // Trying to read the land mentioned in the error: SR-2324-2K (Hex decoded from user error: a53522d323332342d324b)
-        // Wait, the error data "a53522d...24b" ends with 4b which is 'K'. 
-        // 53 52 2d 32 33 32 34 2d 32 4b -> SR-2324-2K
-        const data = await contract.getLand('SR-2324-2K');
+        // Trying to read the land mentioned in the error: SR-2324-6C
+        const data = await contract.getLand('SR-2324-6C');
         console.log('Land Found:', data);
     } catch (e) {
         console.log('Land NOT found (This is GOOD for registration):', e.message);
