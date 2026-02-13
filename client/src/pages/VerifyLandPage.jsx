@@ -32,79 +32,98 @@ export const VerifyLandPage = () => {
     }, [token]);
 
     // Blockchain & Approval Logic
+    // Blockchain & Approval Logic
     const handleVerifyAndApprove = async (land) => {
+        if (!window.ethereum) {
+            alert('MetaMask is not installed!');
+            return;
+        }
+
+        // Force switch to Polygon Amoy (Chain ID 80002 = 0x13882)
+        const targetChainId = '0x13882';
+        const targetChainConfig = {
+            chainId: targetChainId,
+            chainName: 'Polygon Amoy Testnet',
+            rpcUrls: ['https://rpc-amoy.polygon.technology/'],
+            nativeCurrency: {
+                name: "MATIC",
+                symbol: "MATIC",
+                decimals: 18
+            },
+            blockExplorerUrls: ['https://www.oklink.com/amoy']
+        };
+
         try {
-            if (!window.ethereum) {
-                alert('MetaMask is not installed!');
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: targetChainId }],
+            });
+        } catch (switchError) {
+            // This error code indicates that the chain has not been added to MetaMask.
+            if (switchError.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [targetChainConfig],
+                    });
+                } catch (addError) {
+                    setError('Please add Polygon Amoy to MetaMask manually.');
+                    setTimeout(() => setError(''), 5000);
+                    return;
+                }
+            } else {
+                console.error(switchError);
+                setError('Failed to switch network. Please switch to Polygon Amoy manually.');
+                setTimeout(() => setError(''), 5000);
                 return;
             }
-
-            // Force switch to Localhost (Chain ID 1337 = 0x539)
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x539' }],
-                });
-            } catch (switchError) {
-                // This error code indicates that the chain has not been added to MetaMask.
-                if (switchError.code === 4902) {
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [
-                                {
-                                    chainId: '0x539',
-                                    chainName: 'Localhost 8545',
-                                    rpcUrls: ['http://127.0.0.1:8545'],
-                                    nativeCurrency: {
-                                        name: "ETH",
-                                        symbol: "ETH",
-                                        decimals: 18
-                                    },
-                                },
-                            ],
-                        });
-                    } catch (addError) {
-                        setError('Please add Localhost 8545 to MetaMask manually.');
-                        setTimeout(() => setError(''), 5000);
-                        return;
-                    }
-                } else {
-                    console.error(switchError);
-                    // On some versions, simple switch error might not be 4902
-                }
-            }
+        }
 
 
+        try {
             setProcessingId(land._id);
             setError('');
 
-            // 1. Generate Hash (Using simple string concat for demo, usually use precise hashing or Merkle tree)
+            // 1. Generate Hash
             const dataString = `${land.surveyNumber}-${land.area}-${land.address}-${land.ownerName}`;
             const landHash = ethers.id(dataString);
 
+            // 2. Blockchain Transaction
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
 
-
-            const confirm = window.confirm(`Verifying Land: ${land.surveyNumber}\nHash: ${landHash.slice(0, 10)}...\n\nConfirm to mint to Blockchain?`);
-            if (!confirm) {
+            // DOUBLE CHECK: Validate signer is on correct network
+            const network = await provider.getNetwork();
+            if (network.chainId !== 80002n) {
+                setError('Wrong Network! Please switch to Polygon Amoy.');
                 setProcessingId(null);
                 return;
             }
 
-            // 2. Blockchain Transaction
-            const provider = new ethers.BrowserProvider(window.ethereum); // Ethers v6 syntax
-            const signer = await provider.getSigner();
             const contract = new ethers.Contract(LandRegistry.address, LandRegistry.abi, signer);
 
-            const tx = await contract.registerLand(land.surveyNumber, landHash);
-            console.log('Transaction sent:', tx.hash);
+            let tx;
+            try {
+                // Amoy requires high gas price (30+ Gwei)
+                // Optimized to 30 Gwei to save cost but ensure success
+                tx = await contract.registerLand(land.surveyNumber, landHash, {
+                    maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'),
+                    maxFeePerGas: ethers.parseUnits('50', 'gwei'),
+                });
+                console.log('Transaction sent:', tx.hash);
+            } catch (txError) {
+                if (txError.message && txError.message.includes('rate limit')) {
+                    throw new Error('RPC Rate Limit Exceeded. Please wait 30 seconds and try again.');
+                }
+                throw txError;
+            }
+
 
             // Wait for confirmation
             await tx.wait();
             console.log('Transaction mined');
 
             // 3. Backend Update (Store Hash, TxHash & verificationDocument)
-            // MUST usage FormData for file upload
             const updateData = new FormData();
             updateData.append('status', 'LAND_APPROVED');
             updateData.append('landHash', landHash);
@@ -121,6 +140,33 @@ export const VerifyLandPage = () => {
 
         } catch (err) {
             console.error(err);
+
+            // Handle User Rejection
+            if (err.info?.error?.code === 4001 || err.code === 'ACTION_REJECTED') {
+                setError('Transaction Cancelled by User.');
+                setTimeout(() => setError(''), 3000);
+                setProcessingId(null);
+                return;
+            }
+
+            // Handle Insufficient Funds
+            if (err.code === 'INSUFFICIENT_FUNDS' || err.message?.includes('insufficient funds')) {
+                setError('⚠️ Insufficient Test MATIC. Please get free tokens from Amoy Faucet.');
+                // Open Faucet in new tab
+                window.open('https://faucet.polygon.technology/', '_blank');
+                setTimeout(() => setError(''), 10000);
+                setProcessingId(null);
+                return;
+            }
+
+            // Handle Rate Limits specifically
+            if (err.message && (err.message.includes('429') || err.message.includes('too many errors') || err.message.includes('rate limit'))) {
+                setError('⚠️ Network Busy (RPC Rate Limit). Please wait 1 minute and try again.');
+                setTimeout(() => setError(''), 10000); // Show for longer
+                setProcessingId(null);
+                return;
+            }
+
             // Handle "Already Registered" Error
             if (err.message && (err.message.includes('already registered') || err.message.includes('execution reverted'))) {
                 const alreadyRegistered = window.confirm(
@@ -133,8 +179,6 @@ export const VerifyLandPage = () => {
                         updateData.append('status', 'LAND_APPROVED');
                         updateData.append('landHash', 'SYNCED_FROM_BLOCKCHAIN');
                         updateData.append('txHash', 'PREVIOUSLY_MINTED');
-
-
 
                         await apiClient.patch(`/land/verify/${land._id}`, updateData, {
                             headers: { 'Content-Type': 'multipart/form-data' }

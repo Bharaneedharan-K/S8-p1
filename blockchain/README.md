@@ -1,51 +1,38 @@
-# How to Run the Blockchain Network
+# Blockchain Land Registry
 
-This guide explains how to start the local Ethereum network, deploy the smart contract, and connect your wallet.
+This directory contains the Smart Contract and deployment scripts for the Land Registry System.
 
-## Prerequisites
-- Node.js installed
-- MetaMask Browser Extension installed
+## Network Details
+- **Network**: Polygon Amoy Testnet
+- **Chain ID**: 80002
+- **Currency**: MATIC (Testnet)
 
-## Step 1: Start the Local Blockchain Node
-This commands starts a local Ethereum network (Hardhat Network) on your machine.
-1. Open a terminal in the `blockchain` folder.
-2. Run the following command:
-   ```bash
-   npx hardhat node
-   ```
-3. **KEEP THIS TERMINAL OPEN.** You will see a list of "Accounts" and "Private Keys". You will need these later.
+## 👥 Team Member Setup Guide
+**Follow these steps to use the application:**
 
-## Step 2: Deploy the Smart Contract
-This command compiles your Solidity code and puts it on your local network.
-1. Open a **SECOND** terminal in the `blockchain` folder.
-2. Run the deployment script:
-   ```bash
-   npx hardhat run scripts/deploy.js --network localhost
-   ```
-3. You should see a message: `LandRegistry deployed to: 0x...`
-4. This script also auto-updates the frontend with the new address.
+### 1. Install MetaMask
+- Download and install the [MetaMask Extension](https://metamask.io/) for your browser.
+- Create a new wallet (Save your 12-word recovery phrase safely!).
+- *Note: You do NOT need the project's private key. Use your own unique wallet.*
 
-## Step 3: Connect MetaMask to Localhost
-1. Open MetaMask.
-2. Click the network dropdown (usually top-left) -> **Add Network**.
-3. Choose **"Add a network manually"** at the bottom.
-4. Fill in these details:
-   - **Network Name**: Localhost 8545
-   - **New RPC URL**: `http://127.0.0.1:8545`
-   - **Chain ID**: `1337`
-   - **Currency Symbol**: ETH
-5. Click **Save**.
+### 2. Add Polygon Amoy Network
+The easiest way is to open the application and click **"Verify & Mint"**. MetaMask will ask to add the network automatically.
 
-## Step 4: Import Test Account (Get Free ETH)
-1. Go back to the **First Terminal** (where `npx hardhat node` is running).
-2. Scroll up to see the list of accounts.
-3. Copy the **Private Key** of Account #0 (starts with `0x...`).
-4. In MetaMask:
-   - Click the generic profile icon (top-right circle).
-   - Click **Import Account**.
-   - Paste the private key.
-   - Click **Import**.
-5. You should now see **10000 ETH** in your balance.
+**Manual Configuration:**
+- **Network Name**: Polygon Amoy Testnet
+- **RPC URL**: `https://rpc-amoy.polygon.technology/`
+- **Chain ID**: `80002`
+- **Currency Symbol**: `MATIC`
+- **Block Explorer**: `https://www.oklink.com/amoy`
 
-## Step 5: Run the App
-Now you can go to the **Admin Dashboard** -> **Verify Land** and click "Verify & Mint". MetaMask will pop up asking you to sign the transaction!
+### 3. Get Free MATIC (Test Funds)
+You need "Gas Fees" to perform actions on the blockchain.
+1.  Open MetaMask and **Copy your Address** (starts with `0x...`).
+2.  Go to the [Polygon Amoy Faucet](https://faucet.polygon.technology/).
+3.  Select **Network: PoS (Amoy)** and **Token: MATIC**.
+4.  Paste your address and click **Submit**.
+5.  Wait 1-2 minutes. You will receive **0.2 MATIC**.
+
+### 4. You are Ready!
+- Connect your wallet to the application.
+- You can now **Verify Lands** and **Approve Transfers**.

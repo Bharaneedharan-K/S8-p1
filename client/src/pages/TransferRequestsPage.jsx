@@ -86,13 +86,20 @@ export const TransferRequestsPage = () => {
         try {
             if (!window.ethereum) return alert('MetaMask not installed');
 
-            // Force Localhost
+            // Force Switch to Polygon Amoy
+            const targetChainId = '0x13882'; // Amoy
             try {
                 await window.ethereum.request({
                     method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x539' }],
+                    params: [{ chainId: targetChainId }],
                 });
-            } catch (switchError) {/* Handle error */ }
+            } catch (switchError) {
+                // Should add chain if missing, but for now just error
+                if (switchError.code === 4902) {
+                    alert('Please add Polygon Amoy Network to MetaMask');
+                }
+                return;
+            }
 
             const confirm = window.confirm(`Approve Transfer for Land ${req.landId.surveyNumber}?\nFrom: ${req.sellerId.name}\nTo: ${req.buyerId.name}`);
             if (!confirm) return;
@@ -107,6 +114,12 @@ export const TransferRequestsPage = () => {
             const signer = await provider.getSigner();
             const contract = new ethers.Contract(LandRegistry.address, LandRegistry.abi, signer);
 
+            // Gas Overrides for Amoy
+            const gasOptions = {
+                maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'),
+                maxFeePerGas: ethers.parseUnits('50', 'gwei'),
+            };
+
             // Check if land exists on blockchain
             let isRegistered = false;
             try {
@@ -120,14 +133,15 @@ export const TransferRequestsPage = () => {
             let tx;
             if (isRegistered) {
                 // If exists, Transfer
-                tx = await contract.transferLand(req.landId.surveyNumber, transferHash);
+                tx = await contract.transferLand(req.landId.surveyNumber, transferHash, gasOptions);
             } else {
                 // If missing, Register (Mint Fresh)
-                // We use transferHash as the landHash for simplicity in this flow
-                tx = await contract.registerLand(req.landId.surveyNumber, transferHash);
+                tx = await contract.registerLand(req.landId.surveyNumber, transferHash, gasOptions);
             }
 
+            console.log('Transaction sent:', tx.hash);
             await tx.wait();
+            console.log('Transaction mined');
 
             // Backend Update
             await apiClient.patch(`/transfer/approve/${req._id}`, {
@@ -141,6 +155,32 @@ export const TransferRequestsPage = () => {
 
         } catch (err) {
             console.error(err);
+
+            // Handle User Rejection
+            if (err.info?.error?.code === 4001 || err.code === 'ACTION_REJECTED') {
+                setError('Transaction Cancelled by User.');
+                setTimeout(() => setError(''), 3000);
+                setActionLoading(null);
+                return;
+            }
+
+            // Handle Insufficient Funds
+            if (err.code === 'INSUFFICIENT_FUNDS' || err.message?.includes('insufficient funds')) {
+                setError('⚠️ Insufficient Test MATIC. Please get free tokens from Amoy Faucet.');
+                window.open('https://faucet.polygon.technology/', '_blank');
+                setTimeout(() => setError(''), 10000);
+                setActionLoading(null);
+                return;
+            }
+
+            // Handle Rate Limits specifically
+            if (err.message && (err.message.includes('429') || err.message.includes('too many errors') || err.message.includes('rate limit'))) {
+                setError('⚠️ Network Busy (RPC Rate Limit). Please wait 1 minute and try again.');
+                setTimeout(() => setError(''), 10000);
+                setActionLoading(null);
+                return;
+            }
+
             setError('Approval failed: ' + (err.reason || err.message));
         } finally {
             setActionLoading(null);
@@ -178,7 +218,7 @@ export const TransferRequestsPage = () => {
         const isRejected = status === 'TRANSFER_REJECTED';
 
         if (isRejected) {
-             return (
+            return (
                 <div className="w-full bg-red-50 border border-red-100 rounded-xl p-4 flex items-center justify-center gap-2 text-red-700 font-bold">
                     <FaTimes /> Transfer Rejected
                 </div>
@@ -190,9 +230,9 @@ export const TransferRequestsPage = () => {
                 <div className="relative flex items-center justify-between w-full">
                     {/* Progress Bar Background */}
                     <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 rounded-full"></div>
-                    
+
                     {/* Active Progress Bar */}
-                    <div 
+                    <div
                         className="absolute top-1/2 left-0 h-1 bg-[#0B3D91] -z-10 rounded-full transition-all duration-500"
                         style={{ width: `${(Math.max(0, currentStepIndex) / (steps.length - 1)) * 100}%` }}
                     ></div>
@@ -218,7 +258,7 @@ export const TransferRequestsPage = () => {
                         );
                     })}
                 </div>
-                
+
                 {/* Dynamic Status Message */}
                 <div className="mt-6 p-3 bg-blue-50 border border-blue-100 rounded-lg text-center text-sm text-[#0B3D91] font-medium flex items-center justify-center gap-2">
                     {status === 'TRANSFER_INITIATED' && <><FaUser /> Waiting for Buyer to Accept Request</>}

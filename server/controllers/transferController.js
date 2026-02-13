@@ -135,13 +135,16 @@ export const approveTransfer = async (req, res) => {
             transfer.transferHash = transferHash;
             transfer.txHash = txHash;
 
-            // Update Land Ownership
+            // Update Land Ownership & Hash
             const land = await Land.findById(transfer.landId);
             land.farmerId = transfer.buyerId;
-            // Ideally should also update ownerName, but we fetch that from User usually. 
-            // If Land has ownerName field, update it:
+
             const buyer = await User.findById(transfer.buyerId);
             land.ownerName = buyer.name;
+
+            // CRITICAL FIX: Update the landHash to match the new Transfer Hash
+            // The transferHash is essentially the new landHash
+            land.landHash = transferHash;
 
             await land.save();
             await transfer.save();

@@ -268,12 +268,9 @@ const VerificationSearch = () => {
       }
 
       // 2. Connect to Blockchain (ReadOnly)
-      let provider;
-      if (window.ethereum) {
-        provider = new ethers.BrowserProvider(window.ethereum);
-      } else {
-        provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545'); // Fallback
-      }
+      // We use a public RPC to avoid triggering Metamask or hitting User's rate limits for simple reads
+      const amoyRpc = "https://rpc-amoy.polygon.technology/";
+      const provider = new ethers.JsonRpcProvider(amoyRpc);
 
       const contractAddress = LandRegistry.address;
       const abi = [
