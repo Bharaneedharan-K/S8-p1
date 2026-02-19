@@ -197,9 +197,11 @@ export const createOfficer = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: sendEmail
+      message: emailSent
         ? 'Officer created and credentials emailed successfully!'
-        : 'Officer created successfully (Email skipped).',
+        : (sendEmail
+          ? `Officer created, but Email failed: ${emailErrorMsg}. Please share credentials manually.`
+          : 'Officer created successfully (Email skipped).'),
       officer: officer.toJSON(),
     });
   } catch (error) {
