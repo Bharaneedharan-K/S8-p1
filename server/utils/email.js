@@ -1,44 +1,8 @@
-import nodemailer from 'nodemailer';
+// Use a custom Google Apps Script Web App to bypass Render's SMTP port blocks 
+// and 3rd party API spam account activation requirements.
+// This sends email securely via the owner's Google account via a simple stateless HTTP POST.
 
-// Create transporter (using Gmail or other email service)
-let transporter;
-
-const getTransporter = () => {
-  if (!transporter) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-      console.error('❌ EMAIL CONFIG MISSING in .env');
-    }
-
-    transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // false for 587 (STARTTLS)
-      requireTLS: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-      // Increase timeout for slow connections
-      connectionTimeout: 10000,
-      greetingTimeout: 5000,
-      socketTimeout: 10000,
-    });
-  }
-  return transporter;
-};
-
-// Verify connection (Lazy)
-const verifyTransporter = async () => {
-  try {
-    const t = getTransporter();
-    await t.verify();
-    console.log('✅ Email service is ready');
-  } catch (error) {
-    console.log('⚠️ Email service connection warning:', error.message);
-  }
-};
-// Trigger verification independently so it doesn't block imports
-setTimeout(verifyTransporter, 2000);
+const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
 
 /**
  * Send officer credentials email
@@ -108,15 +72,6 @@ export const sendOfficerCredentials = async (recipientEmail, officerName, passwo
             font-family: 'Courier New', monospace;
             word-break: break-all;
           }
-          .warning {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fecaca;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 20px 0;
-            font-size: 14px;
-          }
           .footer {
             background: rgba(0, 0, 0, 0.3);
             color: #cbd5e1;
@@ -124,16 +79,6 @@ export const sendOfficerCredentials = async (recipientEmail, officerName, passwo
             text-align: center;
             font-size: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-          }
-          .button {
-            display: inline-block;
-            background: linear-gradient(to right, #3b82f6 0%, #2563eb 100%);
-            color: white;
-            padding: 12px 30px;
-            text-decoration: none;
-            border-radius: 6px;
-            margin: 20px 0;
-            font-weight: bold;
           }
         </style>
       </head>
@@ -146,9 +91,7 @@ export const sendOfficerCredentials = async (recipientEmail, officerName, passwo
 
           <div class="content">
             <p>Dear <strong>${officerName}</strong>,</p>
-
-            <p>Your account for the <strong>Welfora Land Verification System</strong> has been successfully created.</p>
-
+            <p>Your account for the <strong>Blockchain Land Verification System</strong> has been successfully created.</p>
             <p>Please use the credentials below to log in:</p>
 
             <div class="credentials-box">
@@ -156,45 +99,53 @@ export const sendOfficerCredentials = async (recipientEmail, officerName, passwo
                 <div class="label">Username (Email)</div>
                 <div class="value">${recipientEmail}</div>
               </div>
-
               <div class="credential-item">
                 <div class="label">Password</div>
                 <div class="value">${password}</div>
-                <div style="margin-top:5px; font-size:12px; color:#cbd5e1; font-style:italic;">(Please change this after your first login)</div>
               </div>
             </div>
 
             <p><strong>Instructions:</strong></p>
             <ol style="color:white; padding-left:20px;">
-              <li>Go to the <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" style="color:#4ade80;">Officer Login Portal</a>.</li>
+              <li>Go to the Officer Login Portal.</li>
               <li>Enter your username and password.</li>
-              <li>Complete your profile setup.</li>
             </ol>
-
-            <p>If you have any issues, please contact the administrator immediately.</p>
-
-            <p>Best regards,<br><strong>Welfora Admin Team</strong></p>
+            <p>Best regards,<br><strong>Admin Team</strong></p>
           </div>
 
           <div class="footer">
-            <p>This is an automated email. Please do not reply to this message.</p>
-            <p>© 2026 Welfora Land Portal. All rights reserved.</p>
+            <p>This is an automated email via Land Registry Portal.</p>
+            <p>© 2026 Blockchain Land Portal. All rights reserved.</p>
           </div>
         </div>
       </body>
       </html>
     `;
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER || 'noreply@welfora.gov.in',
+    const payload = {
       to: recipientEmail,
-      subject: '🔐 Verify Your Officer Account - Welfora Land Portal',
-      html: htmlContent,
+      subject: '🔐 Verify Your Officer Account - Land Verification Portal',
+      html: htmlContent
     };
 
-    const info = await getTransporter().sendMail(mailOptions);
-    console.log('Officer credentials email sent:', info.response);
-    return { success: true, messageId: info.messageId };
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Note: we can't send { mode: 'no-cors' } from backend node, but Apps Script standard JSON is fine
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error from Apps Script:', errorText);
+      throw new Error(`Apps Script responded with ${response.status}: ${errorText}`);
+    }
+
+    console.log('Officer credentials email sent via Google Apps Script API!');
+    return { success: true };
+
   } catch (error) {
     console.error('Error sending officer credentials email:', error);
     throw new Error(`Failed to send email: ${error.message}`);
@@ -206,16 +157,24 @@ export const sendOfficerCredentials = async (recipientEmail, officerName, passwo
  */
 export const sendTestEmail = async (recipientEmail) => {
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER || 'noreply@land-verification.gov',
+    const payload = {
       to: recipientEmail,
       subject: 'Test Email - Land Verification System',
-      html: '<h1>Test Email</h1><p>Email configuration is working correctly!</p>',
+      html: '<h1>Test Email</h1><p>Google Apps Script Email configuration is working correctly!</p>'
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Test email sent:', info.response);
-    return { success: true, messageId: info.messageId };
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) throw new Error('Failed to send test email');
+
+    console.log('Test email sent via Google Apps Script!');
+    return { success: true };
   } catch (error) {
     console.error('Error sending test email:', error);
     throw new Error(`Failed to send test email: ${error.message}`);

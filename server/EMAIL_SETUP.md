@@ -1,166 +1,88 @@
-# Email Configuration Guide - Officer Credentials
+# 📧 Google Apps Script Email API Setup Guide
 
-## Overview
+Our project uses a completely free, custom-built Google Apps Script to send emails (like Officer Credentials) securely from your Gmail account. 
 
-When an admin creates a new officer account, the system automatically sends the officer's login credentials (email and password) to their email address.
+This method is superior for free hosting tiers (like Render.com) because it completely bypasses standard SMTP port (465/587) blocking and avoids third-party spam restrictions that require manual human account activation (like Brevo/SendGrid).
 
-## Setup Instructions
+---
 
-### Step 1: Enable Gmail API and Generate App Password
+## 🛠️ Step 1: Create the Apps Script
+1. Go to your browser and log into the Google Account you want the emails to be sent from.
+2. Go to [script.google.com](https://script.google.com/).
+3. Click the **"New Project"** button on the top left.
+4. Name the project `Land Registry Email API` (or whatever you like) by clicking on "Untitled project" at the top.
 
-1. Go to [Google Account Security Settings](https://myaccount.google.com/security)
-2. Enable **2-Step Verification** if not already enabled
-3. Go to [App Passwords](https://myaccount.google.com/apppasswords)
-4. Select **Mail** and **Windows Computer** (or your device)
-5. Google will generate a **16-character app password**
-6. Copy this password (without spaces)
+## 💻 Step 2: Add the Code
+1. In the editor, you will see a default `function myFunction() { }`. 
+2. Delete everything and **paste the exact code below**:
 
-### Step 2: Update .env File
+```javascript
+function doPost(e) {
+  try {
+    // 1. Parse the incoming JSON payload from our Node.js server
+    var data = JSON.parse(e.postData.contents);
+    
+    // 2. Validate that we received an email 'to' address
+    if (!data.to) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false, 
+        error: "Missing 'to' parameter"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-Open `server/.env` and update these values:
-
-```env
-# Email Configuration (Gmail)
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASSWORD=your-app-password
-FRONTEND_URL=http://localhost:3000
+    // 3. Command Google's MailApp to send the email directly
+    MailApp.sendEmail({
+      to: data.to,
+      subject: data.subject || "Land Registry Notification",
+      htmlBody: data.html || "<p>No HTML Body provided</p>",
+      name: data.name || "Land Registry System" // Optional sender name override
+    });
+    
+    // 4. Return success response to Node.js backend
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true, 
+      message: "Email dispatched successfully via Google Servers"
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    // 5. Catch any Google-side errors and return them to the Node server
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false, 
+      error: error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
 ```
+3. Click the **Save** icon (Floppy Disk) or press `Ctrl + S`.
 
-**Example:**
+## 🚀 Step 3: Deploy as a Web App (Creates your API URL)
+1. On the top right of the screen, click the **Deploy** button.
+2. Select **New deployment**.
+3. Click the gear icon `⚙️` next to "Select type" and choose **Web app**.
+4. Configure the settings **EXACTLY** like this:
+   - **Description**: `Version 1` (or anything)
+   - **Execute as**: `Me (your_email@gmail.com)` ⚠️ *(Crucial: This ensures it uses your email to send)*
+   - **Who has access**: `Anyone` ⚠️ *(Crucial: This allows your Render backend to ping it without logging in)*
+5. Click **Deploy**.
 
-```env
-EMAIL_USER=admin@government.in
-EMAIL_PASSWORD=abcd efgh ijkl mnop
-FRONTEND_URL=http://localhost:3000
-```
+## 🔐 Step 4: Grant Permissions (One-Time)
+When you deploy for the very first time, Google will ask for permission to send emails on your behalf.
+1. Click **Authorize access**.
+2. Select your Google account.
+3. You will see a scary warning page ("Google hasn’t verified this app"). 
+4. Click **Advanced** at the bottom left.
+5. Click **Go to Land Registry Email API (unsafe)**.
+6. Click **Allow**.
 
-### Step 3: Verify Email Service (Optional)
-
-The system automatically verifies the email connection on server startup. Check server logs for:
-
-- ✅ `Email service is ready to send emails` - Configuration is correct
-- ❌ `Email service connection error` - Check your credentials
-
-## How It Works
-
-### When Officer is Created:
-
-1. **Admin creates officer** → Fills form with officer details
-2. **Password is set** → Admin enters a password in the form
-3. **Officer account saved** → Officer record created in database
-4. **Email sent automatically** → Officer's credentials emailed to their address
-5. **Success message shown** → Admin sees confirmation that email was sent
-
-### Email Content:
-
-The officer receives a professional HTML email containing:
-
-- ✉️ Their email address
-- 🔐 Their login password
-- 🔗 Link to login page
-- ⚠️ Security warning to change password after first login
-- 📋 Overview of officer responsibilities
-
-## Troubleshooting
-
-### Email Not Sending?
-
-1. **Check .env credentials**
-
-   ```bash
-   EMAIL_USER=your-email@gmail.com (must be valid)
-   EMAIL_PASSWORD=app-password (not your regular password)
+## 🔗 Step 5: Copy the URL to your project
+1. Standard deployment will finish and show a pop-up.
+2. Under "Web app", copy the generated **URL**.
+   *(It will look like `https://script.google.com/macros/s/AKfy...something.../exec`)*.
+3. Open the `server/.env` file in your project code.
+4. Paste the URL into the `APPS_SCRIPT_URL` variable:
+   ```env
+   # Google Apps Script Email API
+   APPS_SCRIPT_URL=https://script.google.com/macros/s/....../exec
    ```
 
-2. **Check Gmail 2-Step Verification**
-   - Must be enabled to use App Passwords
-   - App Passwords only work with 2FA enabled
-
-3. **Check server logs**
-
-   ```
-   // Look for these messages:
-   Email service is ready to send emails  // ✅ Good
-   Email service connection error         // ❌ Problem with credentials
-   ```
-
-4. **Test email configuration**
-   - Run the test email endpoint (if implemented)
-   - Check spam/junk folder in recipient email
-
-### Common Issues:
-
-| Issue                   | Solution                                             |
-| ----------------------- | ---------------------------------------------------- |
-| "Invalid credentials"   | Use app password, not regular password               |
-| "Less secure app" error | Enable 2-Step Verification in Gmail settings         |
-| Email not received      | Check spam folder, verify recipient email is correct |
-| Service times out       | Check internet connection, Gmail servers status      |
-
-## Security Considerations
-
-1. ⚠️ **App Password**: Use Google App Password, not your regular password
-2. 🔐 **Never commit .env**: Add `.env` to `.gitignore`
-3. 📧 **Email in logs**: Server logs contain email addresses (normal)
-4. 🔄 **Password change**: Officer should change password on first login
-5. 🚨 **Credentials in email**: Considered acceptable for admin-created accounts
-
-## Alternative Email Services
-
-If you want to use a different service instead of Gmail:
-
-### Option 1: SendGrid
-
-```env
-EMAIL_SERVICE=sendgrid
-EMAIL_API_KEY=your-sendgrid-api-key
-```
-
-### Option 2: Outlook/Office365
-
-```env
-EMAIL_USER=your-email@outlook.com
-EMAIL_PASSWORD=your-password
-EMAIL_SERVICE=outlook
-```
-
-### Option 3: Nodemailer with SMTP
-
-```env
-EMAIL_HOST=smtp.example.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@example.com
-EMAIL_PASSWORD=your-password
-```
-
-## Files Modified
-
-- `server/utils/email.js` - Email sending utility
-- `server/controllers/authController.js` - Updated createOfficer to send email
-- `server/.env` - Added email configuration
-
-## Testing
-
-To test the setup:
-
-1. **Create a test officer** through the admin panel
-2. **Check the officer's email** for the credentials email
-3. **Verify email content** includes name, email, and password
-4. **Test login** with the provided credentials
-
-## Environment Variables
-
-```env
-EMAIL_USER          # Gmail address
-EMAIL_PASSWORD      # Google App Password (16 chars)
-FRONTEND_URL        # Frontend URL for login link
-NODE_ENV            # development/production
-```
-
-## Notes
-
-- 📧 Email sending is **non-blocking** - Officer creation succeeds even if email fails
-- 🔍 All email activities are logged to server console
-- 🔐 Passwords are never stored in plain text (bcrypt hashed)
-- 📱 Officers should change password after first login
-- 🌐 Works in both development and production environments
+You are done! Your backend will now send a simple JSON packet to this URL, and Google will automatically send an email from your Gmail account to the Officer's inbox instantly!

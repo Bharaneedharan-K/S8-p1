@@ -166,16 +166,20 @@ export const createOfficer = async (req, res) => {
     }
 
     // Strict Email Logic: If sendEmail is true, try sending FIRST
+    let emailSent = false;
+    let emailErrorMsg = '';
+
     if (sendEmail) {
       try {
         console.log(`📧 Attempting to send credentials to ${email}...`);
         await sendOfficerCredentials(email, name, password);
         console.log(`✅ Email sent successfully to ${email}`);
+        emailSent = true;
       } catch (emailError) {
         console.error(`❌ Email failed:`, emailError.message);
         return res.status(500).json({
           success: false,
-          message: 'Failed to send verification email. Officer account NOT created.',
+          message: 'Email connection timed out. Please UNCHECK "Send Credentials via Email" to create the account manually.',
           error: emailError.message
         });
       }
