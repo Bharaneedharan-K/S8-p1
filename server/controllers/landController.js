@@ -90,6 +90,12 @@ export const getAvailableSlots = async (req, res) => {
         const { officerId } = req.params;
         if (!officerId) return res.status(400).json({ success: false, message: 'Officer ID is required' });
 
+        // Prevent browser caching so fresh slot availability is always returned
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.setHeader('Surrogate-Control', 'no-store');
+
         const slots = [];
         const today = new Date();
         let currentDay = new Date(today);
