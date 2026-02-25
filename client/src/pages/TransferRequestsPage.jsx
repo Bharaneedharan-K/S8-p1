@@ -106,9 +106,9 @@ export const TransferRequestsPage = () => {
 
             setActionLoading(req._id);
 
-            // Generate Hash
-            const transferString = `${req.landId.surveyNumber}-${req.sellerId._id}-${req.buyerId._id}-${Date.now()}`;
-            const transferHash = ethers.id(transferString);
+            // Generate Hash (Must exactly match the Public Verification logic: SurveyNumber-Area-Address-OwnerName)
+            const dataString = `${req.landId.surveyNumber}-${req.landId.area}-${req.landId.address}-${req.buyerId.name}`;
+            const transferHash = ethers.id(dataString);
 
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
