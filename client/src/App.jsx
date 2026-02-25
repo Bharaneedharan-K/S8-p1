@@ -37,208 +37,206 @@ function App() {
             <div className="flex-1 flex flex-col overflow-hidden relative">
               <Navbar />
               <div className="flex-1 overflow-x-hidden overflow-y-auto bg-[#F4F6F9] scrollbar-hide">
-                <div className="container mx-auto px-4 py-6 md:px-6 md:py-8 max-w-7xl">
-                  <Routes>
-                    {/* Public routes */}
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/verify-land" element={<div className="min-h-screen flex items-center justify-center"><h1>🔍 Land Verification Coming Soon</h1></div>} />
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/verify-land" element={<div className="min-h-screen flex items-center justify-center"><h1>🔍 Land Verification Coming Soon</h1></div>} />
 
-                    {/* Auth routes */}
-                    <Route
-                      path="/login"
-                      element={
-                        <PublicRoute>
-                          <LoginPage />
-                        </PublicRoute>
-                      }
-                    />
-                    <Route
-                      path="/register"
-                      element={
-                        <PublicRoute>
-                          <RegisterPage />
-                        </PublicRoute>
-                      }
-                    />
+                  {/* Auth routes */}
+                  <Route
+                    path="/login"
+                    element={
+                      <PublicRoute>
+                        <LoginPage />
+                      </PublicRoute>
+                    }
+                  />
+                  <Route
+                    path="/register"
+                    element={
+                      <PublicRoute>
+                        <RegisterPage />
+                      </PublicRoute>
+                    }
+                  />
 
-                    {/* Protected routes */}
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <PrivateRoute>
-                          <DashboardPage />
-                        </PrivateRoute>
-                      }
-                    />
+                  {/* Protected routes */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <PrivateRoute>
+                        <DashboardPage />
+                      </PrivateRoute>
+                    }
+                  />
 
-                    {/* Farmer routes */}
-                    <Route
-                      path="/farmer/verify"
-                      element={
-                        <PrivateRoute requiredRole="FARMER">
-                          <FarmerVerificationPage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/farmer/profile"
-                      element={
-                        <PrivateRoute requiredRole="FARMER">
-                          <FarmerProfilePage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/farmer/lands"
-                      element={
-                        <PrivateRoute requiredRole="FARMER">
-                          <VerifiedRoute>
-                            <LandRecordsPage />
-                          </VerifiedRoute>
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/farmer/add-land"
-                      element={
-                        <PrivateRoute requiredRole="FARMER">
-                          <VerifiedRoute>
-                            <AddLandPage />
-                          </VerifiedRoute>
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/farmer/schemes"
-                      element={
-                        <PrivateRoute requiredRole="FARMER">
-                          <VerifiedRoute>
-                            <SchemesPage />
-                          </VerifiedRoute>
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/farmer/applications"
-                      element={
-                        <PrivateRoute requiredRole="FARMER">
-                          <VerifiedRoute>
-                            <MyApplicationsPage />
-                          </VerifiedRoute>
-                        </PrivateRoute>
-                      }
-                    />
-
-                    {/* Officer routes */}
-                    <Route
-                      path="/officer/farmers"
-                      element={
-                        <PrivateRoute requiredRole="OFFICER">
-                          <OfficerVerificationPage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/officer/add-land"
-                      element={
-                        <PrivateRoute requiredRole="OFFICER">
-                          <AddLandPage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/officer/lands"
-                      element={
-                        <PrivateRoute requiredRole="OFFICER">
+                  {/* Farmer routes */}
+                  <Route
+                    path="/farmer/verify"
+                    element={
+                      <PrivateRoute requiredRole="FARMER">
+                        <FarmerVerificationPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/farmer/profile"
+                    element={
+                      <PrivateRoute requiredRole="FARMER">
+                        <FarmerProfilePage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/farmer/lands"
+                    element={
+                      <PrivateRoute requiredRole="FARMER">
+                        <VerifiedRoute>
                           <LandRecordsPage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/officer/profile"
-                      element={
-                        <PrivateRoute requiredRole="OFFICER">
-                          <div className="min-h-screen flex items-center justify-center"><h1>👤 Officer Profile (Phase 1)</h1></div>
-                        </PrivateRoute>
-                      }
-                    />
+                        </VerifiedRoute>
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/farmer/add-land"
+                    element={
+                      <PrivateRoute requiredRole="FARMER">
+                        <VerifiedRoute>
+                          <AddLandPage />
+                        </VerifiedRoute>
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/farmer/schemes"
+                    element={
+                      <PrivateRoute requiredRole="FARMER">
+                        <VerifiedRoute>
+                          <SchemesPage />
+                        </VerifiedRoute>
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/farmer/applications"
+                    element={
+                      <PrivateRoute requiredRole="FARMER">
+                        <VerifiedRoute>
+                          <MyApplicationsPage />
+                        </VerifiedRoute>
+                      </PrivateRoute>
+                    }
+                  />
 
-                    {/* Admin routes */}
-                    <Route
-                      path="/admin/officers"
-                      element={
-                        <PrivateRoute requiredRole="ADMIN">
-                          <ManageOfficersPage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/farmers"
-                      element={
-                        <PrivateRoute requiredRole="ADMIN">
-                          <ManageFarmersPage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/verify-land"
-                      element={
-                        <PrivateRoute requiredRole="ADMIN">
-                          <VerifyLandPage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/lands"
-                      element={
-                        <PrivateRoute requiredRole="ADMIN">
-                          <div className="min-h-screen flex items-center justify-center"><h1>📋 Land Approvals (Phase 3)</h1></div>
-                        </PrivateRoute>
-                      }
-                    />
+                  {/* Officer routes */}
+                  <Route
+                    path="/officer/farmers"
+                    element={
+                      <PrivateRoute requiredRole="OFFICER">
+                        <OfficerVerificationPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/officer/add-land"
+                    element={
+                      <PrivateRoute requiredRole="OFFICER">
+                        <AddLandPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/officer/lands"
+                    element={
+                      <PrivateRoute requiredRole="OFFICER">
+                        <LandRecordsPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/officer/profile"
+                    element={
+                      <PrivateRoute requiredRole="OFFICER">
+                        <div className="min-h-screen flex items-center justify-center"><h1>👤 Officer Profile (Phase 1)</h1></div>
+                      </PrivateRoute>
+                    }
+                  />
 
-                    <Route
-                      path="/admin/applications"
-                      element={
-                        <PrivateRoute requiredRole="ADMIN">
-                          <SchemeApplicationsPage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/schemes"
-                      element={
-                        <PrivateRoute requiredRole="ADMIN">
-                          <ManageSchemesPage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/logs"
-                      element={
-                        <PrivateRoute requiredRole="ADMIN">
-                          <BlockchainLogsPage />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/transfer-requests"
-                      element={
-                        <PrivateRoute>
-                          <VerifiedRoute>
-                            <TransferRequestsPage />
-                          </VerifiedRoute>
-                        </PrivateRoute>
-                      }
-                    />
+                  {/* Admin routes */}
+                  <Route
+                    path="/admin/officers"
+                    element={
+                      <PrivateRoute requiredRole="ADMIN">
+                        <ManageOfficersPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/farmers"
+                    element={
+                      <PrivateRoute requiredRole="ADMIN">
+                        <ManageFarmersPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/verify-land"
+                    element={
+                      <PrivateRoute requiredRole="ADMIN">
+                        <VerifyLandPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/lands"
+                    element={
+                      <PrivateRoute requiredRole="ADMIN">
+                        <div className="min-h-screen flex items-center justify-center"><h1>📋 Land Approvals (Phase 3)</h1></div>
+                      </PrivateRoute>
+                    }
+                  />
 
-                    {/* Error routes */}
-                    <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                  <Route
+                    path="/admin/applications"
+                    element={
+                      <PrivateRoute requiredRole="ADMIN">
+                        <SchemeApplicationsPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/schemes"
+                    element={
+                      <PrivateRoute requiredRole="ADMIN">
+                        <ManageSchemesPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/logs"
+                    element={
+                      <PrivateRoute requiredRole="ADMIN">
+                        <BlockchainLogsPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/transfer-requests"
+                    element={
+                      <PrivateRoute>
+                        <VerifiedRoute>
+                          <TransferRequestsPage />
+                        </VerifiedRoute>
+                      </PrivateRoute>
+                    }
+                  />
 
-                    {/* Catch all */}
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </div>
+                  {/* Error routes */}
+                  <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+                  {/* Catch all */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
               </div>
 
               {/* Global Chatbot Widget */}
