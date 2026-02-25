@@ -225,7 +225,7 @@ export const getTransferRequests = async (req, res) => {
         // For Admin (Show All) or Specific filtering can be added later
 
         const requests = await TransferRequest.find(query)
-            .populate('landId', 'surveyNumber district area')
+            .populate('landId', 'surveyNumber district area address')
             .populate('sellerId', 'name email mobile')
             .populate('buyerId', 'name email mobile')
             .populate('officerId', 'name')
