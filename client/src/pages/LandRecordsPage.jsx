@@ -15,7 +15,7 @@ export const LandRecordsPage = () => {
     const [transferLoading, setTransferLoading] = useState(false);
     const [successMsg, setSuccessMsg] = useState('');
 
-    useEffect(() => {
+    useEffect(() => {  
         const fetchLands = async () => {
             try {
                 setLoading(true);
