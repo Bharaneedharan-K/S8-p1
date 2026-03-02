@@ -1,4 +1,5 @@
 import Scheme from '../models/Scheme.js';
+import { notifyFarmers } from '../utils/notificationUtils.js';
 
 // Admin: Create Scheme
 export const createScheme = async (req, res) => {
@@ -56,6 +57,9 @@ export const createScheme = async (req, res) => {
 
         await scheme.save();
         console.log('✅ Scheme Created:', scheme._id);
+
+        await notifyFarmers('New Scheme Available', `${schemeName} has just been added. Check if you are eligible!`, 'INFO', '/farmer/schemes');
+
         res.status(201).json({ success: true, message: 'Scheme created successfully', scheme });
 
     } catch (error) {

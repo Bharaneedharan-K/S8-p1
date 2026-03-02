@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaLeaf, FaSignOutAlt, FaBars, FaTimes, FaChevronDown, FaLock } from 'react-icons/fa';
+import apiClient from '../services/api';
+import { FaLeaf, FaSignOutAlt, FaBars, FaTimes, FaChevronDown, FaLock, FaBell, FaCheck, FaInfoCircle, FaTrash } from 'react-icons/fa';
 
 export const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -10,6 +11,72 @@ export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch notifications
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 60000); // Poll every 60s
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
+
+  const fetchNotifications = async () => {
+    try {
+      const { data } = await apiClient.get('/notifications');
+      if (data.success) {
+        setNotifications(data.notifications);
+        setUnreadCount(data.notifications.filter(n => !n.isRead).length);
+      }
+    } catch (error) {
+      console.error('Failed to fetch notifications', error);
+    }
+  };
+
+  const handleNotificationClick = async (notif) => {
+    if (!notif.isRead) {
+      try {
+        await apiClient.patch(`/notifications/${notif._id}/read`);
+        setNotifications(prev => prev.map(n => n._id === notif._id ? { ...n, isRead: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      } catch (error) {
+        console.error('Failed to mark read', error);
+      }
+    }
+    if (notif.link) {
+      navigate(notif.link);
+      setShowNotifications(false);
+    }
+  };
+
+  const markAllAsRead = async (e) => {
+    e.stopPropagation();
+    try {
+      await apiClient.patch('/notifications/read-all');
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Failed to clear notifications', error);
+    }
+  };
+
+  const handleDeleteNotification = async (e, id) => {
+    e.stopPropagation();
+    try {
+      await apiClient.delete(`/notifications/${id}`);
+      setNotifications(prev => prev.filter(n => n._id !== id));
+      // Only decrement unread count if the deleted notification was unread
+      const deletedNotif = notifications.find(n => n._id === id);
+      if (deletedNotif && !deletedNotif.isRead) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error('Failed to delete notification', error);
+    }
+  };
 
   // Handle scroll effect
   useEffect(() => {
@@ -29,13 +96,16 @@ export const Navbar = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownOpen && !event.target.closest('.relative')) {
+      if (dropdownOpen && !event.target.closest('.user-dropdown')) {
         setDropdownOpen(false);
+      }
+      if (showNotifications && !event.target.closest('.notif-dropdown')) {
+        setShowNotifications(false);
       }
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [dropdownOpen]);
+  }, [dropdownOpen, showNotifications]);
 
   const handleLogout = () => {
     logout();
@@ -61,9 +131,9 @@ export const Navbar = () => {
       return (
         <Link
           to={to}
-          className={`block px-4 py-3 rounded-lg text-base font-bold transition-all ${active
-            ? 'bg-[#0B3D91] text-white'
-            : 'text-[#555555] hover:bg-gray-100'
+          className={`block px-4 py-3 rounded-lg text-base font-bold transition-all duration-300 ${active
+            ? 'bg-gradient-to-r from-[#0B3D91] to-[#1565C0] text-white shadow-md'
+            : 'text-[#555555] hover:bg-gray-100 hover:text-[#0B3D91]'
             }`}
         >
           {children}
@@ -88,7 +158,9 @@ export const Navbar = () => {
     return (
       <Link
         to={to}
-        className={`relative px-4 py-2 text-sm font-bold rounded-lg transition-all ${active ? 'text-white bg-white/10' : 'text-white/70 hover:text-white hover:bg-white/5'
+        className={`relative px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${active
+          ? 'text-white bg-white/20 shadow-inner backdrop-blur-sm border border-white/20'
+          : 'text-white/80 hover:text-white hover:bg-white/10'
           }`}
       >
         {children}
@@ -101,9 +173,9 @@ export const Navbar = () => {
   return (
     <>
       <nav
-        className={`fixed w-full z-50 transition-all duration-300 ${scrolled || mobileMenuOpen
-          ? 'bg-[#0B3D91] shadow-lg border-b border-white/10 py-2'
-          : 'bg-[#0B3D91] py-3'
+        className={`fixed w-full z-50 transition-all duration-500 border-b ${scrolled || mobileMenuOpen
+          ? 'bg-[#0B3D91]/95 backdrop-blur-md shadow-xl border-white/10 py-2'
+          : 'bg-gradient-to-r from-[#0B3D91] to-[#0D47A1] border-transparent py-4'
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -140,7 +212,7 @@ export const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <div className="flex bg-[#082A66] rounded-lg px-1 py-1 mr-4 border border-white/5">
+                  <div className="flex bg-black/20 backdrop-blur-sm rounded-full p-1 border border-white/10 mr-2 shadow-inner">
                     {user?.role === 'FARMER' && (
                       <>
                         <NavLink to="/dashboard">Dashboard</NavLink>
@@ -158,7 +230,7 @@ export const Navbar = () => {
                       <>
                         <NavLink to="/dashboard">Dashboard</NavLink>
                         <NavLink to="/officer/farmers">Verifications</NavLink>
-                        <NavLink to="/officer/add-land">Add Land Record</NavLink>
+                        <NavLink to="/officer/add-land">Verify Land</NavLink>
                         <NavLink to="/officer/lands">Land Records</NavLink>
                         <NavLink to="/transfer-requests">Transfers</NavLink>
                       </>
@@ -178,36 +250,102 @@ export const Navbar = () => {
                     )}
                   </div>
 
-                  {/* Profile Dropdown */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setDropdownOpen(!dropdownOpen)}
-                      className="flex items-center gap-3 p-1.5 pl-3 pr-2 rounded-full border border-white/10 hover:bg-white/5 transition-all group"
-                    >
-                      <div className="text-right hidden lg:block">
-                        <p className="text-xs font-bold text-white">{user?.name}</p>
-                        <p className="text-[10px] text-white/70 uppercase">{user?.role}</p>
-                      </div>
-                      <div className="w-9 h-9 bg-white text-[#0B3D91] rounded-full flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-105 transition-transform">
-                        {user?.name?.charAt(0)}
-                      </div>
-                      <FaChevronDown className={`text-white/70 text-xs transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {dropdownOpen && (
-                      <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg border border-[#E0E0E0] py-2 animate-fadeIn origin-top-right z-50">
-                        <div className="px-4 py-3 border-b border-gray-100 lg:hidden">
-                          <p className="text-sm font-semibold text-[#222222]">{user?.name}</p>
-                          <p className="text-xs text-[#555555]">{user?.email}</p>
+                  <div className="flex items-center gap-3">
+                    {/* Profile Dropdown */}
+                    <div className="relative user-dropdown">
+                      <button
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                        className="flex items-center gap-3 p-1.5 pl-3 pr-2 rounded-full border border-white/10 hover:bg-white/5 transition-all group"
+                      >
+                        <div className="text-right hidden lg:block">
+                          <p className="text-xs font-bold text-white">{user?.name}</p>
+                          <p className="text-[10px] text-white/70 uppercase">{user?.role}</p>
                         </div>
-                        <button
-                          onClick={handleLogout}
-                          className="w-full text-left px-4 py-2.5 text-sm text-[#D32F2F] hover:bg-red-50 font-medium transition-colors flex items-center gap-2"
-                        >
-                          <FaSignOutAlt /> Sign Out
-                        </button>
-                      </div>
-                    )}
+                        <div className="w-9 h-9 bg-white text-[#0B3D91] rounded-full flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-105 transition-transform">
+                          {user?.name?.charAt(0)}
+                        </div>
+                        <FaChevronDown className={`text-white/70 text-xs transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {dropdownOpen && (
+                        <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg border border-[#E0E0E0] py-2 animate-fadeIn origin-top-right z-50">
+                          <div className="px-4 py-3 border-b border-gray-100 lg:hidden">
+                            <p className="text-sm font-semibold text-[#222222]">{user?.name}</p>
+                            <p className="text-xs text-[#555555]">{user?.email}</p>
+                          </div>
+                          <button
+                            onClick={handleLogout}
+                            className="w-full text-left px-4 py-2.5 text-sm text-[#D32F2F] hover:bg-red-50 font-medium transition-colors flex items-center gap-2"
+                          >
+                            <FaSignOutAlt /> Sign Out
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Notification Bell */}
+                    <div className="relative notif-dropdown">
+                      <button
+                        onClick={() => {
+                          setShowNotifications(!showNotifications);
+                          setDropdownOpen(false);
+                        }}
+                        className="relative p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-300 border border-white/20 backdrop-blur-sm hover:scale-105 shadow-lg group flex items-center justify-center"
+                      >
+                        <FaBell className={`text-lg transition-all duration-300 group-hover:rotate-12 ${unreadCount > 0 ? 'animate-pulse text-yellow-300' : ''}`} />
+                        {unreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-4 w-4 bg-gradient-to-r from-red-500 to-pink-500 text-[9px] font-bold text-white items-center justify-center border border-white shadow-sm shadow-red-500/50">
+                              {unreadCount > 9 ? '9+' : unreadCount}
+                            </span>
+                          </span>
+                        )}
+                      </button>
+
+                      {showNotifications && (
+                        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100/50 py-2 animate-fadeIn origin-top-right z-50 overflow-hidden ring-1 ring-black/5">
+                          <div className="px-5 py-4 border-b border-gray-100/50 flex justify-between items-center bg-gray-50/50">
+                            <h3 className="text-sm font-extrabold text-[#111] tracking-wide">Notifications</h3>
+                            {unreadCount > 0 && (
+                              <button onClick={markAllAsRead} className="text-xs font-semibold text-[#0B3D91] hover:text-[#1565C0] transition-colors flex items-center gap-1">
+                                <FaCheck className="text-[10px]" /> Mark all read
+                              </button>
+                            )}
+                          </div>
+                          <div className="max-h-[350px] overflow-y-auto">
+                            {notifications.length === 0 ? (
+                              <div className="px-4 py-8 text-center text-[#555] flex flex-col items-center">
+                                <FaBell className="text-gray-300 text-3xl mb-2" />
+                                <p className="text-sm">You have no new notifications.</p>
+                              </div>
+                            ) : (
+                              notifications.map((notif) => (
+                                <div
+                                  key={notif._id}
+                                  onClick={() => handleNotificationClick(notif)}
+                                  className={`px-4 py-3 border-b flex items-start gap-3 cursor-pointer transition-colors ${notif.isRead ? 'bg-white hover:bg-gray-50' : 'bg-blue-50/50 hover:bg-blue-50'}`}
+                                >
+                                  <div className={`mt-1 flex-shrink-0 w-2 h-2 rounded-full ${notif.isRead ? 'bg-transparent' : 'bg-[#0B3D91]'}`}></div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className={`text-sm ${notif.isRead ? 'text-[#555]' : 'font-bold text-[#222]'}`}>{notif.title}</p>
+                                    <p className={`text-xs mt-0.5 line-clamp-2 ${notif.isRead ? 'text-gray-400' : 'text-[#444]'}`}>{notif.message}</p>
+                                    <p className="text-[10px] text-gray-400 mt-1 font-medium">{new Date(notif.createdAt).toLocaleString()}</p>
+                                  </div>
+                                  <button
+                                    onClick={(e) => handleDeleteNotification(e, notif._id)}
+                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors flex-shrink-0"
+                                    title="Delete notification"
+                                  >
+                                    <FaTrash className="text-xs" />
+                                  </button>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </>
               )}

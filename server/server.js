@@ -12,6 +12,7 @@ import landRoutes from './routes/land.js';
 import schemeRoutes from './routes/scheme.js';
 import transferRoutes from './routes/transfer.js';
 import chatRoutes from './routes/chat.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import applicationRoutes from './routes/application.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import User from './models/User.js';
@@ -39,6 +40,7 @@ app.use('/api/schemes', schemeRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/transfer', transferRoutes);
 app.use('/api/chat', chatRoutes); // AI Chatbot
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

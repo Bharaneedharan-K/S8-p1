@@ -3,6 +3,7 @@ import { generateToken } from '../utils/jwt.js';
 import { sendOfficerCredentials } from '../utils/email.js';
 import { uploadToCloudinary } from '../utils/cloudinary.js';
 import { validationResult } from 'express-validator';
+import { createNotification, notifyOfficersInDistrict } from '../utils/notificationUtils.js';
 
 // Register - Farmer Only
 export const register = async (req, res) => {
@@ -59,6 +60,9 @@ export const register = async (req, res) => {
 
     // Generate token
     const token = generateToken(user._id, user.role);
+
+    // Notify officers in the farmer's district
+    await notifyOfficersInDistrict(district, 'New Farmer Registered', `${name} has just registered in your district and needs verification.`, 'INFO', '/officer/farmers');
 
     res.status(201).json({
       success: true,
@@ -311,6 +315,14 @@ export const updateUserStatus = async (req, res) => {
         success: false,
         message: 'User not found',
       });
+    }
+
+    if (user.role === 'FARMER') {
+      if (status === 'FARMER_VERIFIED') {
+        await createNotification(user._id, 'Profile Verified', 'Your farmer profile has been verified successfully by an officer.', 'SUCCESS', '/dashboard');
+      } else if (status === 'FARMER_REJECTED') {
+        await createNotification(user._id, 'Profile Rejected', 'Your farmer profile verification was rejected. Please contact support or re-register.', 'ERROR');
+      }
     }
 
     res.status(200).json({

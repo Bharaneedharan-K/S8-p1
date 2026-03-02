@@ -204,6 +204,30 @@ export const AddLandPage = () => {
         }
     };
 
+    const handleReject = async () => {
+        const reason = window.prompt("Enter rejection reason:");
+        if (!reason) return;
+
+        try {
+            setLoading(true);
+            await apiClient.patch(`/land/verify/${selectedLandId}`, {
+                status: 'LAND_REJECTED',
+                rejectionReason: reason
+            });
+            setSuccess('Land application rejected successfully.');
+            await fetchPendingAppointments();
+            setTimeout(() => {
+                setSuccess('');
+                setViewMode('list');
+                resetForm();
+            }, 2000);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to reject.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const resetForm = () => {
         setFormData({
             ownerName: user?.name || '',
@@ -661,12 +685,22 @@ export const AddLandPage = () => {
                                     >
                                         Cancel
                                     </button>
+                                    {isOfficer && selectedLandId && (
+                                        <button
+                                            type="button"
+                                            onClick={handleReject}
+                                            disabled={loading}
+                                            className="flex-1 py-3.5 border border-red-200 text-[#D32F2F] font-bold rounded-xl hover:bg-red-50 transition-all"
+                                        >
+                                            Reject
+                                        </button>
+                                    )}
                                     <button
                                         type="submit"
                                         disabled={loading || (isFarmer && !formData.verificationDate)}
                                         className="flex-[2] py-3.5 bg-[#0B3D91] text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:bg-[#092C6B] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]"
                                     >
-                                        {loading ? <FaSpinner className="animate-spin" /> : (selectedLandId ? 'Submit Report' : 'Confirm & Book')}
+                                        {loading ? <FaSpinner className="animate-spin" /> : (selectedLandId ? 'Approve & Upload' : 'Confirm & Book')}
                                     </button>
                                 </div>
                             </form>

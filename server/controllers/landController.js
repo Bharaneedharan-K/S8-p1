@@ -1,6 +1,7 @@
 import Land from '../models/Land.js';
 import User from '../models/User.js';
 import { uploadToCloudinary } from '../utils/cloudinary.js';
+import { createNotification, notifyAdmins } from '../utils/notificationUtils.js';
 
 // Add new Land Record (Farmer or Officer)
 export const addLandRecord = async (req, res) => {
@@ -71,6 +72,10 @@ export const addLandRecord = async (req, res) => {
         });
 
         await newLand.save();
+
+        if (finalOfficerId) {
+            await createNotification(finalOfficerId, 'New Land Registered', `Survey ${surveyNumber} has been registered and awaits your document verification.`, 'INFO', '/officer/add-land');
+        }
 
         res.status(201).json({
             success: true,
@@ -207,6 +212,16 @@ export const verifyLandRecord = async (req, res) => {
 
         if (!land) {
             return res.status(404).json({ success: false, message: 'Land record not found' });
+        }
+
+        // Send notifications based on the result
+        if (status === 'LAND_APPROVED') {
+            await createNotification(land.farmerId, 'Land Approved', `Your land (Survey ${land.surveyNumber}) has been approved and verified!`, 'SUCCESS', '/dashboard');
+        } else if (status === 'LAND_REJECTED') {
+            await createNotification(land.farmerId, 'Land Rejected', `Your land (Survey ${land.surveyNumber}) was rejected: ${updateData.rejectionReason}`, 'ERROR');
+        } else if (status === 'LAND_PENDING_ADMIN_APPROVAL' && req.userRole === 'OFFICER') {
+            // If officer is just pushing it to Admin
+            await notifyAdmins('Land Verified by Officer', `Officer has verified land Survey ${land.surveyNumber} documents. Pending final Admin block-minting.`, 'INFO', '/admin/verify-land');
         }
 
         res.status(200).json({

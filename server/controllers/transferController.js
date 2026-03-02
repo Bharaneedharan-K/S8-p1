@@ -2,6 +2,7 @@ import TransferRequest from '../models/TransferRequest.js';
 import Land from '../models/Land.js';
 import User from '../models/User.js';
 import { uploadToCloudinary } from '../utils/cloudinary.js';
+import { createNotification, notifyAdmins } from '../utils/notificationUtils.js';
 
 // 1. Initiate Transfer (Seller)
 export const initiateTransfer = async (req, res) => {
@@ -58,6 +59,9 @@ export const initiateTransfer = async (req, res) => {
 
         await newTransfer.save();
 
+        // Notify Buyer
+        await createNotification(buyer._id, 'Transfer Request', `You have received a new land transfer request from ${req.userRole === 'FARMER' ? 'a seller' : 'someone'}.`, 'INFO', '/transfer-requests');
+
         res.status(201).json({ success: true, message: 'Transfer Initiated! Waiting for Buyer Acceptance.', transfer: newTransfer });
 
     } catch (error) {
@@ -79,6 +83,9 @@ export const acceptTransfer = async (req, res) => {
 
         transfer.status = 'TRANSFER_ACCEPTED';
         await transfer.save();
+
+        // Notify Officer
+        await createNotification(transfer.officerId, 'Transfer Accepted', 'A buyer has accepted a transfer request. Verification needed.', 'INFO', '/transfer-requests');
 
         res.status(200).json({ success: true, message: 'Transfer Accepted! Sent to Officer for Verification.', transfer });
 
@@ -108,6 +115,9 @@ export const verifyTransfer = async (req, res) => {
 
         transfer.status = 'TRANSFER_VERIFIED';
         await transfer.save();
+
+        // Notify Admins
+        await notifyAdmins('Transfer Verified', 'An officer has verified a transfer deed. Pending Admin approval.', 'INFO', '/transfer-requests');
 
         res.status(200).json({ success: true, message: 'Transfer Verified! Sent to Admin for Approval.', transfer });
 
@@ -149,6 +159,10 @@ export const approveTransfer = async (req, res) => {
             await land.save();
             await transfer.save();
 
+            // Notify Seller and Buyer
+            await createNotification(transfer.sellerId, 'Transfer Completed', `Your land transfer has been approved and minted on the blockchain.`, 'SUCCESS');
+            await createNotification(transfer.buyerId, 'Transfer Completed', `Land has been successfully transferred to your name!`, 'SUCCESS', '/dashboard');
+
             res.status(200).json({ success: true, message: 'Transfer Approved & Executed!', transfer });
 
         } else {
@@ -189,6 +203,9 @@ export const rejectTransfer = async (req, res) => {
         transfer.status = 'TRANSFER_REJECTED';
         transfer.rejectionReason = reason || 'Rejected';
         await transfer.save();
+
+        await createNotification(transfer.sellerId, 'Transfer Rejected', `Your transfer request was rejected: ${reason || 'Rejected'}`, 'ERROR');
+        await createNotification(transfer.buyerId, 'Transfer Rejected', `A transfer request you were involved in was rejected.`, 'ERROR');
 
         res.status(200).json({ success: true, message: 'Transfer Rejected.', transfer });
 

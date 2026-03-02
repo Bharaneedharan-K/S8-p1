@@ -2,6 +2,7 @@ import SchemeApplication from '../models/SchemeApplication.js';
 import Scheme from '../models/Scheme.js';
 import Land from '../models/Land.js';
 import { uploadToCloudinary } from '../utils/cloudinary.js';
+import { createNotification, notifyAdmins } from '../utils/notificationUtils.js';
 
 // Farmer: Apply for Scheme
 export const applyForScheme = async (req, res) => {
@@ -69,6 +70,15 @@ export const applyForScheme = async (req, res) => {
         });
 
         await application.save();
+
+        // Notify Admins about the new application
+        await notifyAdmins(
+            'New Scheme Application',
+            `A new application has been submitted for scheme: ${scheme.schemeName} (Survey: ${land.surveyNumber}).`,
+            'INFO',
+            '/admin/applications'
+        );
+
         res.status(201).json({ success: true, message: 'Application submitted successfully!', application });
 
     } catch (error) {
@@ -134,10 +144,16 @@ export const reviewApplication = async (req, res) => {
                 reviewedAt: new Date()
             },
             { new: true }
-        );
+        ).populate('schemeId', 'schemeName');
 
         if (!application) {
             return res.status(404).json({ success: false, message: 'Application not found' });
+        }
+
+        if (status === 'APPROVED') {
+            await createNotification(application.farmerId, 'Application Approved', `Your application for ${application.schemeId.schemeName} has been approved.`, 'SUCCESS', '/farmer/applications');
+        } else if (status === 'REJECTED') {
+            await createNotification(application.farmerId, 'Application Rejected', `Your application for ${application.schemeId.schemeName} was rejected: ${adminRemarks}`, 'ERROR', '/farmer/applications');
         }
 
         res.status(200).json({ success: true, message: `Application ${status}`, application });

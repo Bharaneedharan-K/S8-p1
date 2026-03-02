@@ -40,8 +40,6 @@ function App() {
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<LandingPage />} />
-                  <Route path="/verify-land" element={<div className="min-h-screen flex items-center justify-center"><h1>🔍 Land Verification Coming Soon</h1></div>} />
-
                   {/* Auth routes */}
                   <Route
                     path="/login"
