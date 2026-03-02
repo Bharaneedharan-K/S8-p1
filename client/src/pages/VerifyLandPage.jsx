@@ -170,9 +170,12 @@ export const VerifyLandPage = () => {
             }
 
             // Handle "Already Registered" Error
-            if (err.message && (err.message.includes('already registered') || err.message.includes('execution reverted'))) {
+            const isAlreadyRegistered = err.message && err.message.toLowerCase().includes('already registered');
+            const isReverted = err.message && err.message.toLowerCase().includes('execution reverted');
+
+            if (isAlreadyRegistered || (isReverted && err.reason && err.reason.toLowerCase().includes('already registered'))) {
                 const alreadyRegistered = window.confirm(
-                    `Blockchain Error: "${err.reason || 'Land already registered'}"\n\nIt seems this land was already minted but the database wasn't updated.\n\nDo you want to FORCE SYNC the database to 'Approved'?`
+                    `Blockchain Error: "Land already registered"\n\nIt seems this land was already minted but the database wasn't updated.\n\nDo you want to FORCE SYNC the database to 'Approved'?`
                 );
 
                 if (alreadyRegistered) {
@@ -194,9 +197,16 @@ export const VerifyLandPage = () => {
                         setTimeout(() => setError(''), 5000);
                     }
                 }
+            } else if (isReverted && err.reason) {
+                setError(`Verification failed: ${err.reason}`);
+                setTimeout(() => setError(''), 5000);
+                return;
             }
-            setError('Verification failed: ' + (err.reason || err.message || 'Unknown error'));
-            setTimeout(() => setError(''), 5000);
+
+            if (!isAlreadyRegistered && !(isReverted && err.reason && err.reason.toLowerCase().includes('already registered'))) {
+                setError('Verification failed: ' + (err.reason || err.message || 'Unknown error'));
+                setTimeout(() => setError(''), 5000);
+            }
         } finally {
             setProcessingId(null);
         }
