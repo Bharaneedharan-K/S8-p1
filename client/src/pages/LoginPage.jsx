@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FaLeaf, FaLock, FaBolt, FaLandmark, FaWrench, FaExclamationTriangle, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ export const LoginPage = () => {
 
           <div className="relative z-10">
             <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center text-4xl mb-6 shadow-inner border border-white/20">
-              🌾
+              <FaLeaf className="text-white drop-shadow-md" />
             </div>
             <h2 className="text-3xl font-extrabold mb-4 leading-tight text-white">
               Welcome to the <br />Farmer & Land Portal
@@ -57,11 +58,11 @@ export const LoginPage = () => {
               Secure access to your land records, government schemes, and digital verification services.
             </p>
             <div className="flex items-center gap-4 text-xs font-bold text-white">
-              <span className="flex items-center gap-1">🔒 Secure</span>
-              <span className="w-1 h-1 bg-blue-300 rounded-full"></span>
-              <span className="flex items-center gap-1">🚀 Fast</span>
-              <span className="w-1 h-1 bg-blue-300 rounded-full"></span>
-              <span className="flex items-center gap-1">🏛️ Government</span>
+              <span className="flex items-center gap-1.5"><FaLock className="text-blue-200" /> Secure</span>
+              <span className="w-1.5 h-1.5 bg-blue-300 rounded-full"></span>
+              <span className="flex items-center gap-1.5"><FaBolt className="text-yellow-400" /> Fast</span>
+              <span className="w-1.5 h-1.5 bg-blue-300 rounded-full"></span>
+              <span className="flex items-center gap-1.5"><FaLandmark className="text-[#90CAF9]" /> Government</span>
             </div>
           </div>
         </div>
@@ -75,7 +76,9 @@ export const LoginPage = () => {
 
           {/* Demo Credentials Box */}
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 text-xs text-[#0B3D91]">
-            <p className="font-bold text-[#0B3D91] mb-1">🔧 Demo Admin Credentials:</p>
+            <p className="font-bold text-[#0B3D91] mb-2 flex items-center gap-2">
+              <FaWrench className="opacity-80 text-sm" /> Demo Admin Credentials:
+            </p>
             <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">
               <span>Email:</span> <span className="font-mono text-[#222222]">admin@government.in</span>
               <span>Pass:</span> <span className="font-mono text-[#222222]">Admin@12345</span>
@@ -84,8 +87,9 @@ export const LoginPage = () => {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             {(error || localError) && (
-              <div className="bg-red-50 text-[#D32F2F] px-4 py-3 rounded-xl text-sm font-medium border border-red-100 flex items-center gap-2 animate-fadeIn">
-                <span>⚠️</span> {error || localError}
+              <div className="bg-red-50 text-[#D32F2F] px-4 py-3 rounded-xl text-sm font-medium border border-red-200 flex items-center gap-3 shadow-sm animate-fadeIn">
+                <FaExclamationTriangle className="text-red-500 text-lg flex-shrink-0" />
+                <span>{error || localError}</span>
               </div>
             )}
 
@@ -117,9 +121,9 @@ export const LoginPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555555] hover:text-[#222222] text-sm font-medium"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#555555] hover:text-[#0B3D91] transition-colors"
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
                 </button>
               </div>
             </div>

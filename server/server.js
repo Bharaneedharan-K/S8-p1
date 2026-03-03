@@ -14,6 +14,7 @@ import transferRoutes from './routes/transfer.js';
 import chatRoutes from './routes/chat.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import applicationRoutes from './routes/application.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import User from './models/User.js';
 import cloudinary from './utils/cloudinary.js';
@@ -41,6 +42,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/transfer', transferRoutes);
 app.use('/api/chat', chatRoutes); // AI Chatbot
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

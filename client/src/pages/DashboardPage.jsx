@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import apiClient from '../services/api';
 import {
   FaTractor, FaUserShield, FaBuildingColumns, FaMapLocationDot,
   FaRightLeft, FaCircleCheck, FaHandHoldingDollar, FaClipboardList,
@@ -10,6 +11,24 @@ import {
 
 export const DashboardPage = () => {
   const { user } = useAuth();
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await apiClient.get('/dashboard/stats');
+        setStats(res.data.stats);
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (user) {
+      fetchStats();
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-[#F4F6F9] pb-20">
@@ -40,9 +59,17 @@ export const DashboardPage = () => {
         </div>
 
         <div className="animate-fadeIn">
-          {user?.role === 'FARMER' && <FarmerDashboard user={user} />}
-          {user?.role === 'OFFICER' && <OfficerDashboard user={user} />}
-          {user?.role === 'ADMIN' && <AdminDashboard />}
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0B3D91]"></div>
+            </div>
+          ) : (
+            <>
+              {user?.role === 'FARMER' && <FarmerDashboard user={user} stats={stats} />}
+              {user?.role === 'OFFICER' && <OfficerDashboard user={user} stats={stats} />}
+              {user?.role === 'ADMIN' && <AdminDashboard stats={stats} />}
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -107,7 +134,7 @@ const ActionCard = ({ to, title, description, icon, color = "bg-[#0B3D91]", lock
 
 // --- Sub-Dashboards ---
 
-const FarmerDashboard = ({ user }) => {
+const FarmerDashboard = ({ user, stats }) => {
   const isVerified = user?.status === 'FARMER_VERIFIED';
   const isPending = !isVerified;
 
@@ -128,8 +155,8 @@ const FarmerDashboard = ({ user }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Status" value={isVerified ? 'Verified' : 'Pending'} icon={isVerified ? <FaCircleCheck /> : <FaClock />} color={isVerified ? '#2E8B57' : '#FF9933'} />
         <StatCard title="District" value={user?.district} icon={<FaMapLocationDot />} color="#0B3D91" />
-        <StatCard title="Lands" value="--" icon={<FaLayerGroup />} color="#222222" />
-        <StatCard title="Applications" value="--" icon={<FaFileSignature />} color="#555555" />
+        <StatCard title="Lands" value={stats?.landsCount ?? '--'} icon={<FaLayerGroup />} color="#222222" />
+        <StatCard title="Applications" value={stats?.applicationsCount ?? '--'} icon={<FaFileSignature />} color="#555555" />
       </div>
 
       {/* Services Grid */}
@@ -176,14 +203,14 @@ const FarmerDashboard = ({ user }) => {
   );
 };
 
-const OfficerDashboard = ({ user }) => {
+const OfficerDashboard = ({ user, stats }) => {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Assigned District" value={user?.district} icon={<FaMapLocationDot />} color="#0B3D91" />
-        <StatCard title="Pending Review" value="--" icon={<FaClock />} color="#FF9933" />
-        <StatCard title="Verified Today" value="--" icon={<FaCircleCheck />} color="#2E8B57" />
-        <StatCard title="Transfer Requests" value="--" icon={<FaRightLeft />} color="#555555" />
+        <StatCard title="Pending Review" value={stats?.pendingReview ?? '--'} icon={<FaClock />} color="#FF9933" />
+        <StatCard title="Verified Today" value={stats?.verifiedToday ?? '--'} icon={<FaCircleCheck />} color="#2E8B57" />
+        <StatCard title="Transfer Requests" value={stats?.transferRequests ?? '--'} icon={<FaRightLeft />} color="#555555" />
       </div>
 
       <div>
@@ -225,14 +252,14 @@ const OfficerDashboard = ({ user }) => {
   );
 };
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ stats }) => {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title="Total Farmers" value="--" icon={<FaUsers />} color="#0B3D91" />
-        <StatCard title="Total Officers" value="--" icon={<FaUserShield />} color="#2E8B57" />
-        <StatCard title="Lands Minted" value="--" icon={<FaLayerGroup />} color="#FF9933" />
-        <StatCard title="Pending Actions" value="--" icon={<FaClock />} color="#D32F2F" />
+        <StatCard title="Total Farmers" value={stats?.totalFarmers ?? '--'} icon={<FaUsers />} color="#0B3D91" />
+        <StatCard title="Total Officers" value={stats?.totalOfficers ?? '--'} icon={<FaUserShield />} color="#2E8B57" />
+        <StatCard title="Lands Minted" value={stats?.landsMinted ?? '--'} icon={<FaLayerGroup />} color="#FF9933" />
+        <StatCard title="Pending Actions" value={stats?.pendingActions ?? '--'} icon={<FaClock />} color="#D32F2F" />
       </div>
 
       <div>
