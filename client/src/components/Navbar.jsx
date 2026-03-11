@@ -245,7 +245,6 @@ export const Navbar = () => {
                         <NavLink to="/transfer-requests">Transfers</NavLink>
                         <NavLink to="/admin/schemes">Schemes</NavLink>
                         <NavLink to="/admin/applications">Applications</NavLink>
-                        <NavLink to="/admin/logs">Audit Logs</NavLink>
                       </>
                     )}
                   </div>
